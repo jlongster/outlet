@@ -1,0 +1,29 @@
+Outlet is a programming language designed with games in mind. It is Lisp-like in nature and compiles to javascript.
+
+See http://jlongster.com/2012/01/04/outlet-my-lisp-to-javascript-experiment.html.
+
+Example:
+
+    (define foo 5)
+
+    (define (bar x)
+      (+ x 1))
+
+    (define (buz x y)
+      (let ((z 5))
+        (+ x y z)))
+
+    (define (fib n)
+      (if (= n 0)
+          n
+          (+ n (fib (- n 1)))))
+
+    (define (Y func)
+      ((lambda (f) (f f))
+       (lambda (f)
+         (func f))))
+
+To get started:
+
+    var outlet = require('./outlet');
+    outlet.compile('(define foo 5)'); // returns javascript source
