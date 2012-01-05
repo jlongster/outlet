@@ -1,0 +1,15 @@
+body {
+    text-align: center;
+    font-size: 1.5em;
+}
+
+textarea {
+    font-size: 1.25em;
+}
+
+#output {
+    text-align: left;
+    width: 700px;
+    margin: 0 auto;
+    overflow: auto;
+}
