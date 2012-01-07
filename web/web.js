@@ -409,6 +409,8 @@ install_parser(ast.LIST, function(node, parse, generator) {
         '*': generator.write_mult,
         '/': generator.write_divide,
         '=': generator.write_equals,
+        '>': generator.write_gt,
+        '<': generator.write_lt,
         'if': generator.write_if
     };
 
@@ -509,6 +511,15 @@ install_parser(ast.LIST, function(node, parse, generator) {
                             expr]);
 
         generator.write_set(set, parse);
+    }
+    else if(first.data == 'quote') {
+        generator.write_array(node.children[1], true);
+    }
+    else if(first.data == 'list') {
+        var lst = ast.node(ast.LIST,
+                          null,
+                          node.children.slice(1));
+        generator.write_array(lst);
     }
     else if(hooks[first.data]) {
         hooks[first.data](node, parse);
@@ -668,7 +679,8 @@ require.define("util", function (require, module, exports, __dirname, __filename
 });
 
 require.define("/ast.js", function (require, module, exports, __dirname, __filename) {
-    
+    var util = require('util');
+
 var ROOT = -1;
 var TERM = 0;
 var STRING = 1;
@@ -709,16 +721,21 @@ function pretty_print(ast, indent) {
             pad += ' ';
         }
 
-        //sys.puts(pad + str);
+        util.puts(pad + str);
     }
 
     var data = '';
-    if(ast.type == TERM || ast.type == STRING || ast.type == NUMBER) {
+    if(ast.data) {
         data = ': ' + util.inspect(ast.data);
     }
 
-    puts(type_str(ast.type) + data);
-
+    if(ast === undefined || ast === null) {
+        puts('NULL');
+    }
+    else {
+        puts(type_str(ast.type) + data);    
+    }
+    
     for(var i=0; i<ast.children.length; i++) {
         pretty_print(ast.children[i], indent+2);
     }
@@ -740,7 +757,7 @@ module.exports = {
 require.define("/grammar.js", function (require, module, exports, __dirname, __filename) {
     var ast = require('./ast');
 
-module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator, Before, After) {
+function grammar(All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator, Before, After) {
     var Repeated = function(rule) {
         return Y(function(seq){
             return Any(All(rule, seq), rule);
@@ -772,7 +789,7 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
         function init(rule) {
             return Before(rule, function(state) { return ''; });
         }
-        
+
         var content = Any(
             All(Char("\\"), capture(NotChar(""))),
             capture(NotChar("\""))
@@ -784,14 +801,32 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
     })();
 
     var term = (function() {
-        return Capture(Repeated(NotChar("() ")),
+        return Capture(Repeated(NotChar("()' ")),
                        function(buf, s) { return ast.node(ast.TERM, buf); });
     })();
+
+
+    // match any possible element, must pass in the lst rule
+    function elements(lst) {
+        function capture_quoted(buf, node) {
+            // add a "quote" term
+            var quote = ast.node(ast.TERM, 'quote');
+            return ast.node(ast.LIST,
+                            null,
+                            [quote, node]);
+        }
+
+        var rule = Any(lst, number, string, term);
+
+        // also match quoted elements, inserted a quote term if matched
+        return Any(Capture(All(Char("'"), rule), capture_quoted),
+                   rule);
+    }
 
     var list = Y(function(list) {
         return Before(
             All(Char("("),
-                Repeated(All(After(Any(list, number, string, term),
+                Repeated(All(After(elements(list),
                                    function(parent, child) {
                                        return ast.add_child(parent, child);
                                    }),
@@ -802,8 +837,8 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
     });
 
     return Before(Repeated(All(Optional(space),
-                               After(Any(list, number, string),
-                                     function(root, child) { 
+                               After(elements(list),
+                                     function(root, child) {
                                          return ast.node(ast.ROOT,
                                                          null,
                                                          root.children.concat([child]));
@@ -811,15 +846,28 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
                                Optional(space))),
                   function(state) { return ast.node(ast.ROOT); });
 };
+
+module.exports = grammar;
+
+// var reader = require('./ext/Parser');
+// ast.pretty_print(reader.Parse(reader.Parser(grammar), "(define a '(one wo three))"));
+
 });
 
 require.define("/compiler-js.js", function (require, module, exports, __dirname, __filename) {
-    
+    var fs = require('fs');
+var ast = require('./ast');
+
 module.exports = function() {
     var code = [];
     function write(src, eol) {
         code.push(src + (eol ? '\n' : ''));
     };
+
+    function write_runtime() {
+        var rt = fs.readFileSync('runtime.js', 'utf-8');
+        write(rt, true);
+    }
 
     function link(node1, node2, tag) {
         node2.link = node1;
@@ -842,7 +890,12 @@ module.exports = function() {
 
     function write_term(node) {
         // TERM (variable, keyword, etc)
-        write(node.data);
+        write(node.data.replace(/-/g, '_'));
+    }
+
+    function write_symbol(node) {
+        // SYMBOL
+        write('make_symbol("' + node.data + '")');
     }
 
     function write_set(node, parse) {
@@ -936,6 +989,243 @@ module.exports = function() {
         write_op('==', node, parse);
     }
 
+    function write_gt(node, parse) {
+        write_op('>', node, parse);
+    }
+
+    function write_lt(node, parse) {
+        write_op('<', node, parse);
+    }
+
+    function write_func_call(node, parse) {
+        write('(');
+        parse(node.children[0]);
+        write(')(');
+
+        for(var i=1; i<node.children.length; i++) {
+            if(i>1) {
+                write(',');
+            }
+
+            var arg = node.children[i];
+
+            // link these nodes for context (big hack)
+            link(node, arg, 'expr');
+            parse(arg);
+
+            // unlink it to avoid circular references
+            unlink(arg);
+        }
+
+        write(')');
+
+        // if the parent node is not a function call, we should end
+        // the expression. this solves ambiguities with the next
+        // statement which could be another function call in the form
+        // (foo)(x, y, z) where it tries to call the result of this
+        // function
+        if(!node.link ||
+           (node.link && node.link.tag != 'expr')) {
+            write(';');
+        }
+    }
+
+    function write_array(node, quoted) {
+        if(node.type == ast.TERM) {
+            if(quoted) {
+                write_symbol(node);
+            }
+            else {
+                write_term(node);
+            }
+        }
+        else if(node.type == ast.NUMBER) {
+            write_number(node);
+        }
+        else if(node.type == ast.STRING) {
+            write_string(node);
+        }
+        else if(node.type == ast.LIST) {
+            write('[');
+            for(var i=0; i<node.children.length; i++) {
+                if(i > 0) {
+                    write(',');
+                }
+                write_array(node.children[i], quoted);
+            }
+            write(']');
+        }
+    }
+
+    return {
+        write_runtime: write_runtime,
+        write_number: write_number,
+        write_string: write_string,
+        write_term: write_term,
+        write_set: write_set,
+        write_set_excl: write_set_excl,
+        write_lambda: write_lambda,
+        write_if: write_if,
+        write_plus: write_plus,
+        write_minus: write_minus,
+        write_mult: write_mult,
+        write_divide: write_divide,
+        write_equals: write_equals,
+        write_gt: write_gt,
+        write_lt: write_lt,
+        write_func_call: write_func_call,
+        write_array: write_array,
+        write_symbol: write_symbol,
+
+        get_code: function() {
+            return code.join('');
+        }
+    };
+};
+
+});
+
+require.define("fs", function (require, module, exports, __dirname, __filename) {
+    // nothing to see here... no file methods for the browser
+
+});
+
+require.define("/compiler-lua.js", function (require, module, exports, __dirname, __filename) {
+    var fs = require('fs');
+var ast = require('./ast');
+
+module.exports = function() {
+    var code = [];
+    function write(src, eol) {
+        code.push(src + (eol ? '\n' : ''));
+    };
+
+    function write_runtime() {
+        var rt = fs.readFileSync('runtime.lua', 'utf-8');
+        write(rt, true);
+    }
+
+    function link(node1, node2, tag) {
+        node2.link = node1;
+        node1.tag = tag;
+    }
+
+    function unlink(node) {
+        node.link = null;
+    }
+
+    function write_number(node) {
+        write(node.data);
+    }
+
+    function write_string(node) {
+        write('"' + node.data + '"');
+    }
+
+    function write_term(node) {
+        write(node.data.replace(/-/g, '_'));
+    }
+
+    function write_symbol(node) {
+        write('make_symbol("' + node.data + '")');
+    }
+
+    function write_set(node, parse) {
+        write('local ');
+        write_set_excl(node, parse);
+    }
+
+    function write_set_excl(node, parse) {
+        write(node.children[1].data + ' = ');
+        parse(node.children[2]);
+        write(';');
+    }
+
+    function write_lambda(node, parse) {
+        var lst = node.children[1];
+        var args = [];
+
+        for(var i=0; i<lst.children.length; i++) {
+            args.push(lst.children[i].data);
+        }
+
+        write('function(' + args.join(',') + ')', true);
+
+        for(var i=2; i<node.children.length; i++) {
+            if(i == node.children.length-1) {
+                write('return ');
+            }
+            parse(node.children[i]);
+        }
+
+        write(' end', true);
+
+    }
+
+    function write_if(node, parse) {
+        write('(function()');
+
+        write('if ');
+        parse(node.children[1]);
+        write(' then return ');
+        parse(node.children[2]);
+
+        if(node.children.length > 3) {
+            write(' else return ');
+            parse(node.children[3]);
+        }
+        
+        write(' end');
+        write(' end)()', true);
+    }
+
+
+    function write_op(op, node, parse) {
+        // (EXPR1 <op> EXPR2 <op> ... <op> EXPRn),
+        write('(');
+        for(var i=1; i<node.children.length; i++) {
+            if(i > 1) {
+                write(op);
+            }
+
+            // Link these nodes for context (big hack)
+            var arg = node.children[i];
+            link(node, arg, 'expr');
+            parse(arg);
+            unlink(arg);
+        }
+
+        write(')');
+    }
+
+   function write_plus(node, parse) {
+        write_op('+', node, parse);
+    }
+
+    function write_minus(node, parse) {
+        write_op('-', node, parse);
+    }
+
+    function write_mult(node, parse) {
+        write_op('*', node, parse);
+    }
+
+    function write_divide(node, parse) {
+        write_op('/', node, parse);
+    }
+
+    function write_equals(node, parse) {
+        write_op('==', node, parse);
+    }
+
+    function write_gt(node, parse) {
+        write_op('>', node, parse);
+    }
+
+    function write_lt(node, parse) {
+        write_op('<', node, parse);
+    }
+
     function write_func_call(node, parse) {
         write('(');
         parse(node.children[0]);
@@ -966,7 +1256,36 @@ module.exports = function() {
         }
     }
 
+    function write_array(node, quoted) {
+        if(node.type == ast.TERM) {
+            if(quoted) {
+                write_symbol(node);
+            }
+            else {
+                write_term(node);
+            }
+        }
+        else if(node.type == ast.NUMBER) {
+            write_number(node);
+        }
+        else if(node.type == ast.STRING) {
+            write_string(node);
+        }
+        else if(node.type == ast.LIST) {
+            write('{');
+            for(var i=0; i<node.children.length; i++) {
+                if(i > 0) {
+                    write(',');
+                }
+                write_array(node.children[i], quoted);
+            }
+            write('}');
+        }
+    }
+
+
     return {
+        write_runtime: write_runtime,
         write_number: write_number,
         write_string: write_string,
         write_term: write_term,
@@ -979,23 +1298,35 @@ module.exports = function() {
         write_mult: write_mult,
         write_divide: write_divide,
         write_equals: write_equals,
+        write_gt: write_gt,
+        write_lt: write_lt,
         write_func_call: write_func_call,
+        write_array: write_array,
 
         get_code: function() {
             return code.join('');
         }
     };
 };
-
 });
 
 require.define("/outlet.js", function (require, module, exports, __dirname, __filename) {
     var compiler = require('./compiler');
 var js_generator = require('./compiler-js');
+var lua_generator = require('./compiler-lua');
 
 module.exports = {
-    compile: function(src) {
-        return compiler.compile(src, js_generator());
+    compile: function(src, target) {
+        var gen;
+        if(target == 'lua') {
+            gen = lua_generator();
+        }
+        else {
+            gen = js_generator();
+        }
+
+        gen.write_runtime();
+        return compiler.compile(src, gen);
     }
 };
 

@@ -66,6 +66,8 @@ install_parser(ast.LIST, function(node, parse, generator) {
         '*': generator.write_mult,
         '/': generator.write_divide,
         '=': generator.write_equals,
+        '>': generator.write_gt,
+        '<': generator.write_lt,
         'if': generator.write_if
     };
 
@@ -166,6 +168,15 @@ install_parser(ast.LIST, function(node, parse, generator) {
                             expr]);
 
         generator.write_set(set, parse);
+    }
+    else if(first.data == 'quote') {
+        generator.write_array(node.children[1], true);
+    }
+    else if(first.data == 'list') {
+        var lst = ast.node(ast.LIST,
+                          null,
+                          node.children.slice(1));
+        generator.write_array(lst);
     }
     else if(hooks[first.data]) {
         hooks[first.data](node, parse);

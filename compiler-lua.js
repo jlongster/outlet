@@ -8,7 +8,7 @@ module.exports = function() {
     };
 
     function write_runtime() {
-        var rt = fs.readFileSync('runtime.js', 'utf-8');
+        var rt = fs.readFileSync('runtime.lua', 'utf-8');
         write(rt, true);
     }
 
@@ -22,40 +22,33 @@ module.exports = function() {
     }
 
     function write_number(node) {
-        // NUMBER
         write(node.data);
     }
 
     function write_string(node) {
-        // STRING
         write('"' + node.data + '"');
     }
 
     function write_term(node) {
-        // TERM (variable, keyword, etc)
         write(node.data.replace(/-/g, '_'));
     }
 
     function write_symbol(node) {
-        // SYMBOL
         write('make_symbol("' + node.data + '")');
     }
 
     function write_set(node, parse) {
-        // var TERM = EXPR;
-        write('var ');
+        write('local ');
         write_set_excl(node, parse);
     }
 
     function write_set_excl(node, parse) {
-        // TERM = EXPR;
         write(node.children[1].data + ' = ');
         parse(node.children[2]);
         write(';');
     }
 
     function write_lambda(node, parse) {
-        // function(TERM1, TERM2, ...) { EXPR1; EXPR2; ...; return EXPRn; }
         var lst = node.children[1];
         var args = [];
 
@@ -63,7 +56,7 @@ module.exports = function() {
             args.push(lst.children[i].data);
         }
 
-        write('function(' + args.join(',') + '){', true);
+        write('function(' + args.join(',') + ')', true);
 
         for(var i=2; i<node.children.length; i++) {
             if(i == node.children.length-1) {
@@ -72,27 +65,27 @@ module.exports = function() {
             parse(node.children[i]);
         }
 
-        write('}', true);
+        write(' end', true);
+
     }
 
     function write_if(node, parse) {
-        // (function() { if(EXPR1) { return EXPR2; } else { return EXPR3; }})()
-        write('(function() {');
+        write('(function()');
 
-        write('if(');
+        write('if ');
         parse(node.children[1]);
-        write(') { return ');
+        write(' then return ');
         parse(node.children[2]);
-        write(';}');
 
         if(node.children.length > 3) {
-            write(' else { return ');
+            write(' else return ');
             parse(node.children[3]);
-            write(';}');
         }
-
-        write('})()', true);
+        
+        write(' end');
+        write(' end)()', true);
     }
+
 
     function write_op(op, node, parse) {
         // (EXPR1 <op> EXPR2 <op> ... <op> EXPRn),
@@ -112,7 +105,7 @@ module.exports = function() {
         write(')');
     }
 
-    function write_plus(node, parse) {
+   function write_plus(node, parse) {
         write_op('+', node, parse);
     }
 
@@ -152,21 +145,18 @@ module.exports = function() {
 
             var arg = node.children[i];
 
-            // link these nodes for context (big hack)
+            // Link these nodes for context (big hack)
             link(node, arg, 'expr');
             parse(arg);
 
-            // unlink it to avoid circular references
+            // Unlink it to avoid circular references
             unlink(arg);
         }
 
         write(')');
 
-        // if the parent node is not a function call, we should end
-        // the expression. this solves ambiguities with the next
-        // statement which could be another function call in the form
-        // (foo)(x, y, z) where it tries to call the result of this
-        // function
+        // If the parent node is not a function call, we should end
+        // the expression
         if(!node.link ||
            (node.link && node.link.tag != 'expr')) {
             write(';');
@@ -189,16 +179,17 @@ module.exports = function() {
             write_string(node);
         }
         else if(node.type == ast.LIST) {
-            write('[');
+            write('{');
             for(var i=0; i<node.children.length; i++) {
                 if(i > 0) {
                     write(',');
                 }
                 write_array(node.children[i], quoted);
             }
-            write(']');
+            write('}');
         }
     }
+
 
     return {
         write_runtime: write_runtime,
@@ -218,7 +209,6 @@ module.exports = function() {
         write_lt: write_lt,
         write_func_call: write_func_call,
         write_array: write_array,
-        write_symbol: write_symbol,
 
         get_code: function() {
             return code.join('');

@@ -1,4 +1,4 @@
-Outlet is a programming language. It is Lisp-like in nature and compiles to javascript.
+Outlet is a programming language. It is Lisp-like in nature and compiles to both javascript and lua.
 
 See http://jlongster.com/2012/01/04/outlet-my-lisp-to-javascript-experiment.html.
 
@@ -27,3 +27,9 @@ To get started:
 
     var outlet = require('./outlet');
     outlet.compile('(define foo 5)'); // returns javascript source
+
+outlet.compile takes a target language as the argument, and supports 'js' or 'lua' for now, defaulting to 'js'. For example, to output lua:
+
+    outlet.compile('(define foo 5)', 'lua'); // returns lua source
+
+See test.ol for example Outlet code.

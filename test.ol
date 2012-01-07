@@ -3,9 +3,12 @@
 (define (bar x)
   (+ x 1))
 
-(define (buz x y)
-  (let ((z 5))
-    (+ x y z)))
+(define (buz x)
+  (let ((y x)
+        (add_1 (if (< x 0)
+                   (lambda (n) (- n 1))
+                   (lambda (n) (+ n 1)))))
+    (add_1 y)))
 
 (define (fib n)
   (if (= n 0)
@@ -17,5 +20,6 @@
    (lambda (f)
      (func f))))
 
-(define (array-join arr del)
-  (arr.join del))
+(for-each
+ (lambda (x) (print x))
+ '(1 2 3 4))

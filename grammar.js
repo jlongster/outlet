@@ -1,6 +1,6 @@
 var ast = require('./ast');
 
-module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator, Before, After) {
+function grammar(All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator, Before, After) {
     var Repeated = function(rule) {
         return Y(function(seq){
             return Any(All(rule, seq), rule);
@@ -32,7 +32,7 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
         function init(rule) {
             return Before(rule, function(state) { return ''; });
         }
-        
+
         var content = Any(
             All(Char("\\"), capture(NotChar(""))),
             capture(NotChar("\""))
@@ -44,14 +44,32 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
     })();
 
     var term = (function() {
-        return Capture(Repeated(NotChar("() ")),
+        return Capture(Repeated(NotChar("()' ")),
                        function(buf, s) { return ast.node(ast.TERM, buf); });
     })();
+
+
+    // match any possible element, must pass in the lst rule
+    function elements(lst) {
+        function capture_quoted(buf, node) {
+            // add a "quote" term
+            var quote = ast.node(ast.TERM, 'quote');
+            return ast.node(ast.LIST,
+                            null,
+                            [quote, node]);
+        }
+
+        var rule = Any(lst, number, string, term);
+
+        // also match quoted elements, inserted a quote term if matched
+        return Any(Capture(All(Char("'"), rule), capture_quoted),
+                   rule);
+    }
 
     var list = Y(function(list) {
         return Before(
             All(Char("("),
-                Repeated(All(After(Any(list, number, string, term),
+                Repeated(All(After(elements(list),
                                    function(parent, child) {
                                        return ast.add_child(parent, child);
                                    }),
@@ -62,8 +80,8 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
     });
 
     return Before(Repeated(All(Optional(space),
-                               After(Any(list, number, string),
-                                     function(root, child) { 
+                               After(elements(list),
+                                     function(root, child) {
                                          return ast.node(ast.ROOT,
                                                          null,
                                                          root.children.concat([child]));
@@ -71,3 +89,8 @@ module.exports = function (All, Any, Capture, Char, NotChar, Optional, Y, EOF, T
                                Optional(space))),
                   function(state) { return ast.node(ast.ROOT); });
 };
+
+module.exports = grammar;
+
+// var reader = require('./ext/Parser');
+// ast.pretty_print(reader.Parse(reader.Parser(grammar), "(define a '(one wo three))"));

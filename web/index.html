@@ -1,19 +1,72 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>outlet</title>
+    <title>Outlet REPL</title>
     <link type="text/css" href="index.css" rel="stylesheet" />
     <script type="text/javascript" src="web.js"></script>
     <script type="text/javascript" src="ui.js"></script>
+    <script type="text/javascript" src="runtime.js"></script>
   </head>
   <body>
-    <p>Type some outlet below:</p>
-    <textarea id="src" rows="7" cols="40"></textarea>
-    <p><input type="submit" value="Run" onclick="compile();" /></p>
-    <h4>output</h4>
-    <p id="output"></p>
-    <h4>result</h4>
-    <p id="result"></p>
+    <div class="content">
+      <h2>Welcome to the Outlet REPL</h2>
+      <p>
+        Outlet is a new language to experiment with compiling Lisp to
+        other languages like javascript and lua. Read more about
+        it <a href="http://jlongster.com/2012/01/04/outlet-my-lisp-to-javascript-experiment.html">here</a>
+        and download it <a href="https://github.com/jlongster/outlet">here</a>.
+      </p>
+      <div class="repl-title">
+        Type some outlet below:
+        <div class="lang">
+          Target:
+          <select name="lang" id="lang">
+            <option value="js">js</option>
+            <option value="lua">lua</option>
+          </select>
+        </div>
+      </div>
+      <div class="input">
+        <textarea id="src" rows="10" cols="50"></textarea>
+      </div>
+      <div class="run"><input type="submit" value="Run" onclick="compile();" /></div>
+      <h4>result</h4>
+      <div id="result"></div>
+      <h4>output</h4>
+      <div id="output"></div>
+      <h2>Examples</h2>
+      <pre>(define foo 5)
+
+(define (bar x)
+  (+ x 1))
+
+(define (buz x)
+  (let ((y x)
+        (add_1 (if (< x 0)
+                   (lambda (n) (- n 1))
+                   (lambda (n) (+ n 1)))))
+    (add_1 y)))
+
+(define (fib n)
+  (if (= n 0)
+      n
+      (+ n (fib (- n 1)))))
+
+(define (Y func)
+  ((lambda (f) (f f))
+   (lambda (f)
+     (func f))))
+
+(define (string_split str c)
+  (str.split c))
+
+(string_split "hello\"world" "\"")
+
+(for-each
+ (lambda (x) (console.log x))
+ '(1 2 3 4))
+</pre>
+    </div>
   </body>
 </html>
 

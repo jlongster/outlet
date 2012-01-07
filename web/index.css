@@ -1,15 +1,55 @@
 body {
-    text-align: center;
     font-size: 1.5em;
+    background-color: #eeeeef;
+    margin: 0;
+    padding: 0;
+    color: #333333;
+}
+
+.content {
+    width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    overflow: hidden;
+    padding: 0 1em;
+    box-shadow: 0 0 1px grey;
+}
+
+h2, .input {
+    text-align: center;
 }
 
 textarea {
-    font-size: 1.25em;
+    font-size: 1.1em;
+}
+
+.run {
+    text-align: center;
+    margin: .5em 0;
+}
+
+.run input {
+    font-size: 1em;
+}
+
+h4 {
+    margin-bottom: 0;
 }
 
 #output {
+    background-color: 
     text-align: left;
     width: 700px;
     margin: 0 auto;
     overflow: auto;
+}
+
+.repl-title {
+    margin: 1em 0;
+}
+
+.lang {
+    float: right;
+    font-size: .75em;
+    margin-top: .25em;
 }

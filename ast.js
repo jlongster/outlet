@@ -1,3 +1,4 @@
+var util = require('util');
 
 var ROOT = -1;
 var TERM = 0;
@@ -39,16 +40,21 @@ function pretty_print(ast, indent) {
             pad += ' ';
         }
 
-        //sys.puts(pad + str);
+        util.puts(pad + str);
     }
 
     var data = '';
-    if(ast.type == TERM || ast.type == STRING || ast.type == NUMBER) {
+    if(ast.data) {
         data = ': ' + util.inspect(ast.data);
     }
 
-    puts(type_str(ast.type) + data);
-
+    if(ast === undefined || ast === null) {
+        puts('NULL');
+    }
+    else {
+        puts(type_str(ast.type) + data);    
+    }
+    
     for(var i=0; i<ast.children.length; i++) {
         pretty_print(ast.children[i], indent+2);
     }
