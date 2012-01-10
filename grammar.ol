@@ -5,7 +5,8 @@
     (Y (lambda (seq)
          (any (all rule seq) rule))))
 
-  (define space (repeated " \t\n\r"))
+  (define space-char " \t\n\r")
+  (define space (repeated (char space-char)))
 
   (define comment (all (optional space)
                        (char ";")
@@ -13,7 +14,8 @@
                        space))
 
   (define number
-    (capture (repeated (char "1234567890"))
+    (capture (all (optional (char "-"))
+                  (repeated (char "1234567890")))
              (lambda (text state)
                (ast.node ast.NUMBER text))))
 
@@ -24,25 +26,25 @@
                       (lambda (buf state) (+ state buf)))))
           (capt_node
            (lambda (rule)
-             (capture (lambda (str state)
+             (capture rule
+                      (lambda (str state)
                         (ast.node ast.STRING str)))))
           (init
            (lambda (rule)
              (before rule (lambda (state) "")))))
       
       (define content
-        (any (all (char "\\" (capt (not-char ""))))
-             (capture (not-char "\""))))
+        (any (all (char "\\") (capt (not-char "")))
+             (capt (not-char "\""))))
       
       (init (all (char "\"")
                  (capt_node (optional (repeated content)))
                  (char "\"")))))
-
+  
   (define term
-    (capture (repeated (all (not-char "()'")
-                            space))
+    (capture (repeated (any (not-char (+ "()'" space-char))))
              (lambda (buf s)
-               (ast.node (ast.TERM buf)))))
+               (ast.node ast.TERM buf))))
 
   (define (elements lst)
     (define (capture_quoted buf node)
@@ -59,10 +61,11 @@
          (before
           (all (char "(")
                (repeated
-                (all (after (elements lst)
+                (any space
+                     comment
+                     (after (elements lst)
                             (lambda (parent child)
-                              (ast.add_child parent child)))
-                     (optional (any space comment))))
+                              (ast.add_child parent child)))))
                (char ")"))
           (lambda (state)
             (ast.node ast.LIST))))))
@@ -75,3 +78,5 @@
                  (ast.node ast.ROOT
                            null
                            (root.children.concat (list child))))))))
+
+(set! module.exports grammar)

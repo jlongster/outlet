@@ -1,105 +1,53 @@
-var ast = require('./ast');
-
-function grammar(All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator, Before, After) {
-    var Repeated = function(rule) {
-        return Y(function(seq){
-            return Any(All(rule, seq), rule);
-        });
-    };
-
-    var space_char = " \t\n\r";
-    var space = Repeated(Char(space_char));
-
-    // For comments, there might be space before it, at least one
-    // semicolon, eat all text up to the newline, then eat all the
-    // space after it up to the next element
-    var comment = All(Optional(space),
-                      Char(';'),
-                      Repeated(NotChar("\n")),
-                      space);
-
-    var number = (function() {
-        var digit = Char("1234567890");
-        var digits = Repeated(digit);
-
-        function capture(text, state) {
-            return ast.node(ast.NUMBER, text);
-        }
-
-        return Capture(digits, capture);
-    })();
-
-    var string = (function() {
-        function capture(rule) {
-            return Capture(rule, function(buf, state) { return state + buf; });
-        }
-
-        function capture_node(rule) {
-            return Capture(rule, function(str, state) { return ast.node(ast.STRING, str); });
-        }
-
-        function init(rule) {
-            return Before(rule, function(state) { return ''; });
-        }
-
-        var content = Any(
-            All(Char("\\"), capture(NotChar(""))),
-            capture(NotChar("\""))
-        );
-
-        return init(All(Char('"'),
-                        capture_node(Optional(Repeated(content))),
-                        Char('"')));
-    })();
-
-    var term = (function() {
-        return Capture(Repeated(NotChar("()'" + space_char)),
-                       function(buf, s) { return ast.node(ast.TERM, buf); });
-    })();
-
-
-    // match any possible element, must pass in the lst rule
-    function elements(lst) {
-        function capture_quoted(buf, node) {
-            // add a "quote" term
-            var quote = ast.node(ast.TERM, 'quote');
-            return ast.node(ast.LIST,
-                            null,
-                            [quote, node]);
-        }
-
-        var rule = Any(lst, number, string, term);
-
-        // also match quoted elements, inserted a quote term if matched
-        return Any(Capture(All(Char("'"), rule), capture_quoted),
-                   rule);
-    }
-
-    var list = Y(function(list) {
-        return Before(
-            All(Char("("),
-                Repeated(Any(space,
-                             comment,
-                             After(elements(list),
-                                   function(parent, child) {
-                                       return ast.add_child(parent, child);
-                                   }))),
-                Char(")")),
-            function(state) { return ast.node(ast.LIST); }
-        );
-    });
-
-    return Repeated(Any(space,
-                        comment,
-                        After(elements(list),
-                              function(root, child) {
-                                  return ast.node(ast.ROOT,
-                                                  null,
-                                                  root.children.concat([child]));
-                              })));
-};
-
-module.exports = grammar;
-
-// var reader = require('./ext/Parser');
-// ast.pretty_print(reader.Parse(reader.Parser(grammar), "(define a '(one wo three))"));
+var runtime = require('./runtime');
+var make_symbol = runtime.make_symbol;
+var map = runtime.map;
+var for_each = runtime.for_each;
+var display = runtime.display;
+var pp = runtime.pp;
+var inspect = runtime.inspect;
+var eqp = runtime.eqp;
+var nullp = runtime.nullp;
+var car = runtime.car;
+var cdr = runtime.cdr;
+var ast = require("./ast");
+var grammar = function(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after){
+var repeated = function(rule){
+return Y(function(seq){
+return any(all(rule,seq),rule);}
+);}
+;var space_char = " \t\n\r";var space = repeated(char(space_char));;var comment = all(optional(space),char(";"),repeated(not_char("\n")),space);;var number = capture(all(optional(char("-")),repeated(char("1234567890"))),function(text,state){
+return ast.node(ast.NUMBER,text);}
+);;var string = (function(capt,capt_node,init){
+var content = any(all(char("\\"),capt(not_char(""))),capt(not_char("\"")));;return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));}
+)(function(rule){
+return capture(rule,function(buf,state){
+return (state+buf)}
+);}
+,function(rule){
+return capture(rule,function(str,state){
+return ast.node(ast.STRING,str);}
+);}
+,function(rule){
+return before(rule,function(state){
+return ""}
+);}
+);;var term = capture(repeated(any(not_char(("()'"+space_char)))),function(buf,s){
+return ast.node(ast.TERM,buf);}
+);;var elements = function(lst){
+var capture_quoted = function(buf,node){
+return (function(q){
+return ast.node(ast.LIST,null,[q,node]);}
+)(ast.node(ast.TERM,"quote"));}
+;return (function(rule){
+return any(capture(all(char("'"),rule),capture_quoted),rule);}
+)(any(lst,number,string,term));}
+;var lst = Y(function(lst){
+return before(all(char("("),repeated(any(space,comment,after(elements(lst),function(parent,child){
+return ast.add_child(parent,child);}
+))),char(")")),function(state){
+return ast.node(ast.LIST);}
+);}
+);;return repeated(any(space,comment,after(elements(lst),function(root,child){
+return ast.node(ast.ROOT,null,root.children.concat([child]));}
+)));}
+;module.exports = grammar;

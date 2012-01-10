@@ -1,5 +1,5 @@
-var reader = require('./ext/Parser');
 var util = require('util');
+var reader = require('./parser');
 var ast = require('./ast');
 var grammar = require('./grammar');
 
@@ -24,9 +24,9 @@ function inspect(obj) {
 
 // main functions
 function read(src) {
-    return reader.Parse(reader.Parser(grammar),
-                        src,
-                        ast.node(ast.ROOT));
+    return reader(grammar,
+                  src,
+                  ast.node(ast.ROOT));
 }
 
 function parse(node, generator) {
@@ -164,7 +164,7 @@ install_parser(ast.LIST, function(node, parse, generator) {
         generator.write_set(set, parse);
     }
     else if(first.data == 'quote') {
-        generator.write_array(node.children[1], true);
+        generator.write_array(node.children[1], parse, true);
     }
     else if(first.data == 'list') {
         var lst = ast.node(ast.LIST,

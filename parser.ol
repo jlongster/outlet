@@ -30,8 +30,8 @@
 
   (define (not-char alphabet)
     (lambda (text state)
-      (if (and (eq? text.length -1)
-               (> (alphabet.indexOf (text.charAt 0)) -1))
+      (if (and (> text.length 0)
+               (eq? (alphabet.indexOf (text.charAt 0)) -1))
           (list (text.substr 1) state)
           null)))
 
@@ -51,12 +51,12 @@
         (define (run lst r)
           (if (null? lst)
               r
-              (let ((r ((car lst) text state)))
+              (let ((r ((car lst) (car r) (car (cdr r)))))
                 (if (not r)
                     null
                     (run (cdr lst) r)))))
 
-        (run args null))))
+        (run args (list text state)))))
 
   (define (capture func hook)
     (lambda (text state)
@@ -81,8 +81,10 @@
 
   (grammar all any capture char not-char optional Y eof terminator before after))
 
-(define (parse parser text state)
-  (let ((r (parser text state)))
+(define (parse grammar text state)
+  (let ((r ((parser grammar) text state)))
     (if r
         (car (cdr r))
         null)))
+
+(set! module.exports parse)

@@ -12,7 +12,7 @@ module.exports = {
             gen = js_generator();
         }
 
-        gen.write_runtime();
+        gen.write_runtime(target);
         return compiler.compile(src, gen);
     }
 };

@@ -7,8 +7,14 @@ module.exports = function() {
         code.push(src + (eol ? '\n' : ''));
     };
 
-    function write_runtime() {
-        var rt = fs.readFileSync('runtime.js', 'utf-8');
+    function write_runtime(target) {
+        var file = 'runtime.js';
+
+        if(target == 'nodejs') {
+            file = 'runtime-node.js';
+        }
+
+        var rt = fs.readFileSync(file, 'utf-8');
         write(rt, true);
     }
 
@@ -98,7 +104,7 @@ module.exports = function() {
         else {
             write('function() {', true);
             write('var ' + args_expr.data +
-                  ' = Array.slice.call(null, arguments);', true);
+                  ' = Array.prototype.slice.call(arguments);', true);
         }
 
         for(var i=2; i<node.children.length; i++) {
@@ -250,6 +256,14 @@ module.exports = function() {
             }
 
             write('})()', true);
+        },
+
+        'and': function(node, parse) {
+            write_op('&&', node, parse);
+        },
+
+        'or': function(node, parse) {
+            write_op('||', node, parse);
         },
 
         'not': function(node, parse) {

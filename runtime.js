@@ -18,16 +18,24 @@ function for_each(func, arr) {
     }    
 }
 
-function print(msg) {
+function display(msg) {
     console.log(msg);
+}
+
+function pp(obj) {
+    display(inspect(obj));
 }
 
 function inspect(obj) {
     return util.inspect(obj);
 }
 
+function eqp(v1, v2) {
+    return v1 == v2;
+}
+
 function nullp(arr) {
-    return obj.length && obj.length == 0;
+    return arr.length !== undefined && arr.length == 0;
 }
 
 function car(arr) {
@@ -36,4 +44,17 @@ function car(arr) {
 
 function cdr(arr) {
     return arr.slice(1);
+}
+
+module.exports = {
+    make_symbol: make_symbol,
+    map: map,
+    for_each: for_each,
+    display: display,
+    pp: pp,
+    inspect: inspect,
+    eqp: eqp,
+    nullp: nullp,
+    car: car,
+    cdr: cdr
 }
