@@ -1,6 +1,5 @@
 var reader = require('./ext/Parser');
 var util = require('util');
-
 var ast = require('./ast');
 var grammar = require('./grammar');
 
@@ -25,7 +24,9 @@ function inspect(obj) {
 
 // main functions
 function read(src) {
-    return reader.Parse(reader.Parser(grammar), src);
+    return reader.Parse(reader.Parser(grammar),
+                        src,
+                        ast.node(ast.ROOT));
 }
 
 function parse(node, generator) {
@@ -60,17 +61,6 @@ install_parser(ast.TERM, function(node, parse, generator) {
 });
 
 install_parser(ast.LIST, function(node, parse, generator) {
-    var hooks = {
-        '+': generator.write_plus,
-        '-': generator.write_minus,
-        '*': generator.write_mult,
-        '/': generator.write_divide,
-        '=': generator.write_equals,
-        '>': generator.write_gt,
-        '<': generator.write_lt,
-        'if': generator.write_if
-    };
-
     var first = node.children[0];
 
     assert(first.type == ast.TERM || first.type == ast.LIST,
@@ -122,10 +112,14 @@ install_parser(ast.LIST, function(node, parse, generator) {
         // do some ast structure verification, should look like:
         // (lambda (term1 term2 ...) expr ...)
         var args = node.children[1];
-        assert_type(args, ast.LIST);
 
-        for(var i=0; i<args.children.length; i++) {
-            assert_type(args.children[i], ast.TERM);
+        if(args.type == ast.LIST) {
+            for(var i=0; i<args.children.length; i++) {
+                assert_type(args.children[i], ast.TERM);
+            }
+        }
+        else if(args.type != ast.TERM) {
+            throw "lambda must have a list of argument or a binding term";
         }
 
         generator.write_lambda(node, parse);
@@ -176,10 +170,10 @@ install_parser(ast.LIST, function(node, parse, generator) {
         var lst = ast.node(ast.LIST,
                           null,
                           node.children.slice(1));
-        generator.write_array(lst);
+        generator.write_array(lst, parse);
     }
-    else if(hooks[first.data]) {
-        hooks[first.data](node, parse);
+    else if(generator.has_hook(first.data)) {
+        generator.run_hook(first.data, node, parse);
     }
     else {
         generator.write_func_call(node, parse);
@@ -196,4 +190,4 @@ module.exports = {
     read: read,
     parse: parse,
     compile: compile
-}
+};

@@ -1,3 +1,4 @@
+var util = require('util');
 
 function make_symbol(str) {
     return str;
@@ -19,4 +20,20 @@ function for_each(func, arr) {
 
 function print(msg) {
     console.log(msg);
+}
+
+function inspect(obj) {
+    return util.inspect(obj);
+}
+
+function nullp(arr) {
+    return obj.length && obj.length == 0;
+}
+
+function car(arr) {
+    return arr[0];
+}
+
+function cdr(arr) {
+    return arr.slice(1);
 }

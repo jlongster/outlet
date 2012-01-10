@@ -7,7 +7,16 @@ function grammar(All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator,
         });
     };
 
-    var space = Repeated(Char(" \t\n\r"));
+    var space_char = " \t\n\r";
+    var space = Repeated(Char(space_char));
+
+    // For comments, there might be space before it, at least one
+    // semicolon, eat all text up to the newline, then eat all the
+    // space after it up to the next element
+    var comment = All(Optional(space),
+                      Char(';'),
+                      Repeated(NotChar("\n")),
+                      space);
 
     var number = (function() {
         var digit = Char("1234567890");
@@ -44,7 +53,7 @@ function grammar(All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator,
     })();
 
     var term = (function() {
-        return Capture(Repeated(NotChar("()' ")),
+        return Capture(Repeated(NotChar("()'" + space_char)),
                        function(buf, s) { return ast.node(ast.TERM, buf); });
     })();
 
@@ -73,21 +82,20 @@ function grammar(All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator,
                                    function(parent, child) {
                                        return ast.add_child(parent, child);
                                    }),
-                             Optional(space))),
+                             Optional(Any(space, comment)))),
                 Char(")")),
             function(state) { return ast.node(ast.LIST); }
         );
     });
 
-    return Before(Repeated(All(Optional(space),
-                               After(elements(list),
-                                     function(root, child) {
-                                         return ast.node(ast.ROOT,
-                                                         null,
-                                                         root.children.concat([child]));
-                                     }),
-                               Optional(space))),
-                  function(state) { return ast.node(ast.ROOT); });
+    return Repeated(Any(space,
+                        comment,
+                        After(elements(list),
+                              function(root, child) {
+                                  return ast.node(ast.ROOT,
+                                                  null,
+                                                  root.children.concat([child]));
+                              })));
 };
 
 module.exports = grammar;

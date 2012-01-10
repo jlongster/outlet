@@ -18,3 +18,8 @@ end
 function print(msg)
    io.write(msg)
 end
+
+function inspect(obj)
+   -- todo: more advanced inspecting
+   return tostring(obj)
+end

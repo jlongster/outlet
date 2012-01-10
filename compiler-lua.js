@@ -21,6 +21,14 @@ module.exports = function() {
         node.link = null;
     }
 
+    function has_hook(name) {
+        return !!hooks[name];
+    }
+
+    function run_hook(name, node, parse) {
+        hooks[name](node, parse);
+    }
+
     function write_number(node) {
         write(node.data);
     }
@@ -69,24 +77,6 @@ module.exports = function() {
 
     }
 
-    function write_if(node, parse) {
-        write('(function()');
-
-        write('if ');
-        parse(node.children[1]);
-        write(' then return ');
-        parse(node.children[2]);
-
-        if(node.children.length > 3) {
-            write(' else return ');
-            parse(node.children[3]);
-        }
-        
-        write(' end');
-        write(' end)()', true);
-    }
-
-
     function write_op(op, node, parse) {
         // (EXPR1 <op> EXPR2 <op> ... <op> EXPRn),
         write('(');
@@ -103,34 +93,6 @@ module.exports = function() {
         }
 
         write(')');
-    }
-
-   function write_plus(node, parse) {
-        write_op('+', node, parse);
-    }
-
-    function write_minus(node, parse) {
-        write_op('-', node, parse);
-    }
-
-    function write_mult(node, parse) {
-        write_op('*', node, parse);
-    }
-
-    function write_divide(node, parse) {
-        write_op('/', node, parse);
-    }
-
-    function write_equals(node, parse) {
-        write_op('==', node, parse);
-    }
-
-    function write_gt(node, parse) {
-        write_op('>', node, parse);
-    }
-
-    function write_lt(node, parse) {
-        write_op('<', node, parse);
     }
 
     function write_func_call(node, parse) {
@@ -190,8 +152,82 @@ module.exports = function() {
         }
     }
 
+    var hooks = {
+        '+': function(node, parse) {
+            write_op('+', node, parse);
+        },
+
+        '-': function(node, parse) {
+            write_op('-', node, parse);
+        },
+
+        '*': function(node, parse) {
+            write_op('*', node, parse);
+        },
+
+        '/': function(node, parse) {
+            write_op('/', node, parse);
+        },
+
+        '=': function(node, parse) {
+            write_op('===', node, parse);
+        },
+
+        '>': function(node, parse) {
+            write_op('>', node, parse);
+        },
+
+        '<': function(node, parse) {
+            write_op('<', node, parse)
+        },
+
+        'if': function (node, parse) {
+            write('(function()');
+
+            write('if ');
+            parse(node.children[1]);
+            write(' then return ');
+            parse(node.children[2]);
+
+            if(node.children.length > 3) {
+                write(' else return ');
+                parse(node.children[3]);
+            }
+            
+            write(' end');
+            write(' end)()', true);
+        },
+
+        'throw': function(node, parse) {
+            write('error(');
+            parse(node);
+            write(')');
+        },
+
+        'require': function(node, parse) {
+            for(var i=1; i<node.children.length; i++) {
+                var expr = node.children[i];
+                var name = expr.children[0].data;
+                var path = expr.children[1].data;
+
+                write(name + ' = ' +
+                      'require("' + path + '");', true);
+            }
+        },
+
+        'not': function(node, parse) {
+            write('not ');
+            parse(node);
+        },
+
+        'string-append': function(node, parse) {
+            write_op(' .. ', node, parse);
+        }
+    };
 
     return {
+        has_hook: has_hook,
+        run_hook: run_hook,
         write_runtime: write_runtime,
         write_number: write_number,
         write_string: write_string,
@@ -199,16 +235,9 @@ module.exports = function() {
         write_set: write_set,
         write_set_excl: write_set_excl,
         write_lambda: write_lambda,
-        write_if: write_if,
-        write_plus: write_plus,
-        write_minus: write_minus,
-        write_mult: write_mult,
-        write_divide: write_divide,
-        write_equals: write_equals,
-        write_gt: write_gt,
-        write_lt: write_lt,
         write_func_call: write_func_call,
         write_array: write_array,
+        write_symbol: write_symbol,
 
         get_code: function() {
             return code.join('');
