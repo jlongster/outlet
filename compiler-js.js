@@ -83,13 +83,17 @@ module.exports = function() {
         var args_expr = node.children[1];
 
         if(args_expr.type == ast.LIST) {
-            var args = [];
+            write('function(');
 
             for(var i=0; i<args_expr.children.length; i++) {
-                args.push(args_expr.children[i].data);
+                if(i>0) {
+                    write(',');
+                }
+
+                write_term(args_expr.children[i]);
             }
 
-            write('function(' + args.join(',') + '){', true);
+            write('){', true);
         }
         else {
             write('function() {', true);

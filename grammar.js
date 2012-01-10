@@ -78,11 +78,12 @@ function grammar(All, Any, Capture, Char, NotChar, Optional, Y, EOF, Terminator,
     var list = Y(function(list) {
         return Before(
             All(Char("("),
-                Repeated(All(After(elements(list),
+                Repeated(Any(space,
+                             comment,
+                             After(elements(list),
                                    function(parent, child) {
                                        return ast.add_child(parent, child);
-                                   }),
-                             Optional(Any(space, comment)))),
+                                   }))),
                 Char(")")),
             function(state) { return ast.node(ast.LIST); }
         );
