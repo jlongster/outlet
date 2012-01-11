@@ -202,6 +202,11 @@ module.exports = function() {
     }
 
     var hooks = {
+        'js': function(node, parse) {
+            // write a raw js string
+            write(node.children[1].data);
+        },
+
         '+': function(node, parse) {
             write_op('+', node, parse);
         },

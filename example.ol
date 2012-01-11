@@ -24,9 +24,5 @@
 ;;  (lambda (x) (print x))
 ;;  '(1 2 3 4))
 
-(define (print-n n)
-  (cond
-   ((> n 0) (display "positive"))
-   ((< n 0) (display "negative"))
-   ((= n 0) (display "0"))
-   (else (display "wait, what?"))))
+(define (foo arr)
+  (js "console.log(arr.length);"))
