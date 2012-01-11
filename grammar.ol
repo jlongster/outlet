@@ -60,12 +60,13 @@
     (Y (lambda (lst)
          (before
           (all (char "(")
-               (repeated
-                (any space
-                     comment
-                     (after (elements lst)
-                            (lambda (parent child)
-                              (ast.add_child parent child)))))
+               (optional
+                (repeated
+                 (any space
+                      comment
+                      (after (elements lst)
+                             (lambda (parent child)
+                               (ast.add_child parent child))))))
                (char ")"))
           (lambda (state)
             (ast.node ast.LIST))))))

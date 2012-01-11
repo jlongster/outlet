@@ -9,6 +9,7 @@ var eqp = runtime.eqp;
 var nullp = runtime.nullp;
 var car = runtime.car;
 var cdr = runtime.cdr;
+var vector_ref = runtime.vector_ref;
 var ast = require("./ast");
 var grammar = function(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after){
 var repeated = function(rule){
@@ -42,9 +43,9 @@ return ast.node(ast.LIST,null,[q,node]);}
 return any(capture(all(char("'"),rule),capture_quoted),rule);}
 )(any(lst,number,string,term));}
 ;var lst = Y(function(lst){
-return before(all(char("("),repeated(any(space,comment,after(elements(lst),function(parent,child){
+return before(all(char("("),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){
 return ast.add_child(parent,child);}
-))),char(")")),function(state){
+)))),char(")")),function(state){
 return ast.node(ast.LIST);}
 );}
 );;return repeated(any(space,comment,after(elements(lst),function(root,child){
