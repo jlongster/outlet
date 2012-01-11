@@ -34,6 +34,10 @@ function eqp(v1, v2) {
     return v1 == v2;
 }
 
+function equalp(v1, v2) {
+    return v1 == v2;
+}
+
 function nullp(arr) {
     return arr.length !== undefined && arr.length == 0;
 }
@@ -46,6 +50,30 @@ function cdr(arr) {
     return arr.slice(1);
 }
 
+function vector_ref(arr, i) {
+    return arr[i];
+}
+
+function vector_set_excl(arr, i, v) {
+    arr[i] = v;
+}
+
+function vector_concat(arr1, arr2) {
+    return arr1.concat(arr2);
+}
+
+function vector(v) {
+    return [v];
+}
+
+function object() {
+    return {};
+}
+
+function object_ref(obj, key) {
+    return obj[key];
+}
+
 module.exports = {
     make_symbol: make_symbol,
     map: map,
@@ -54,7 +82,14 @@ module.exports = {
     pp: pp,
     inspect: inspect,
     eqp: eqp,
+    equalp: equalp,
     nullp: nullp,
     car: car,
-    cdr: cdr
-}
+    cdr: cdr,
+    vector_ref: vector_ref,
+    vector_set_excl: vector_set_excl,
+    vector_concat: vector_concat,
+    vector: vector,
+    object: object,
+    object_ref: object_ref
+};

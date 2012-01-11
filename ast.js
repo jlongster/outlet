@@ -15,9 +15,12 @@ function node(type, data, children) {
 }
 
 function add_child(parent, child) {
-    return node(parent.type,
-                parent.data,
-                parent.children.concat([child]));
+    if(child) {
+        return node(parent.type,
+                    parent.data,
+                    parent.children.concat([child]));
+    }
+    return parent;
 }
 
 function type_str(type) {

@@ -62,6 +62,7 @@ module.exports = function() {
         var term = node.data;
         term = term.replace(/-/g, '_');
         term = term.replace(/\?/g, 'p');
+        term = term.replace(/\!/g, '_excl');
         write(term);
     }
 
