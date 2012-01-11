@@ -172,6 +172,42 @@ install_parser(ast.LIST, function(node, parse, generator) {
                           node.children.slice(1));
         generator.write_array(lst, parse);
     }
+    else if(first.data == 'begin') {
+        // convert a begin into a self-called lambda
+        var body = node.children.slice(1);
+        var lambda = ast.node(ast.LIST, null,
+                              [ast.node(ast.TERM, 'lambda'),
+                               ast.node(ast.LIST, null, [])].concat(body));
+        var called = ast.node(ast.LIST, null, [lambda]);
+        parse(called);
+    }
+    else if(first.data == 'cond') {
+        function transform(i, current_if) {
+            if(i >= node.children.length) {
+                return current_if;
+            }
+
+            var n = node.children[i];
+
+            var condition = n.children[0];
+            var res = ast.node(ast.LIST,
+                               null,
+                               [ast.node(ast.TERM, 'begin')].concat(n.children.slice(1)));
+
+            if(condition.type == ast.TERM && condition.data == 'else') {
+                return res;
+            }
+
+            var expr = ast.node(ast.LIST,
+                                null,
+                                [ast.node(ast.TERM, 'if'),
+                                 condition,
+                                 res]);
+            return ast.add_child(expr, transform(i+1));
+        }
+
+        parse(transform(1));
+    }
     else if(generator.has_hook(first.data)) {
         generator.run_hook(first.data, node, parse);
     }
