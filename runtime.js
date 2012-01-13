@@ -1,7 +1,10 @@
 var util = require('util');
 
 function make_symbol(str) {
-    return str;
+    return {
+        str: str,
+        symbol: true
+    };
 }
 
 function map(func, arr) {
@@ -42,6 +45,17 @@ function nullp(arr) {
     return arr.length !== undefined && arr.length == 0;
 }
 
+function cons(v1, v2) {
+    // this is NOT a correct representation for pairs, but will do for
+    // now
+    if(v2.length) {
+        return [v1].concat(v2);
+    }
+    else {
+        return [v1, v2];
+    }
+}
+
 function car(arr) {
     return arr[0];
 }
@@ -74,6 +88,22 @@ function object_ref(obj, key) {
     return obj[key];
 }
 
+function numberp(obj) {
+    return typeof obj == 'number';
+}
+
+function symbolp(obj) {
+    return (obj.str && obj.symbol);
+}
+
+function stringp(obj) {
+    return typeof obj == 'string';
+}
+
+function pairp(obj) {
+    return obj.length;
+}
+
 module.exports = {
     make_symbol: make_symbol,
     map: map,
@@ -84,6 +114,7 @@ module.exports = {
     eqp: eqp,
     equalp: equalp,
     nullp: nullp,
+    cons: cons,
     car: car,
     cdr: cdr,
     vector_ref: vector_ref,
@@ -91,5 +122,9 @@ module.exports = {
     vector_concat: vector_concat,
     vector: vector,
     object: object,
-    object_ref: object_ref
+    object_ref: object_ref,
+    numberp: numberp,
+    symbolp: symbolp,
+    stringp: stringp,
+    pairp: pairp
 };

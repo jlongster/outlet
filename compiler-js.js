@@ -1,7 +1,7 @@
 var fs = require('fs');
 var ast = require('./ast');
 
-module.exports = function() {
+function generator() {
     var code = [];
     function write(src, eol) {
         code.push(src + (eol ? '\n' : ''));
@@ -18,6 +18,10 @@ module.exports = function() {
         write(rt, true);
     }
 
+    function create_generator() {
+        return generator();
+    }
+    
     function link(node1, node2, tag) {
         node2.link = node1;
         node1.tag = tag;
@@ -59,7 +63,7 @@ module.exports = function() {
 
     function write_term(node) {
         // TERM (variable, keyword, etc)
-        var term = node.data;
+        var term = node.data.str;
         term = term.replace(/-/g, '_');
         term = term.replace(/\?/g, 'p');
         term = term.replace(/\!/g, '_excl');
@@ -68,7 +72,7 @@ module.exports = function() {
 
     function write_symbol(node) {
         // SYMBOL
-        write('make_symbol("' + node.data + '")');
+        write('make_symbol("' + node.data.str + '")');
     }
 
     function write_set(node, parse) {
@@ -104,7 +108,7 @@ module.exports = function() {
         }
         else {
             write('function() {', true);
-            write('var ' + args_expr.data +
+            write('var ' + args_expr.data.str +
                   ' = Array.prototype.slice.call(arguments);', true);
         }
 
@@ -275,8 +279,8 @@ module.exports = function() {
         'require': function(node, parse) {
             for(var i=1; i<node.children.length; i++) {
                 var expr = node.children[i];
-                var name = expr.children[0].data;
-                var path = expr.children[1].data;
+                var name = expr.children[0].data.str;
+                var path = expr.children[1].data.str;
 
                 write('var ' + name + ' = ' +
                       'require("' + path + '");', true);
@@ -289,6 +293,7 @@ module.exports = function() {
     };
 
     return {
+        create_generator: create_generator,
         has_hook: has_hook,
         run_hook: run_hook,
         write_runtime: write_runtime,
@@ -307,3 +312,5 @@ module.exports = function() {
         }
     };
 };
+
+module.exports = generator;

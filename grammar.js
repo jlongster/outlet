@@ -6,10 +6,21 @@ var display = runtime.display;
 var pp = runtime.pp;
 var inspect = runtime.inspect;
 var eqp = runtime.eqp;
+var equalp = runtime.equalp;
 var nullp = runtime.nullp;
 var car = runtime.car;
 var cdr = runtime.cdr;
 var vector_ref = runtime.vector_ref;
+var vector_set_excl = runtime.vector_set_excl;
+var vector_concat = runtime.vector_concat;
+var vector = runtime.vector;
+var object = runtime.object;
+var object_ref = runtime.object_ref;
+var numberp = runtime.numberp;
+var symbolp = runtime.symbolp;
+var stringp = runtime.stringp;
+var pairp = runtime.pairp;
+
 var ast = require("./ast");
 var grammar = function(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after){
 var repeated = function(rule){
@@ -33,12 +44,12 @@ return before(rule,function(state){
 return ""}
 );}
 );;var term = capture(repeated(any(not_char(("()'"+space_char)))),function(buf,s){
-return ast.node(ast.TERM,buf);}
+return ast.node(ast.TERM,make_symbol(buf));}
 );;var elements = function(lst){
 var capture_quoted = function(buf,node){
 return (function(q){
 return ast.node(ast.LIST,null,[q,node]);}
-)(ast.node(ast.TERM,"quote"));}
+)(ast.node(ast.TERM,make_symbol("quote")));}
 ;return (function(rule){
 return any(capture(all(char("'"),rule),capture_quoted),rule);}
 )(any(lst,number,string,term));}

@@ -44,12 +44,12 @@
   (define term
     (capture (repeated (any (not-char (+ "()'" space-char))))
              (lambda (buf s)
-               (ast.node ast.TERM buf))))
+               (ast.node ast.TERM (make-symbol buf)))))
 
   (define (elements lst)
     (define (capture_quoted buf node)
       ;; add a "quote" term
-      (let ((q (ast.node ast.TERM "quote")))
+      (let ((q (ast.node ast.TERM (make-symbol "quote"))))
         (ast.node ast.LIST null (list q node))))
 
     (let ((rule (any lst number string term)))
