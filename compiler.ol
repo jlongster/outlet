@@ -116,7 +116,8 @@
 (define (macro? node)
   (if (eq? node.type ast.LIST)
       (let ((name (vector-ref node.children 0)))
-        (object-ref macros name.data.str))))
+        (if (eq? node.type ast.TERM)
+            (object-ref macros name.data.str)))))
 
 (define (parse-macro node generator)
   (let ((gen (generator.create-generator))
