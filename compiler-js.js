@@ -172,9 +172,46 @@ function generator() {
         }
     }
 
-    function write_array(node, parse, quoted) {
+    function write_array(node, parse, context) {
+        // Handle quasiquoting specially here. This is hacky and not
+        // the right place to do it, but it works for now.
+        if(context == 'quasi') {
+            // If it's a list with a term in the front, check if it's
+            // an unquote or unquote-splicing and handle it specially
+            if(node.type == ast.LIST &&
+               node.children[0] &&
+               node.children[0].type == ast.TERM) {
+
+                var term = node.children[0];
+
+                if(term.data.str == 'unquote') {
+                    parse_expr(parse, node, node.children[1]);
+                    return;
+                }
+                else if(term.data.str == 'unquote-splicing') {
+                    var lst = node.children[1];
+                    if(lst.type != ast.LIST) {
+                        throw ("unquote-splicing expected a list, got " + 
+                               ast.type_str(lst.type));
+                    }
+
+                    // Splicing should put all the list elements into
+                    // the current element
+                    for(var i=0; i<lst.children.length; i++) {
+                        if(i > 0) {
+                            write(',');
+                        }
+
+                        parse_expr(parse, lst, lst.children[i]);
+                    }
+
+                    return;
+                }
+            }
+        }
+
         if(node.type == ast.TERM) {
-            if(quoted) {
+            if(context == 'quote' || context == 'quasi') {
                 write_symbol(node);
             }
             else {
@@ -194,8 +231,8 @@ function generator() {
                     write(',');
                 }
 
-                if(quoted) {
-                    write_array(node.children[i], parse, quoted);
+                if(context == 'quote' || context == 'quasi') {
+                    write_array(node.children[i], parse, context);
                 }
                 else {
                     parse_expr(parse, node, node.children[i]);
@@ -273,7 +310,7 @@ function generator() {
 
         'not': function(node, parse) {
             write('!');
-            parse(node.children[1]);
+            parse_expr(parse, node, node.children[1]);
         },
 
         'require': function(node, parse) {

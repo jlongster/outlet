@@ -34,18 +34,30 @@
 ;; macros
 
 ;; quasiquote isn't support yet, but will be soon
-(define-macro (helper a b c)
-  (list 'bar (list '+ a b c)))
+(define-macro (helper form)
+  (list 'if
+        (list '< (car (cdr form)) 5)
+        (list '+
+              (car (cdr form))
+              (car (cdr (cdr form))))))
+
+(define-macro (helper form)
+  `(if (< ,(car (cdr form)) 5)
+       (+ ,(car (cdr form))
+          ,(car (cdr (cdr form))))))
 
 (define (bar n)
   (pp n))
 
 (define (foo)
-  (helper 1 2 3))
+  (helper (if 1 2)))
 
 ;; ->
 ;; var bar = function(n){
 ;; return pp(n);}
 ;;
 ;; var foo = function(){
-;; return bar((1+2+3));}
+;; return (function() {if((1<5)) { return (1+2)}})()
+;; }
+
+

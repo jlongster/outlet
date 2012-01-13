@@ -116,7 +116,7 @@
 (define (macro? node)
   (if (eq? node.type ast.LIST)
       (let ((name (vector-ref node.children 0)))
-        (if (eq? node.type ast.TERM)
+        (if (eq? name.type ast.TERM)
             (object-ref macros name.data.str)))))
 
 (define (parse-macro node generator)
@@ -231,7 +231,12 @@
      (generator.write-array
                 (vector-ref node.children 1)
                 parse
-                true))
+                "quote"))
+
+    ((equal? term "quasiquote")
+     (generator.write-array (vector-ref node.children 1)
+                            parse
+                            "quasi"))
 
     ((equal? term "list")
      (generator.write-array

@@ -95,7 +95,7 @@ return vector_set_excl(macros,name,func);}
 return vector_ref(macros,name);}
 ;var macrop = function(node){
 return (function() {if(eqp(node.type,ast.LIST)) { return (function(name){
-return (function() {if(eqp(node.type,ast.TERM)) { return object_ref(macros,name.data.str);}})()
+return (function() {if(eqp(name.type,ast.TERM)) { return object_ref(macros,name.data.str);}})()
 }
 )(vector_ref(node.children,0));}})()
 }
@@ -146,7 +146,10 @@ return generator.write_set(define_to_setlambda(node),parse);}
 )();} else { return (function() {if(equalp(term,"define-macro")) { return (function(){
 return parse_macro(node,generator);}
 )();} else { return (function() {if(equalp(term,"quote")) { return (function(){
-return generator.write_array(vector_ref(node.children,1),parse,true);}
+return generator.write_array(vector_ref(node.children,1),parse,"quote");}
+)();} else { return (function() {if(equalp(term,"quasiquote")) { return (function(){
+return (function() {if(!eqp(node.type,ast.LIST)) { return parse(node);} else { return generator.write_array(vector_ref(node.children,1),parse,"quasi");}})()
+}
 )();} else { return (function() {if(equalp(term,"list")) { return (function(){
 return generator.write_array(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
 )();} else { return (function() {if(equalp(term,"begin")) { return (function(){
@@ -170,6 +173,7 @@ return generator.run_hook(term,node,parse);}
 )();} else { return (function(){
 return generator.write_func_call(node,parse);}
 )();}})()
+}})()
 }})()
 }})()
 }})()

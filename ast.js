@@ -72,5 +72,6 @@ module.exports = {
 
     node: node,
     add_child: add_child,
-    pretty_print: pretty_print
+    pretty_print: pretty_print,
+    type_str: type_str
 };

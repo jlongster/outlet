@@ -8,6 +8,7 @@ var inspect = runtime.inspect;
 var eqp = runtime.eqp;
 var equalp = runtime.equalp;
 var nullp = runtime.nullp;
+var cons = runtime.cons;
 var car = runtime.car;
 var cdr = runtime.cdr;
 var vector_ref = runtime.vector_ref;
@@ -46,12 +47,30 @@ return ""}
 );;var term = capture(repeated(any(not_char(("()'"+space_char)))),function(buf,s){
 return ast.node(ast.TERM,make_symbol(buf));}
 );;var elements = function(lst){
-var capture_quoted = function(buf,node){
+var quoting = function(rule){
+var capt = function(buf,node){
+return (function(special){
 return (function(q){
 return ast.node(ast.LIST,null,[q,node]);}
-)(ast.node(ast.TERM,make_symbol("quote")));}
+)(ast.node(ast.TERM,make_symbol(special)));}
+)((function() {if(equalp(buf.substring(0,2),",@")) { return (function(){
+return "unquote-splicing"}
+)();} else { return (function() {if(equalp(buf.charAt(0),",")) { return (function(){
+return "unquote"}
+)();} else { return (function() {if(equalp(buf.charAt(0),"'")) { return (function(){
+return "quote"}
+)();} else { return (function() {if(equalp(buf.charAt(0),"`")) { return (function(){
+return "quasiquote"}
+)();}})()
+}})()
+}})()
+}})()
+);}
+;return Y(function(q){
+return capture(all(any(char("'"),char("`"),char(","),all(char(","),char("@"))),any(q,rule)),capt);}
+);}
 ;return (function(rule){
-return any(capture(all(char("'"),rule),capture_quoted),rule);}
+return any(quoting(rule),rule);}
 )(any(lst,number,string,term));}
 ;var lst = Y(function(lst){
 return before(all(char("("),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){

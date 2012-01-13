@@ -7,9 +7,12 @@ var generator = require('./compiler-js')();
 var src = require('fs').readFileSync('example.ol', 'utf-8');
 //util.puts(outlet.compile(src, 'nodejs'));
 
-var compiler = require('./compiler-bootstrap');
+var compiler = require('./compiler');
 var reader = require('./parser');
 var grammar = require('./grammar');
+// ast.pretty_print(reader(grammar,
+//                       src,
+//                       ast.node(ast.ROOT)));
 compiler.parse(reader(grammar,
                       src,
                       ast.node(ast.ROOT)),

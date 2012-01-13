@@ -47,13 +47,27 @@
                (ast.node ast.TERM (make-symbol buf)))))
 
   (define (elements lst)
-    (define (capture_quoted buf node)
-      ;; add a "quote" term
-      (let ((q (ast.node ast.TERM (make-symbol "quote"))))
-        (ast.node ast.LIST null (list q node))))
-
+    (define (quoting rule)
+      (define (capt buf node)
+        (let ((special
+               (cond
+                ((equal? (buf.substring 0 2) ",@") "unquote-splicing")
+                ((equal? (buf.charAt 0) ",") "unquote")
+                ((equal? (buf.charAt 0) "'") "quote")
+                ((equal? (buf.charAt 0) "`") "quasiquote"))))
+          (let ((q (ast.node ast.TERM (make-symbol special))))
+            (ast.node ast.LIST null (list q node)))))
+      
+      (Y (lambda (q)
+           (capture (all (any (char "'")
+                            (char "`")
+                            (char ",")
+                            (all (char ",") (char "@")))
+                         (any q rule))
+                    capt))))
+ 
     (let ((rule (any lst number string term)))
-      (any (capture (all (char "'") rule) capture_quoted)
+      (any (quoting rule)
            rule)))
 
   (define lst
