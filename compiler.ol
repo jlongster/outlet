@@ -269,7 +269,7 @@
                                    (list (ast.node ast.TERM (make-symbol "begin")))
                                    (n.children.slice 1)))))
                (if (and (eq? condition.type ast.TERM)
-                        (equal? condition.data "else"))
+                        (equal? condition.data.str "else"))
                    res
                    (ast.add_child
                     (ast.node ast.LIST

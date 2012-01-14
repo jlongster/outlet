@@ -41,7 +41,7 @@ function generator() {
 
     function is_throw(node) {
         return node.type == ast.LIST &&
-            node.children[0].data == 'throw';
+            node.children[0].data.str == 'throw';
     }
 
     function parse_expr(parse, parent, node) {
@@ -341,7 +341,7 @@ function generator() {
             for(var i=1; i<node.children.length; i++) {
                 var expr = node.children[i];
                 var name = expr.children[0].data.str;
-                var path = expr.children[1].data.str;
+                var path = expr.children[1].data;
 
                 write('var ' + name + ' = ' +
                       'require("' + path + '");', true);

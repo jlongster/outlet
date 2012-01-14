@@ -1,4 +1,4 @@
-var outlet = require('./boot/outlet');
+var outlet = require('./outlet');
 var util = require('util');
 
 var src = require('fs').readFileSync('compiler.ol', 'utf-8');

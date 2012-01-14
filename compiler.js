@@ -167,7 +167,7 @@ return parse(ast.node(ast.LIST,null,[lamb]));}
 var transform = function(i){
 return (function() {if(((i>node.children.length)||eqp(i,node.children.length))) { return null} else { return (function(n){
 return (function(condition,res){
-return (function() {if((eqp(condition.type,ast.TERM)&&equalp(condition.data,"else"))) { return res} else { return ast.add_child(ast.node(ast.LIST,null,[ast.node(ast.TERM,make_symbol("if")),condition,res]),transform((i+1)))}})()
+return (function() {if((eqp(condition.type,ast.TERM)&&equalp(condition.data.str,"else"))) { return res} else { return ast.add_child(ast.node(ast.LIST,null,[ast.node(ast.TERM,make_symbol("if")),condition,res]),transform((i+1)))}})()
 }
 )(vector_ref(n.children,0),ast.node(ast.LIST,null,vector_concat([ast.node(ast.TERM,make_symbol("begin"))],n.children.slice(1))));}
 )(vector_ref(node.children,i));}})()
