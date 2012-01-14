@@ -21,20 +21,21 @@ var numberp = runtime.numberp;
 var symbolp = runtime.symbolp;
 var stringp = runtime.stringp;
 var pairp = runtime.pairp;
+var unquote_splice = runtime.unquote_splice;
 
 var reader = require("./parser");
 var util = require("util");
 var ast = require("./ast");
 var grammar = require("./grammar");
 var assert = function(v,msg){
-return (function() {if(!v) { throw(msg);}})()
+return (function() {if(!v) { throw(msg)}})()
 }
 ;var assert_type = function(node,type,msg){
 return assert((node.type===type),("invalid type, expected "+type+": "+inspect(node)));}
 ;var parsers = [];var read = function(src){
 return reader(grammar,src,ast.node(ast.ROOT));}
 ;var parse = function(node,generator){
-return (function() {if(macrop(node)) { return parse(expand(node,generator),generator);} else { return (function(parser){
+return (function() {if(macrop(node)) { return parse(expand(node,generator),generator)} else { return (function(parser){
 assert(parser,("No parser for node type:"+node.type));return parser(node,function(node){
 return parse(node,generator);}
 ,generator);}
@@ -45,7 +46,9 @@ parse(read(src),generator);return generator.get_code();}
 ;var expand = function(node,generator){
 return (function(name){
 return (function(func){
-return nodify(func.apply(null,map(sourcify,node.children.slice(1))));}
+return (function(res){
+ast.pretty_print(res);return res}
+)(nodify(func.apply(null,map(sourcify,node.children.slice(1)))));}
 )(get_macro(name.data.str));}
 )(vector_ref(node.children,0));}
 ;var sourcify = function(node){
@@ -54,7 +57,7 @@ return parseInt(node.data);}
 )();} else { return (function() {if(eqp(node.type,ast.TERM)) { return (function(){
 return node.data}
 )();} else { return (function() {if(eqp(node.type,ast.STRING)) { return (function(){
-return ("\""+node.data+"\"")}
+return node.data}
 )();} else { return (function() {if(eqp(node.type,ast.LIST)) { return (function(){
 return map(sourcify,node.children);}
 )();}})()
@@ -71,7 +74,10 @@ return ast.node(ast.TERM,obj);}
 return ast.node(ast.STRING,obj);}
 )();} else { return (function() {if(pairp(obj)) { return (function(){
 return ast.node(ast.LIST,null,map(nodify,obj));}
+)();} else { return (function() {if(nullp(obj)) { return (function(){
+return ast.node(ast.LIST);}
 )();}})()
+}})()
 }})()
 }})()
 }})()
@@ -95,7 +101,7 @@ return vector_set_excl(macros,name,func);}
 return vector_ref(macros,name);}
 ;var macrop = function(node){
 return (function() {if(eqp(node.type,ast.LIST)) { return (function(name){
-return (function() {if(eqp(name.type,ast.TERM)) { return object_ref(macros,name.data.str);}})()
+return (function() {if(eqp(name.type,ast.TERM)) { return object_ref(macros,name.data.str)}})()
 }
 )(vector_ref(node.children,0));}})()
 }
@@ -138,7 +144,7 @@ return generator.write_func_call(ast.node(ast.LIST,null,vector_concat(vector(lam
 )();} else { return (function() {if(equalp(term,"lambda")) { return (function(){
 var args = vector_ref(node.children,1);;(function() {if(eqp(args.type,ast.LIST)) { return for_each(function(n){
 return assert_type(n,ast.TERM);}
-,args.children);} else { return (function() {if(!eqp(args.type,ast.TERM)) { throw("lambda must have a list of arguments or a binding term");}})()
+,args.children)} else { return (function() {if(!eqp(args.type,ast.TERM)) { throw("lambda must have a list of arguments or a binding term")}})()
 }})()
 return generator.write_lambda(node,parse);}
 )();} else { return (function() {if(equalp(term,"define")) { return (function(){
@@ -161,7 +167,7 @@ return parse(ast.node(ast.LIST,null,[lamb]));}
 var transform = function(i){
 return (function() {if(((i>node.children.length)||eqp(i,node.children.length))) { return null} else { return (function(n){
 return (function(condition,res){
-return (function() {if((eqp(condition.type,ast.TERM)&&equalp(condition.data,"else"))) { return res} else { return ast.add_child(ast.node(ast.LIST,null,[ast.node(ast.TERM,make_symbol("if")),condition,res]),transform((i+1)));}})()
+return (function() {if((eqp(condition.type,ast.TERM)&&equalp(condition.data,"else"))) { return res} else { return ast.add_child(ast.node(ast.LIST,null,[ast.node(ast.TERM,make_symbol("if")),condition,res]),transform((i+1)))}})()
 }
 )(vector_ref(n.children,0),ast.node(ast.LIST,null,vector_concat([ast.node(ast.TERM,make_symbol("begin"))],n.children.slice(1))));}
 )(vector_ref(node.children,i));}})()

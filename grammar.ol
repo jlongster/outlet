@@ -60,9 +60,9 @@
       
       (Y (lambda (q)
            (capture (all (any (char "'")
-                            (char "`")
-                            (char ",")
-                            (all (char ",") (char "@")))
+                              (char "`")
+                              (all (char ",") (char "@"))
+                              (char ","))
                          (any q rule))
                     capt))))
  

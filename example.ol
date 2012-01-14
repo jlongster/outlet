@@ -65,3 +65,14 @@
 ;; return pp(three);}
 ;;
 ;; baz("a","b","c","d"); -> ["c", "d"]
+
+(define-macro (begin . body)
+  `((lambda () ,@body)))
+
+(define (hello)
+  (if (> 1 2)
+      (pp "hello")
+      (begin
+        (pp "something")
+        (pp "is")
+        (pp "working"))))

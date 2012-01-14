@@ -46,6 +46,11 @@ function pretty_print(ast, indent) {
         util.puts(pad + str);
     }
 
+    if(!ast) {
+        puts('undefined');
+        return;
+    }
+
     var data = '';
     if(ast.data) {
         data = ': ' + util.inspect(ast.data);
@@ -58,6 +63,7 @@ function pretty_print(ast, indent) {
         puts(type_str(ast.type) + data);    
     }
     
+
     for(var i=0; i<ast.children.length; i++) {
         pretty_print(ast.children[i], indent+2);
     }

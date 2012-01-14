@@ -42,14 +42,16 @@
 (define (expand node generator)
   (let ((name (vector-ref node.children 0)))
     (let ((func (get-macro name.data.str)))
-      (nodify (func.apply null (map sourcify
-                                    (node.children.slice 1)))))))
+      (let ((res (nodify (func.apply null (map sourcify
+                                               (node.children.slice 1))))))
+        (ast.pretty_print res)
+        res))))
 
 (define (sourcify node)
   (cond
    ((eq? node.type ast.NUMBER) (parseInt node.data))
    ((eq? node.type ast.TERM) node.data)
-   ((eq? node.type ast.STRING) (string-append "\"" node.data "\""))
+   ((eq? node.type ast.STRING) node.data)
    ((eq? node.type ast.LIST) (map sourcify node.children))))
 
 (define (nodify obj)
@@ -57,7 +59,8 @@
    ((number? obj) (ast.node ast.NUMBER obj))
    ((symbol? obj) (ast.node ast.TERM obj))
    ((string? obj) (ast.node ast.STRING obj))
-   ((pair? obj) (ast.node ast.LIST null (map nodify obj)))))
+   ((pair? obj) (ast.node ast.LIST null (map nodify obj)))
+   ((null? obj) (ast.node ast.LIST))))
 
 ;; helpers
 

@@ -104,6 +104,24 @@ function pairp(obj) {
     return obj.length;
 }
 
+function unquote_splice(arr) {
+    var res = [];
+    var i = 0;
+
+    while(i<arr.length) {
+        if(arr[i].please_splice) {
+            res = res.concat(unquote_splice(arr[i].data));
+        }
+        else {
+            res.push(arr[i]);
+        }
+
+        i++;
+    }
+
+    return res;
+}
+
 module.exports = {
     make_symbol: make_symbol,
     map: map,
@@ -126,5 +144,6 @@ module.exports = {
     numberp: numberp,
     symbolp: symbolp,
     stringp: stringp,
-    pairp: pairp
+    pairp: pairp,
+    unquote_splice: unquote_splice
 };

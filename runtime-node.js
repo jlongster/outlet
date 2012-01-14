@@ -21,3 +21,4 @@ var numberp = runtime.numberp;
 var symbolp = runtime.symbolp;
 var stringp = runtime.stringp;
 var pairp = runtime.pairp;
+var unquote_splice = runtime.unquote_splice;

@@ -67,7 +67,7 @@ return "quasiquote"}
 }})()
 );}
 ;return Y(function(q){
-return capture(all(any(char("'"),char("`"),char(","),all(char(","),char("@"))),any(q,rule)),capt);}
+return capture(all(any(char("'"),char("`"),all(char(","),char("@")),char(",")),any(q,rule)),capt);}
 );}
 ;return (function(rule){
 return any(quoting(rule),rule);}
