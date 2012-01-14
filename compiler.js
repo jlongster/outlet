@@ -47,7 +47,7 @@ parse(read(src),generator);return generator.get_code();}
 return (function(name){
 return (function(func){
 return (function(res){
-ast.pretty_print(res);return res}
+return res}
 )(nodify(func.apply(null,map(sourcify,node.children.slice(1)))));}
 )(get_macro(name.data.str));}
 )(vector_ref(node.children,0));}

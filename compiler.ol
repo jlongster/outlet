@@ -44,7 +44,6 @@
     (let ((func (get-macro name.data.str)))
       (let ((res (nodify (func.apply null (map sourcify
                                                (node.children.slice 1))))))
-        (ast.pretty_print res)
         res))))
 
 (define (sourcify node)
