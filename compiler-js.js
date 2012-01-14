@@ -41,6 +41,7 @@ function generator() {
 
     function is_throw(node) {
         return node.type == ast.LIST &&
+            node.children[0].data &&
             node.children[0].data.str == 'throw';
     }
 
