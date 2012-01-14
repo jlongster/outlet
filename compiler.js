@@ -138,7 +138,7 @@ return generator.write_func_call(ast.node(ast.LIST,null,vector_concat(vector(lam
 )();} else { return (function() {if(equalp(term,"lambda")) { return (function(){
 var args = vector_ref(node.children,1);;(function() {if(eqp(args.type,ast.LIST)) { return for_each(function(n){
 return assert_type(n,ast.TERM);}
-,args.children);} else { return (function() {if(eqp(args.type,ast.TERM)) { throw("lambda must have a list of arguments or a binding term");}})()
+,args.children);} else { return (function() {if(!eqp(args.type,ast.TERM)) { throw("lambda must have a list of arguments or a binding term");}})()
 }})()
 return generator.write_lambda(node,parse);}
 )();} else { return (function() {if(equalp(term,"define")) { return (function(){
@@ -148,8 +148,7 @@ return parse_macro(node,generator);}
 )();} else { return (function() {if(equalp(term,"quote")) { return (function(){
 return generator.write_array(vector_ref(node.children,1),parse,"quote");}
 )();} else { return (function() {if(equalp(term,"quasiquote")) { return (function(){
-return (function() {if(!eqp(node.type,ast.LIST)) { return parse(node);} else { return generator.write_array(vector_ref(node.children,1),parse,"quasi");}})()
-}
+return generator.write_array(vector_ref(node.children,1),parse,"quasi");}
 )();} else { return (function() {if(equalp(term,"list")) { return (function(){
 return generator.write_array(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
 )();} else { return (function() {if(equalp(term,"begin")) { return (function(){

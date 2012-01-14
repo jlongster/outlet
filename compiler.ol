@@ -217,7 +217,7 @@
      (if (eq? args.type ast.LIST)
          (for-each (lambda (n) (assert-type n ast.TERM))
                    args.children)
-         (if (eq? args.type ast.TERM)
+         (if (not (eq? args.type ast.TERM))
              (throw "lambda must have a list of arguments or a binding term")))
 
      (generator.write-lambda node parse))

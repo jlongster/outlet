@@ -94,17 +94,35 @@ function generator() {
         var args_expr = node.children[1];
 
         if(args_expr.type == ast.LIST) {
+            var capture_name;
+
             write('function(');
 
             for(var i=0; i<args_expr.children.length; i++) {
-                if(i>0) {
-                    write(',');
-                }
+                var arg = args_expr.children[i];
 
-                write_term(args_expr.children[i]);
+                // support for dot-style rest arguments
+                if(arg.data.str == '.') {
+                    var name = args_expr.children[i+1];
+                    capture_name = name.data.str;
+                    break;
+                }
+                else {
+                    if(i>0) {
+                        write(',');
+                    }
+
+                    write_term(arg);
+                }
             }
 
             write('){', true);
+
+            if(capture_name) {
+                write('var ' + capture_name + 
+                      ' = Array.prototype.slice.call(arguments, ' + 
+                      (args_expr.children.length - 2) + ');', true);
+            }
         }
         else {
             write('function() {', true);
