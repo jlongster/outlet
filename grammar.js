@@ -1,26 +1,152 @@
-var runtime = require('./runtime');
-var make_symbol = runtime.make_symbol;
-var map = runtime.map;
-var for_each = runtime.for_each;
-var display = runtime.display;
-var pp = runtime.pp;
-var inspect = runtime.inspect;
-var eqp = runtime.eqp;
-var equalp = runtime.equalp;
-var nullp = runtime.nullp;
-var cons = runtime.cons;
-var car = runtime.car;
-var cdr = runtime.cdr;
-var vector_ref = runtime.vector_ref;
-var vector_set_excl = runtime.vector_set_excl;
-var vector_concat = runtime.vector_concat;
-var vector = runtime.vector;
-var object = runtime.object;
-var object_ref = runtime.object_ref;
-var numberp = runtime.numberp;
-var symbolp = runtime.symbolp;
-var stringp = runtime.stringp;
-var pairp = runtime.pairp;
+var util = require('util');
+
+function make_symbol(str) {
+    return {
+        str: str,
+        symbol: true
+    };
+}
+
+function map(func, arr) {
+    var r = [];
+    for(var i=0; i<arr.length; i++) {
+        r.push(func(arr[i]));
+    }
+    return r;
+}
+
+function for_each(func, arr) {
+    for(var i=0; i<arr.length; i++) {
+        func(arr[i]);
+    }    
+}
+
+function display(msg) {
+    console.log(msg);
+}
+
+function pp(obj) {
+    display(inspect(obj));
+}
+
+function inspect(obj) {
+    return util.inspect(obj);
+}
+
+function eqp(v1, v2) {
+    return v1 == v2;
+}
+
+function equalp(v1, v2) {
+    return v1 == v2;
+}
+
+function nullp(arr) {
+    return arr.length !== undefined && arr.length == 0;
+}
+
+function cons(v1, v2) {
+    // this is NOT a correct representation for pairs, but will do for
+    // now
+    if(v2.length) {
+        return [v1].concat(v2);
+    }
+    else {
+        return [v1, v2];
+    }
+}
+
+function car(arr) {
+    return arr[0];
+}
+
+function cdr(arr) {
+    return arr.slice(1);
+}
+
+function vector_ref(arr, i) {
+    return arr[i];
+}
+
+function vector_set_excl(arr, i, v) {
+    arr[i] = v;
+}
+
+function vector_concat(arr1, arr2) {
+    return arr1.concat(arr2);
+}
+
+function vector(v) {
+    return [v];
+}
+
+function object() {
+    return {};
+}
+
+function object_ref(obj, key) {
+    return obj[key];
+}
+
+function numberp(obj) {
+    return typeof obj == 'number';
+}
+
+function symbolp(obj) {
+    return (obj.str && obj.symbol);
+}
+
+function stringp(obj) {
+    return typeof obj == 'string';
+}
+
+function pairp(obj) {
+    return obj.length;
+}
+
+function unquote_splice(arr) {
+    var res = [];
+    var i = 0;
+
+    while(i<arr.length) {
+        if(arr[i].please_splice) {
+            res = res.concat(unquote_splice(arr[i].data));
+        }
+        else {
+            res.push(arr[i]);
+        }
+
+        i++;
+    }
+
+    return res;
+}
+
+module.exports = {
+    make_symbol: make_symbol,
+    map: map,
+    for_each: for_each,
+    display: display,
+    pp: pp,
+    inspect: inspect,
+    eqp: eqp,
+    equalp: equalp,
+    nullp: nullp,
+    cons: cons,
+    car: car,
+    cdr: cdr,
+    vector_ref: vector_ref,
+    vector_set_excl: vector_set_excl,
+    vector_concat: vector_concat,
+    vector: vector,
+    object: object,
+    object_ref: object_ref,
+    numberp: numberp,
+    symbolp: symbolp,
+    stringp: stringp,
+    pairp: pairp,
+    unquote_splice: unquote_splice
+};
 
 var ast = require("./ast");
 var grammar = function(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after){
@@ -51,7 +177,7 @@ var quoting = function(rule){
 var capt = function(buf,node){
 return (function(special){
 return (function(q){
-return ast.node(ast.LIST,null,[q,node]);}
+return ast.node(ast.LIST,null,unquote_splice([q,node]));}
 )(ast.node(ast.TERM,make_symbol(special)));}
 )((function() {if(equalp(buf.substring(0,2),",@")) { return (function(){
 return "unquote-splicing"}
@@ -79,6 +205,6 @@ return ast.add_child(parent,child);}
 return ast.node(ast.LIST);}
 );}
 );;return repeated(any(space,comment,after(elements(lst),function(root,child){
-return ast.node(ast.ROOT,null,root.children.concat([child]));}
+return ast.node(ast.ROOT,null,root.children.concat(unquote_splice([child])));}
 )));}
 ;module.exports = grammar;

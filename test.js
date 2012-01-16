@@ -13,6 +13,7 @@ var grammar = require('./grammar');
 // ast.pretty_print(reader(grammar,
 //                       src,
 //                       ast.node(ast.ROOT)));
+generator.write_runtime('js');
 compiler.parse(reader(grammar,
                       src,
                       ast.node(ast.ROOT)),

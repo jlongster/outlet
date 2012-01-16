@@ -1,9 +1,12 @@
 (require (reader "./parser")
          (util "util")
          (ast "./ast")
-         (grammar "./grammar"))
+         (grammar "./grammar")
+         (js "./compiler-js"))
 
 ;; util
+
+(define current-generator false)
 
 (define (assert v msg)
   (if (not v)
@@ -23,7 +26,16 @@
 (define (read src)
   (reader grammar src (ast.node ast.ROOT)))
 
+(define (set-generator gen)
+  (set! current-generator gen))
+
+(define (create-generator)
+  (current-generator.create-generator))
+
 (define (parse node generator)
+  (if (not current-generator)
+      (set! current-generator generator))
+  
   ;; check to see if it's a macro
   (if (macro? node)
       (parse (expand node generator)
@@ -36,7 +48,7 @@
                 generator))))
 
 (define (compile src generator)
-  (parse (read src) generator)  
+  (parse (read src) generator)
   (generator.get-code))
 
 (define (expand node generator)
@@ -44,6 +56,8 @@
     (let ((func (get-macro name.data.str)))
       (let ((res (nodify (func.apply null (map sourcify
                                                (node.children.slice 1))))))
+        ;; maintain node links
+        (if res (set! res.link node.link))
         res))))
 
 (define (sourcify node)
@@ -54,12 +68,14 @@
    ((eq? node.type ast.LIST) (map sourcify node.children))))
 
 (define (nodify obj)
-  (cond
-   ((number? obj) (ast.node ast.NUMBER obj))
-   ((symbol? obj) (ast.node ast.TERM obj))
-   ((string? obj) (ast.node ast.STRING obj))
-   ((pair? obj) (ast.node ast.LIST null (map nodify obj)))
-   ((null? obj) (ast.node ast.LIST))))
+  (if (not obj)
+      null
+      (cond
+       ((number? obj) (ast.node ast.NUMBER obj))
+       ((symbol? obj) (ast.node ast.TERM obj))
+       ((string? obj) (ast.node ast.STRING obj))
+       ((pair? obj) (ast.node ast.LIST null (map nodify obj)))
+       ((null? obj) (ast.node ast.LIST)))))
 
 ;; helpers
 
@@ -205,11 +221,12 @@
            (let ((lambda-node (ast.node ast.LIST
                               null
                               (lambda-header.concat body))))
-             (generator.write-func-call
-              (ast.node ast.LIST
+             (let ((res (ast.node ast.LIST
                         null
-                        (vector-concat (vector lambda-node) (vector-ref nodes 1)))
-              parse))))))
+                        (vector-concat (vector lambda-node) (vector-ref nodes 1)))))
+               ;; maintain node links
+               (set! res.link node.link)
+               (generator.write-func-call res parse)))))))
 
     ((equal? term "lambda")
      ;; do some ast structure verification, should look like:
@@ -247,15 +264,6 @@
                           (node.children.slice 1))
                 parse))
 
-    ((equal? term "begin")
-     (let ((body (node.children.slice 1)))
-       (let ((lamb (ast.node ast.LIST null
-                             (vector-concat
-                              (list (ast.node ast.TERM (make-symbol "lambda"))
-                                    (ast.node ast.LIST null '()))
-                              body))))
-         (parse (ast.node ast.LIST null (list lamb))))))
-
     ((equal? term "cond")
      (define (transform i)
        (if (or (> i node.children.length)
@@ -278,7 +286,10 @@
                                     condition
                                     res))
                     (transform (+ i 1))))))))
-     (parse (transform 1)))
+     (let ((res (transform 1)))
+       ;; maintain node links
+       (set! res.link node.link)
+       (parse res)))
 
     ((generator.has-hook term)
      (generator.run-hook term node parse))
@@ -290,7 +301,23 @@
                   (for-each (lambda (n) (parse n))
                             node.children)))
 
+(install-macro "begin"
+               (lambda body
+                 `((lambda () ,@body))))
+
+(install-macro "eval_outlet"
+               (lambda (form)
+                 ;; make generator, compile the code and eval it. this
+                 ;; is a macro so the eval happens in the right context
+                 `(let ((gen (create_generator)))
+                    (parse (nodify ,form) gen)
+                    (eval (gen.get-code)))))
+
 (set! module.exports (object))
 (set! module.exports.read read)
 (set! module.exports.parse parse)
 (set! module.exports.compile compile)
+
+(set! module.exports.set-generator set-generator)
+(set! module.exports.create_generator create_generator)
+(set! module.exports.nodify nodify)

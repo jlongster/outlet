@@ -8,14 +8,17 @@ function generator() {
     };
 
     function write_runtime(target) {
-        var file = 'runtime.js';
-
-        if(target == 'nodejs') {
-            file = 'runtime-node.js';
+        if(target == 'no-runtime') {
+            return;
         }
 
-        var rt = fs.readFileSync(file, 'utf-8');
+        var rt = fs.readFileSync('runtime.js', 'utf-8');
         write(rt, true);
+
+        if(target != 'js-noeval') {
+            rt = fs.readFileSync('runtime-eval.js', 'utf-8');
+            write(rt, true);
+        }
     }
 
     function create_generator() {
@@ -180,6 +183,9 @@ function generator() {
 
         write(')');
 
+        // var util = require('util');
+        // util.puts(util.inspect(node, false, 4));
+
         // if the parent node is not a function call, we should end
         // the expression. this solves ambiguities with the next
         // statement which could be another function call in the form
@@ -341,11 +347,12 @@ function generator() {
         'require': function(node, parse) {
             for(var i=1; i<node.children.length; i++) {
                 var expr = node.children[i];
-                var name = expr.children[0].data.str;
-                var path = expr.children[1].data;
+                var name = expr.children[0];
+                var path = expr.children[1];
 
-                write('var ' + name + ' = ' +
-                      'require("' + path + '");', true);
+                write('var ');
+                write_term(name);
+                write(' = require("' + path.data + '");', true);
             }
         },
 

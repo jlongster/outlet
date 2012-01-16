@@ -121,29 +121,3 @@ function unquote_splice(arr) {
 
     return res;
 }
-
-module.exports = {
-    make_symbol: make_symbol,
-    map: map,
-    for_each: for_each,
-    display: display,
-    pp: pp,
-    inspect: inspect,
-    eqp: eqp,
-    equalp: equalp,
-    nullp: nullp,
-    cons: cons,
-    car: car,
-    cdr: cdr,
-    vector_ref: vector_ref,
-    vector_set_excl: vector_set_excl,
-    vector_concat: vector_concat,
-    vector: vector,
-    object: object,
-    object_ref: object_ref,
-    numberp: numberp,
-    symbolp: symbolp,
-    stringp: stringp,
-    pairp: pairp,
-    unquote_splice: unquote_splice
-};

@@ -1,40 +1,171 @@
-var runtime = require('./runtime');
-var make_symbol = runtime.make_symbol;
-var map = runtime.map;
-var for_each = runtime.for_each;
-var display = runtime.display;
-var pp = runtime.pp;
-var inspect = runtime.inspect;
-var eqp = runtime.eqp;
-var equalp = runtime.equalp;
-var nullp = runtime.nullp;
-var cons = runtime.cons;
-var car = runtime.car;
-var cdr = runtime.cdr;
-var vector_ref = runtime.vector_ref;
-var vector_set_excl = runtime.vector_set_excl;
-var vector_concat = runtime.vector_concat;
-var vector = runtime.vector;
-var object = runtime.object;
-var object_ref = runtime.object_ref;
-var numberp = runtime.numberp;
-var symbolp = runtime.symbolp;
-var stringp = runtime.stringp;
-var pairp = runtime.pairp;
-var unquote_splice = runtime.unquote_splice;
+var util = require('util');
+
+function make_symbol(str) {
+    return {
+        str: str,
+        symbol: true
+    };
+}
+
+function map(func, arr) {
+    var r = [];
+    for(var i=0; i<arr.length; i++) {
+        r.push(func(arr[i]));
+    }
+    return r;
+}
+
+function for_each(func, arr) {
+    for(var i=0; i<arr.length; i++) {
+        func(arr[i]);
+    }    
+}
+
+function display(msg) {
+    console.log(msg);
+}
+
+function pp(obj) {
+    display(inspect(obj));
+}
+
+function inspect(obj) {
+    return util.inspect(obj);
+}
+
+function eqp(v1, v2) {
+    return v1 == v2;
+}
+
+function equalp(v1, v2) {
+    return v1 == v2;
+}
+
+function nullp(arr) {
+    return arr.length !== undefined && arr.length == 0;
+}
+
+function cons(v1, v2) {
+    // this is NOT a correct representation for pairs, but will do for
+    // now
+    if(v2.length) {
+        return [v1].concat(v2);
+    }
+    else {
+        return [v1, v2];
+    }
+}
+
+function car(arr) {
+    return arr[0];
+}
+
+function cdr(arr) {
+    return arr.slice(1);
+}
+
+function vector_ref(arr, i) {
+    return arr[i];
+}
+
+function vector_set_excl(arr, i, v) {
+    arr[i] = v;
+}
+
+function vector_concat(arr1, arr2) {
+    return arr1.concat(arr2);
+}
+
+function vector(v) {
+    return [v];
+}
+
+function object() {
+    return {};
+}
+
+function object_ref(obj, key) {
+    return obj[key];
+}
+
+function numberp(obj) {
+    return typeof obj == 'number';
+}
+
+function symbolp(obj) {
+    return (obj.str && obj.symbol);
+}
+
+function stringp(obj) {
+    return typeof obj == 'string';
+}
+
+function pairp(obj) {
+    return obj.length;
+}
+
+function unquote_splice(arr) {
+    var res = [];
+    var i = 0;
+
+    while(i<arr.length) {
+        if(arr[i].please_splice) {
+            res = res.concat(unquote_splice(arr[i].data));
+        }
+        else {
+            res.push(arr[i]);
+        }
+
+        i++;
+    }
+
+    return res;
+}
+
+module.exports = {
+    make_symbol: make_symbol,
+    map: map,
+    for_each: for_each,
+    display: display,
+    pp: pp,
+    inspect: inspect,
+    eqp: eqp,
+    equalp: equalp,
+    nullp: nullp,
+    cons: cons,
+    car: car,
+    cdr: cdr,
+    vector_ref: vector_ref,
+    vector_set_excl: vector_set_excl,
+    vector_concat: vector_concat,
+    vector: vector,
+    object: object,
+    object_ref: object_ref,
+    numberp: numberp,
+    symbolp: symbolp,
+    stringp: stringp,
+    pairp: pairp,
+    unquote_splice: unquote_splice
+};
 
 var reader = require("./parser");
 var util = require("util");
 var ast = require("./ast");
 var grammar = require("./grammar");
-var assert = function(v,msg){
+var js = require("./compiler-js");
+var current_generator = false;var assert = function(v,msg){
 return (function() {if(!v) { throw(msg);}})()
 }
 ;var assert_type = function(node,type,msg){
 return assert((node.type===type),("invalid type, expected "+type+": "+inspect(node)));}
 ;var parsers = unquote_splice([]);var read = function(src){
 return reader(grammar,src,ast.node(ast.ROOT));}
+;var set_generator = function(gen){
+return current_generator = gen;}
+;var create_generator = function(){
+return current_generator.create_generator();}
 ;var parse = function(node,generator){
+(function() {if(!current_generator) { return current_generator = generator;}})()
 return (function() {if(macrop(node)) { return parse(expand(node,generator),generator);} else { return (function(parser){
 assert(parser,("No parser for node type:"+node.type));return parser(node,function(node){
 return parse(node,generator);}
@@ -47,6 +178,7 @@ parse(read(src),generator);return generator.get_code();}
 return (function(name){
 return (function(func){
 return (function(res){
+(function() {if(res) { return res.link = node.link;}})()
 return res}
 )(nodify(func.apply(null,map(sourcify,node.children.slice(1)))));}
 )(get_macro(name.data.str));}
@@ -66,7 +198,7 @@ return map(sourcify,node.children);}
 }})()
 }
 ;var nodify = function(obj){
-return (function() {if(numberp(obj)) { return (function(){
+return (function() {if(!obj) { return null} else { return (function() {if(numberp(obj)) { return (function(){
 return ast.node(ast.NUMBER,obj);}
 )();} else { return (function() {if(symbolp(obj)) { return (function(){
 return ast.node(ast.TERM,obj);}
@@ -77,6 +209,7 @@ return ast.node(ast.LIST,null,map(nodify,obj));}
 )();} else { return (function() {if(nullp(obj)) { return (function(){
 return ast.node(ast.LIST);}
 )();}})()
+}})()
 }})()
 }})()
 }})()
@@ -136,7 +269,9 @@ assert_type(name,ast.TERM);return vars_to_nodes(cdr(vars),names.concat(unquote_s
 ;return (function(nodes){
 return (function(lambda_header){
 return (function(lambda_node){
-return generator.write_func_call(ast.node(ast.LIST,null,vector_concat(vector(lambda_node),vector_ref(nodes,1))),parse);}
+return (function(res){
+res.link = node.link;return generator.write_func_call(res,parse);}
+)(ast.node(ast.LIST,null,vector_concat(vector(lambda_node),vector_ref(nodes,1))));}
 )(ast.node(ast.LIST,null,lambda_header.concat(body)));}
 )(unquote_splice([ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,vector_ref(nodes,0))]));}
 )(vars_to_nodes(vars.children,unquote_splice([]),unquote_splice([])));}
@@ -157,12 +292,6 @@ return generator.write_array(vector_ref(node.children,1),parse,"quote");}
 return generator.write_array(vector_ref(node.children,1),parse,"quasi");}
 )();} else { return (function() {if(equalp(term,"list")) { return (function(){
 return generator.write_array(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
-)();} else { return (function() {if(equalp(term,"begin")) { return (function(){
-return (function(body){
-return (function(lamb){
-return parse(ast.node(ast.LIST,null,unquote_splice([lamb])));}
-)(ast.node(ast.LIST,null,vector_concat(unquote_splice([ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,unquote_splice([]))]),body)));}
-)(node.children.slice(1));}
 )();} else { return (function() {if(equalp(term,"cond")) { return (function(){
 var transform = function(i){
 return (function() {if(((i>node.children.length)||eqp(i,node.children.length))) { return null} else { return (function(n){
@@ -172,7 +301,9 @@ return (function() {if((eqp(condition.type,ast.TERM)&&equalp(condition.data.str,
 )(vector_ref(n.children,0),ast.node(ast.LIST,null,vector_concat(unquote_splice([ast.node(ast.TERM,make_symbol("begin"))]),n.children.slice(1))));}
 )(vector_ref(node.children,i));}})()
 }
-;return parse(transform(1));}
+;return (function(res){
+res.link = node.link;return parse(res);}
+)(transform(1));}
 )();} else { return (function() {if(generator.has_hook(term)) { return (function(){
 return generator.run_hook(term,node,parse);}
 )();} else { return (function(){
@@ -187,10 +318,14 @@ return generator.write_func_call(node,parse);}
 }})()
 }})()
 }})()
-}})()
 }
 );install_parser(ast.ROOT,function(node,parse){
 return for_each(function(n){
 return parse(n);}
 ,node.children);}
-);module.exports = object();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;
+);install_macro("begin",function() {
+var body = Array.prototype.slice.call(arguments);
+return unquote_splice([unquote_splice([make_symbol("lambda"),unquote_splice([]),{ please_splice: true, data: body }])])}
+);install_macro("eval_outlet",function(form){
+return unquote_splice([make_symbol("let"),unquote_splice([unquote_splice([make_symbol("gen"),unquote_splice([make_symbol("create_generator")])])]),unquote_splice([make_symbol("parse"),unquote_splice([make_symbol("nodify"),form]),make_symbol("gen")]),unquote_splice([make_symbol("eval"),unquote_splice([make_symbol("gen.get-code")])])])}
+);module.exports = object();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;

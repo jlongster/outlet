@@ -1,3 +1,4 @@
+
 (define foo 5)
 
 (define (bar x)
@@ -21,7 +22,7 @@
      (func f))))
 
 (for-each
- (lambda (x) (print x))
+ (lambda (x) (pp x))
  '(1 2 3 4))
 
 (define (print-n n)
@@ -66,13 +67,9 @@
 ;;
 ;; baz("a","b","c","d"); -> ["c", "d"]
 
-(define-macro (begin . body)
-  `((lambda () ,@body)))
+;; eval
 
-(define (hello)
-  (if (> 1 2)
-      (pp "hello")
-      (begin
-        (pp "something")
-        (pp "is")
-        (pp "working"))))
+(pp (eval_outlet '(baz 1 2 3 4)))
+
+;; ->
+;; [ 3, 4 ]
