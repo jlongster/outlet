@@ -1,0 +1,37 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #dfdfdf;
+}
+
+.header {
+    color: white;
+    background-color: grey;
+    overflow: hidden;
+}
+
+.content {
+    width: 60%;
+    margin: 0 auto;
+}
+
+.page {
+    background-color: #aaaaaa;
+    overflow: hidden;
+    min-width: 400px;
+}
+
+.sidebar {
+    float: left;
+    width: 8em;
+}
+
+.content-main {
+    background-color: white;
+    color: #252525;
+    font-family: Georgia;
+    border-right: 1px solid #cccccc;
+    padding: 1em;
+    margin-left: 8em;
+}

@@ -1,0 +1,221 @@
+---
+layout: page
+title: Semantics
+id: semantics
+---
+
+Outlet is made up of S-expressions, like Lisp. S-expressions use
+parenthesis to dictate structure, like (one (two three)). In that
+statement, two and three are part of the same element which is a child
+of one. You can program with this by applying a few semantics to the
+structure. The result is a really simple but powerful language which
+can parse itself, and do a lot of neat things.
+
+Outlet's semantics are documented here. Outlet is Scheme-inspired but
+adds a lot on top of it for practicality.
+
+h3. Atoms
+
+An atom is a basic building block of the language. It can be a:
+
+* Number: 1, 2, 3.0, -4.5
+* String: "foo", "bar\"with escaped quotes"
+* Boolean: @#f@ or @#t@
+* Symbol: @foo@, @bar-buz@
+
+A number can be in integer or real form with a + or - sign prefixed to
+it. Extended syntaxes TBD.
+
+A string is surrounded by double-quotes. Use the backslash escape
+character to include double-quotes or other special characters in the
+string, such as \n (newline) and \t (tab).
+
+A boolean is simply a constant that significies truthiness. @#t@ means
+true and @#f@ means false.
+
+A symbol is simply an identifier that is always equal to another
+symbol with the same characters. It can contain the following
+characters in addition to the alphanumeric set: @-@, @?@, @!@. A
+symbol can be created by "quoting" it like this:
+
+{% codeblock lang:scheme %}
+'foo
+{% endcodeblock %}
+
+The apostrophe character (') quotes the term @foo@ and Outlet reads it
+as a symbol. Without the quote, Outlet would read foo as a variable
+reference. In this way, variable references are basically evaluated
+symbols.
+
+Symbols are similar to strings but provide different semantics which
+are very helpful. For instance, symbols that are spelled exactly the
+same way are always equal to other, and are quick to use.
+
+h3. Lists and Functions
+
+A list is a simply several atoms surrounded by parentheses:
+
+{% codeblock lang:scheme %}
+(1 2 "three" four)
+{% endcodeblock %}
+
+Lists are "quoted" with the apostrophe character meaning that Outlet
+reads the list in literal form. What you see if what you get. That
+means that "four" is not a variable reference but rather just a
+symbol.
+
+Function calls look similar to lists, but they aren't quoted:
+
+{% codeblock lang:scheme %}
+(foo 1 2 "three" four)
+{% endcodeblock %}
+
+Unquoted lists call the function in the first element. Here, @foo@
+would be called with the 4 arguments following it. Also, @four@ is a
+variable reference in this example because it is unquoted. All
+arguments are eagerly evaluted, so whatever four references is what
+would be passed.
+
+If you want to make a list and include @four@ as a variable, simply use @list@:
+
+{% codeblock lang:scheme %}
+(list 1 2 "three" four)
+{% endcodeblock %}
+
+This is similar to the first example except that @four@ is eagerly
+evaluated and the value it references is passed as an argument, rather
+than the symbol "four". The first example expressed in list form would be:
+
+{% codeblock lang:scheme %}
+(list 1 2 "three" 'four)
+{% endcodeblock %}
+
+h3. Creating/Defining Functions
+
+To define a new function, use @define@.
+
+{% codeblock lang:scheme %}
+(define (foo x y z)
+  (+ x y z))
+{% endcodeblock %}
+
+The name of the function and arguments are passed as a list, and the
+the body of the function afterwards. The value of the last statement
+in the function is returned.
+
+{% codeblock lang:scheme %}
+(foo 1 2 3) ; -> 5
+{% endcodeblock %}
+
+In addition to @define@, use @lambda@ to create an anonymous function.
+
+{% codeblock lang:scheme %}
+(lambda (x y z)
+  (* (+ x y) z))
+{% endcodeblock %}
+
+@lambda@ takes an argument list and returns a function that can be
+called normally.
+
+h3. Assigning variables (side effects)
+
+To assign a value to a variable, use @set!@. The exclamation point
+implies that the function has a side effect, which is important to
+keep track of. Side effects are very practical but they can have bad
+consequences too (even if it's just messy code).
+
+{% codeblock lang:scheme %}
+(set! foo 5)
+(set! foo (lambda () (* 1 2 3)))
+{% endcodeblock %}
+
+The return value of @set!@ is undefined, so do not use it as an
+expression.
+
+h3. Conditional Operators (and/or/etc.)
+
+To combine boolean values, use @and@, @or@, and @not@:
+
+{% codeblock lang:scheme %}
+(and #t #f) ; -> #f
+(or #t #f) ; -> #t
+(not #f) ; -> #t
+{% endcodeblock %}
+
+@and@ and @or@ always return the value the last expression, and are
+short-circuited so that evaluation stops at the first failure.
+
+{% codeblock lang:scheme %}
+(and x (do-something x)) ; returns whatever @do-something@ returns
+
+(define x #t)
+(define y #f)
+(and x y (do-something x y)) ; returns #f, @do-something@ doesn't execute
+{% endcodeblock %}
+
+h3. Conditional Constructs (if/cond/etc.)
+
+There are a few constructs to controlling the flow of the program
+based on conditions. @if@ evaluates a condition and if true, executes
+the second expression and if false, executes the third expression.
+
+{% codeblock lang:scheme %}
+(if (some-condition)
+    (do-this)
+    (do-that-instead))
+{% endcodeblock %}
+
+The third expression (the "else") is not required.
+
+@cond@ is an extended form of @if@ that lets you quickly test against
+several conditions.
+
+{% codeblock lang:scheme %}
+(define x 3)
+(cond ((eq? x 0) 'zero)
+      ((eq? x 1) 'one)
+      ((eq? x 2) 'two)
+      ((eq? x 3) 'three))
+; -> 'three
+{% endcodeblock %}
+
+@cond@ takes a list of of statements, where the first element is the
+condition and the rest of the elements are what to execute if the
+condition is true. You can run multiple expressions after the
+condition. @else@ is special keyword that indicates code to run if
+none of the conditions are met; it is optional.
+
+h3. Expressions with @begin@
+
+@begin@ simply takes a list of expressions and allows you to run them
+in places that only accept one expression.
+
+{% codeblock lang:scheme %}
+(if (some-condition)
+    (begin
+      (define x 5)
+      (foo x)
+      (set! x 10)
+      (bar x)))
+{% endcodeblock %}
+
+h3. Comments
+
+Use the semicolon character (;) to indicate comments.
+
+{% codeblock lang:scheme %}
+;; this is a comment
+(foo 1 2 3)
+{% endcodeblock %}
+
+h3. Todo
+
+These are undocumented features/semantics that I need to document and test:
+
+* need to implement booleans and characters
+* case
+* let
+* named lets
+* loops
+* data structures (vectors, hashes)
+* macros
