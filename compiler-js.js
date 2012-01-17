@@ -62,7 +62,7 @@ function generator() {
 
     function write_string(node) {
         // STRING
-        write('"' + node.data + '"');
+        write('"' + node.data.replace(/\n/g, '\\n') + '"');
     }
 
     function write_term(node) {

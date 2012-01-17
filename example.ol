@@ -45,6 +45,11 @@
 (define (foo)
   (helper (if 1 2)))
 
+(define-macro (when cond . body)
+  `(if ,cond
+       (begin
+         ,@body)))
+
 ;; ->
 ;; var bar = function(n){
 ;; return pp(n);}
@@ -73,3 +78,4 @@
 
 ;; ->
 ;; [ 3, 4 ]
+
