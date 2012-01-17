@@ -9,16 +9,16 @@ function make_symbol(str) {
 
 function map(func, arr) {
     var r = [];
-    for(var i=0; i<arr.length; i++) {
+    for(var i = 0, len = arr.length; i < len; i++) {
         r.push(func(arr[i]));
     }
     return r;
 }
 
 function for_each(func, arr) {
-    for(var i=0; i<arr.length; i++) {
+    for(var i = 0, len = arr.length; i < len; i++) {
         func(arr[i]);
-    }    
+    }
 }
 
 function display(msg) {
@@ -105,15 +105,15 @@ function pairp(obj) {
 }
 
 function unquote_splice(arr) {
-    var res = [];
-    var i = 0;
+    var res = [], i = 0, len = arr.length, elem;
 
-    while(i<arr.length) {
-        if(arr[i].please_splice) {
-            res = res.concat(unquote_splice(arr[i].data));
+    while(i < len) {
+        elem = arr[i];
+        if(elem.please_splice) {
+            res = res.concat(unquote_splice(elem.data));
         }
         else {
-            res.push(arr[i]);
+            res.push(elem);
         }
 
         i++;
