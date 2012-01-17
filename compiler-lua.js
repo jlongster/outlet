@@ -60,13 +60,13 @@ module.exports = function() {
         var lst = node.children[1];
         var args = [];
 
-        for(var i=0; i<lst.children.length; i++) {
+        for(var i=0, len=lst.children.length; i<len; i++) {
             args.push(lst.children[i].data);
         }
 
         write('function(' + args.join(',') + ')', true);
 
-        for(var i=2; i<node.children.length; i++) {
+        for(var i=2, len=node.children.length; i<len; i++) {
             if(i == node.children.length-1) {
                 write('return ');
             }
@@ -80,7 +80,7 @@ module.exports = function() {
     function write_op(op, node, parse) {
         // (EXPR1 <op> EXPR2 <op> ... <op> EXPRn),
         write('(');
-        for(var i=1; i<node.children.length; i++) {
+        for(var i=1, len=node.children.length; i<len; i++) {
             if(i > 1) {
                 write(op);
             }
@@ -100,7 +100,7 @@ module.exports = function() {
         parse(node.children[0]);
         write(')(');
 
-        for(var i=1; i<node.children.length; i++) {
+        for(var i=1, len=node.children.length; i<len; i++) {
             if(i>1) {
                 write(',');
             }
@@ -142,7 +142,7 @@ module.exports = function() {
         }
         else if(node.type == ast.LIST) {
             write('{');
-            for(var i=0; i<node.children.length; i++) {
+            for(var i=0, len=node.children.length; i<len; i++) {
                 if(i > 0) {
                     write(',');
                 }
@@ -193,7 +193,7 @@ module.exports = function() {
                 write(' else return ');
                 parse(node.children[3]);
             }
-            
+
             write(' end');
             write(' end)()', true);
         },
@@ -205,7 +205,7 @@ module.exports = function() {
         },
 
         'require': function(node, parse) {
-            for(var i=1; i<node.children.length; i++) {
+            for(var i=1, len=node.children.length; i<len; i++) {
                 var expr = node.children[i];
                 var name = expr.children[0].data;
                 var path = expr.children[1].data;
