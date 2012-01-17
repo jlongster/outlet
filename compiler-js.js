@@ -24,7 +24,7 @@ function generator() {
     function create_generator() {
         return generator();
     }
-    
+
     function link(node1, node2, tag) {
         node2.link = node1;
         node1.tag = tag;
@@ -54,7 +54,7 @@ function generator() {
         parse(node);
         unlink(node);
     }
-    
+
     function write_number(node) {
         // NUMBER
         write(node.data);
@@ -102,7 +102,7 @@ function generator() {
 
             write('function(');
 
-            for(var i=0; i<args_expr.children.length; i++) {
+            for(var i=0, len=args_expr.children.length; i<len; i++) {
                 var arg = args_expr.children[i];
 
                 // support for dot-style rest arguments
@@ -123,8 +123,8 @@ function generator() {
             write('){', true);
 
             if(capture_name) {
-                write('var ' + capture_name + 
-                      ' = Array.prototype.slice.call(arguments, ' + 
+                write('var ' + capture_name +
+                      ' = Array.prototype.slice.call(arguments, ' +
                       (args_expr.children.length - 2) + ');', true);
             }
         }
@@ -134,7 +134,7 @@ function generator() {
                   ' = Array.prototype.slice.call(arguments);', true);
         }
 
-        for(var i=2; i<node.children.length; i++) {
+        for(var i=2, len=node.children.length; i<len; i++) {
             var child = node.children[i];
 
             if(i == node.children.length-1 &&
@@ -150,12 +150,12 @@ function generator() {
     function write_op(op, node, parse) {
         // (EXPR1 <op> EXPR2 <op> ... <op> EXPRn),
         write('(');
-        for(var i=1; i<node.children.length; i++) {
+        for(var i=1, len=node.children.length; i<len; i++) {
             if(i > 1) {
                 write(op);
             }
 
-            parse_expr(parse, node, node.children[i]);            
+            parse_expr(parse, node, node.children[i]);
         }
 
         write(')');
@@ -173,7 +173,7 @@ function generator() {
 
         write('(');
 
-        for(var i=1; i<node.children.length; i++) {
+        for(var i=1, len=node.children.length; i<len; i++) {
             if(i>1) {
                 write(',');
             }
@@ -219,7 +219,7 @@ function generator() {
                     if(lst.type == ast.LIST) {
                         // Splicing should put all the list elements into
                         // the current element
-                        for(var i=0; i<lst.children.length; i++) {
+                        for(var i=0, len=lst.children.length; i<len; i++) {
                             if(i > 0) {
                                 write(',');
                             }
@@ -232,7 +232,7 @@ function generator() {
                         write('{ please_splice: true, data: ' + lst.data.str + ' }');
                     }
                     else {
-                        throw ("unquote-splicing expected a list or symbol, got " + 
+                        throw ("unquote-splicing expected a list or symbol, got " +
                                ast.type_str(lst.type));
                     }
 
@@ -257,7 +257,7 @@ function generator() {
         }
         else if(node.type == ast.LIST) {
             write('unquote_splice([');
-            for(var i=0; i<node.children.length; i++) {
+            for(var i=0, len=node.children.length; i<len; i++) {
                 if(i > 0) {
                     write(',');
                 }
@@ -345,7 +345,7 @@ function generator() {
         },
 
         'require': function(node, parse) {
-            for(var i=1; i<node.children.length; i++) {
+            for(var i=1, len=node.children.length; i<len; i++) {
                 var expr = node.children[i];
                 var name = expr.children[0];
                 var path = expr.children[1];
