@@ -9,16 +9,16 @@ function make_symbol(str) {
 
 function map(func, arr) {
     var r = [];
-    for(var i=0, len=arr.length; i<len; i++) {
+    for(var i=0; i<arr.length; i++) {
         r.push(func(arr[i]));
     }
     return r;
 }
 
 function for_each(func, arr) {
-    for(var i=0, len=arr.length; i<len; i++) {
+    for(var i=0; i<arr.length; i++) {
         func(arr[i]);
-    }
+    }    
 }
 
 function display(msg) {
@@ -30,7 +30,7 @@ function pp(obj) {
 }
 
 function inspect(obj) {
-    return util.inspect(obj);
+    return util.inspect(obj, null, 10);
 }
 
 function eqp(v1, v2) {
@@ -105,15 +105,15 @@ function pairp(obj) {
 }
 
 function unquote_splice(arr) {
-    var res = [], i = 0, len = arr.length, elem;
+    var res = [];
+    var i = 0;
 
-    while(i<len) {
-        elem = arr[i];
-        if(elem.please_splice) {
-            res = res.concat(unquote_splice(elem.data));
+    while(i<arr.length) {
+        if(arr[i].please_splice) {
+            res = res.concat(unquote_splice(arr[i].data));
         }
         else {
-            res.push(elem);
+            res.push(arr[i]);
         }
 
         i++;
@@ -156,15 +156,19 @@ return any(all(rule,seq),rule);}
 );}
 ;var space_char = " \t\n\r";var space = repeated(char(space_char));;var comment = all(optional(space),char(";"),repeated(not_char("\n")),space);;var number = capture(all(optional(char("-")),repeated(char("1234567890"))),function(text,state){
 return ast.node(ast.NUMBER,text);}
-);;var string = (function(capt,capt_node,init){
-var content = any(all(char("\\"),capt(not_char(""))),capt(not_char("\"")));;return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));}
+);;var string = (function(capt,capt_special,capt_node,init){
+var content = any(capt_special(all(char("\\"),char("n")),"\n"),all(char("\\"),capt(not_char(""))),capt(not_char("\"")));;return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));}
 )(function(rule){
 return capture(rule,function(buf,state){
 return (state+buf)}
 );}
+,function(rule,char){
+return capture(rule,function(str,state){
+return (state+char)}
+);}
 ,function(rule){
 return capture(rule,function(str,state){
-return ast.node(ast.STRING,str);}
+return ast.node(ast.STRING,state);}
 );}
 ,function(rule){
 return before(rule,function(state){

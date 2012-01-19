@@ -62,15 +62,22 @@ function generator() {
 
     function write_string(node) {
         // STRING
-        write('"' + node.data.replace(/\n/g, '\\n') + '"');
+        var str = node.data;
+        str = str.replace(/\\/g, '\\\\');
+        str = str.replace(/\n/g, '\\n');
+        str = str.replace(/"/g, '\\"');
+        write('"' + str  + '"');
     }
 
     function write_term(node) {
         // TERM (variable, keyword, etc)
         var term = node.data.str;
         term = term.replace(/-/g, '_');
-        term = term.replace(/\?/g, 'p');
-        term = term.replace(/\!/g, '_excl');
+        term = term.replace(/\?/g, '_p_');
+        term = term.replace(/\!/g, '_excl_');
+        term = term.replace(/>/g, '_gt_');
+        term = term.replace(/</g, '_lt_');
+        term = term.replace(/%/g, '_per_');
         write(term);
     }
 
@@ -340,8 +347,9 @@ function generator() {
         },
 
         'not': function(node, parse) {
-            write('!');
+            write('(');
             parse_expr(parse, node, node.children[1]);
+            write(' === false)');
         },
 
         'require': function(node, parse) {

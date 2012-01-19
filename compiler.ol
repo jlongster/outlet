@@ -30,7 +30,7 @@
   (set! current-generator gen))
 
 (define (create-generator)
-  (current-generator.create-generator))
+  (current-generator.create_generator))
 
 (define (parse node generator)
   (if (not current-generator)
@@ -49,7 +49,7 @@
 
 (define (compile src generator)
   (parse (read src) generator)
-  (generator.get-code))
+  (generator.get_code))
 
 (define (expand node generator)
   (let ((name (vector-ref node.children 0)))
@@ -132,13 +132,14 @@
   (vector-ref macros name))
 
 (define (macro? node)
-  (if (eq? node.type ast.LIST)
+  (if (and (eq? node.type ast.LIST)
+           (not (null? node.children)))
       (let ((name (vector-ref node.children 0)))
         (if (eq? name.type ast.TERM)
             (object-ref macros name.data.str)))))
 
 (define (parse-macro node generator)
-  (let ((gen (generator.create-generator))
+  (let ((gen (generator.create_generator))
         (func-info (vector-ref node.children 1)))
 
     ;; parse the macro node with a new generator so we can get the raw
@@ -150,7 +151,7 @@
       ;; environment, so we are getting the macro function fo' real.
       ;; we have to put it in an array for some reason
       (let ((func (vector-ref
-                   (eval (string-append "[" (gen.get-code) "]")) 0)))
+                   (eval (string-append "[" (gen.get_code) "]")) 0)))
         (install-macro name.data.str func)))))
 
 ;; parser
@@ -173,6 +174,10 @@
 (install-parser
  ast.LIST
  (lambda (node parse generator)
+
+   (assert (not (null? node.children))
+           "invalid form: empty list")
+   
    (define first (vector-ref node.children 0))
 
    (assert (or (eq? first.type ast.TERM)
@@ -309,9 +314,9 @@
                (lambda (form)
                  ;; make generator, compile the code and eval it. this
                  ;; is a macro so the eval happens in the right context
-                 `(let ((gen (create_generator)))
+                 `(let ((gen (create-generator)))
                     (parse (nodify ,form) gen)
-                    (eval (gen.get-code)))))
+                    (eval (gen.get_code)))))
 
 (set! module.exports (object))
 (set! module.exports.read read)
@@ -319,5 +324,6 @@
 (set! module.exports.compile compile)
 
 (set! module.exports.set-generator set-generator)
-(set! module.exports.create_generator create_generator)
+(set! module.exports.create_generator create-generator)
 (set! module.exports.nodify nodify)
+(set! module.exports.sourcify sourcify)

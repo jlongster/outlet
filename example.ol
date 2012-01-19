@@ -79,3 +79,4 @@
 ;; ->
 ;; [ 3, 4 ]
 
+(display (->string '(foo 2 bar 4 "hel\nlo\"fdfsf")))

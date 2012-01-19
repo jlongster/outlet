@@ -24,17 +24,23 @@
            (lambda (rule)
              (capture rule
                       (lambda (buf state) (+ state buf)))))
+          (capt_special
+           (lambda (rule char)
+             (capture rule
+                      (lambda (str state)
+                        (+ state char)))))
           (capt_node
            (lambda (rule)
              (capture rule
                       (lambda (str state)
-                        (ast.node ast.STRING str)))))
+                        (ast.node ast.STRING state)))))
           (init
            (lambda (rule)
              (before rule (lambda (state) "")))))
       
       (define content
-        (any (all (char "\\") (capt (not-char "")))
+        (any (capt_special (all (char "\\") (char "n")) "\n")
+             (all (char "\\") (capt (not-char "")))
              (capt (not-char "\""))))
       
       (init (all (char "\"")

@@ -4,21 +4,21 @@ var ast = require('./ast');
 var util = require('util');
 var generator = require('./compiler-js')();
 
-var src = require('fs').readFileSync('example.ol', 'utf-8');
+var src = require('fs').readFileSync('test/compile.ol', 'utf-8');
 //util.puts(outlet.compile(src, 'nodejs'));
 
-var compiler = require('./compiler');
+var compiler = require('./compiler2');
 var reader = require('./parser');
 var grammar = require('./grammar');
 // ast.pretty_print(reader(grammar,
 //                       src,
 //                       ast.node(ast.ROOT)));
 generator.write_runtime('js');
-compiler.parse(reader(grammar,
-                      src,
-                      ast.node(ast.ROOT)),
-              generator);
-util.puts(generator.get_code());
+var n = reader(grammar,
+               src,
+               ast.node(ast.ROOT));
+compiler.parse(n, generator);
+ util.puts(generator.get_code());
 
 
 //ast.pretty_print(compiler.read(src));
