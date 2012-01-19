@@ -18,29 +18,42 @@ h3. Atoms
 
 An atom is a basic building block of the language. It can be a:
 
-* Number: 1, 2, 3.0, -4.5
-* String: "foo", "bar\"with escaped quotes"
-* Boolean: @#f@ or @#t@
-* Symbol: @foo@, @bar-buz@
+* Number
+* String
+* Boolean
+* Symbol
 
 A number can be in integer or real form with a + or - sign prefixed to
 it. Extended syntaxes TBD.
 
 A string is surrounded by double-quotes. Use the backslash escape
 character to include double-quotes or other special characters in the
-string, such as \n (newline) and \t (tab).
+string, such as @\n@ (newline) and @\t@ (tab).
 
 A boolean is simply a constant that significies truthiness. @#t@ means
 true and @#f@ means false.
 
+{% codeblock lang:scheme atoms%}
+;; numbers
+3
+4.5
+-5.0
+
+;; strings
+"hello"
+"I read \"a book\" yesterday"
+"See below:\n foo bar baz"
+
+;; booleans
+#f
+#t
+
+{% endcodeblock %}
+
 A symbol is simply an identifier that is always equal to another
 symbol with the same characters. It can contain the following
 characters in addition to the alphanumeric set: @-@, @?@, @!@. A
-symbol can be created by "quoting" it like this:
-
-{% codeblock lang:scheme %}
-'foo
-{% endcodeblock %}
+symbol can be created by "quoting" it like @'foo@.
 
 The apostrophe character (') quotes the term @foo@ and Outlet reads it
 as a symbol. Without the quote, Outlet would read foo as a variable
@@ -51,12 +64,18 @@ Symbols are similar to strings but provide different semantics which
 are very helpful. For instance, symbols that are spelled exactly the
 same way are always equal to other, and are quick to use.
 
+{% codeblock lang:scheme symbols %}
+'foo
+'bar-baz
+'hello?
+{% endcodeblock %}
+
 h3. Lists and Functions
 
 A list is a simply several atoms surrounded by parentheses:
 
 {% codeblock lang:scheme %}
-(1 2 "three" four)
+'(1 2 "three" four)
 {% endcodeblock %}
 
 Lists are "quoted" with the apostrophe character meaning that Outlet
