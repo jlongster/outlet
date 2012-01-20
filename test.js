@@ -17,6 +17,9 @@ generator.write_runtime('js');
 var n = reader(grammar,
                src,
                ast.node(ast.ROOT));
-
+//ast.pretty_print(n);
 compiler.parse(n, generator);
+//util.puts(generator.get_code());
 eval(generator.get_code());
+
+

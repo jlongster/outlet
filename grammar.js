@@ -177,8 +177,11 @@ var repeated = function(rule){
 return Y(function(seq){
 return any(all(rule,seq),rule);}
 );}
-;var space_char = " \n\t\r";var space = repeated(char(space_char));;var comment = all(optional(space),char(";"),repeated(not_char("\n")),space);;var number = capture(all(optional(char("-")),repeated(char("1234567890"))),function(text,state){
+;var space_char = " \n\t\r";var space = repeated(char(space_char));;var comment = all(optional(space),char(";"),repeated(not_char("\n")),space);;var number = capture(all(optional(char("-")),repeated(char("1234567890")),optional(all(char("."),repeated(char("1234567890"))))),function(text,state){
 return ast.node(ast.NUMBER,text);}
+);;var boolean = capture(any(all(char("#"),char("f")),all(char("#"),char("t"))),function(text,state){
+return ast.node(ast.BOOLEAN,(function() {if(equal_p_(text,"#f")) { return false} else { return true}})()
+);}
 );;var string = (function(capt,capt_node,capt_special,init){
 var content = any(capt_special(all(char("\\"),not_char(""))),capt(not_char("\"")));;return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));}
 )(function(rule){
@@ -235,7 +238,7 @@ return capture(all(any(char("'"),char("`"),all(char(","),char("@")),char(",")),a
 );}
 ;return (function(rule){
 return any(quoting(rule),rule);}
-)(any(lst,number,string,term));}
+)(any(lst,number,string,boolean,term));}
 ;var lst = Y(function(lst){
 return before(all(char("("),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){
 return ast.add_child(parent,child);}

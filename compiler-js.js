@@ -55,6 +55,15 @@ function generator() {
         unlink(node);
     }
 
+    function write_boolean(node) {
+        if(node.data === true) {
+            write('true');
+        }
+        else {
+            write('false');
+        }
+    }
+
     function write_number(node) {
         // NUMBER
         write(node.data);
@@ -261,6 +270,9 @@ function generator() {
         else if(node.type == ast.NUMBER) {
             write_number(node);
         }
+        else if(node.type == ast.BOOLEAN) {
+            write_boolean(node);
+        }
         else if(node.type == ast.STRING) {
             write_string(node);
         }
@@ -370,6 +382,7 @@ function generator() {
         has_hook: has_hook,
         run_hook: run_hook,
         write_runtime: write_runtime,
+        write_boolean: write_boolean,
         write_number: write_number,
         write_string: write_string,
         write_term: write_term,

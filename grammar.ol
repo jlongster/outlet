@@ -15,10 +15,20 @@
 
   (define number
     (capture (all (optional (char "-"))
-                  (repeated (char "1234567890")))
+                  (repeated (char "1234567890"))
+                  (optional (all (char ".")
+                                 (repeated (char "1234567890")))))
              (lambda (text state)
                (ast.node ast.NUMBER text))))
 
+  (define boolean
+    (capture (any (all (char "#") (char "f"))
+                  (all (char "#") (char "t")))
+             (lambda (text state)
+               (ast.node ast.BOOLEAN (if (equal? text "#f")
+                                         false
+                                         true)))))
+  
   (define string
     (let ((capt
            (lambda (rule)
@@ -76,7 +86,7 @@
                          (any q rule))
                     capt))))
  
-    (let ((rule (any lst number string term)))
+    (let ((rule (any lst number string boolean term)))
       (any (quoting rule)
            rule)))
 

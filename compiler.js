@@ -200,18 +200,22 @@ parse(read(src),generator);return generator.get_code();}
 ;var expand = function(node,generator){
 return (function(name){
 return (function(func){
+return (function(src){
 return (function(res){
 (function() {if(res) { return res.link = node.link;}})()
 return res}
-)(nodify(func.apply(null,map(sourcify,node.children.slice(1)))));}
+)(nodify(src));}
+)(func.apply(null,map(sourcify,node.children.slice(1))));}
 )(get_macro(name.data.str));}
 )(vector_ref(node.children,0));}
 ;var sourcify = function(node){
 return (function() {if(eq_p_(node.type,ast.NUMBER)) { return (function(){
-return parseInt(node.data);}
+return parseFloat(node.data);}
 )();} else { return (function() {if(eq_p_(node.type,ast.TERM)) { return (function(){
 return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.STRING)) { return (function(){
+return node.data}
+)();} else { return (function() {if(eq_p_(node.type,ast.BOOLEAN)) { return (function(){
 return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.LIST)) { return (function(){
 return map(sourcify,node.children);}
@@ -219,18 +223,23 @@ return map(sourcify,node.children);}
 }})()
 }})()
 }})()
+}})()
 }
 ;var nodify = function(obj){
-return (function() {if(not(obj)) { return null} else { return (function() {if(number_p_(obj)) { return (function(){
+return (function() {if(number_p_(obj)) { return (function(){
 return ast.node(ast.NUMBER,obj);}
 )();} else { return (function() {if(symbol_p_(obj)) { return (function(){
 return ast.node(ast.TERM,obj);}
 )();} else { return (function() {if(string_p_(obj)) { return (function(){
 return ast.node(ast.STRING,obj);}
+)();} else { return (function() {if(boolean_p_(obj)) { return (function(){
+return ast.node(ast.BOOLEAN,obj);}
 )();} else { return (function() {if(pair_p_(obj)) { return (function(){
 return ast.node(ast.LIST,null,map(nodify,obj));}
 )();} else { return (function() {if(null_p_(obj)) { return (function(){
 return ast.node(ast.LIST);}
+)();} else { return (function(){
+return null}
 )();}})()
 }})()
 }})()
@@ -277,6 +286,8 @@ return generator.write_number(node);}
 return generator.write_string(node);}
 );install_parser(ast.TERM,function(node,parse,generator){
 return generator.write_term(node);}
+);install_parser(ast.BOOLEAN,function(node,parse,generator){
+return generator.write_boolean(node);}
 );install_parser(ast.LIST,function(node,parse,generator){
 assert(not(null_p_(node.children)),"invalid form: empty list");var first = vector_ref(node.children,0);;assert((eq_p_(first.type,ast.TERM)||eq_p_(first.type,ast.LIST)),("operator is not a procedure: "+inspect(first)));var term = (first.data&&first.data.str);return (function() {if(equal_p_(term,"set!")) { return (function(){
 assert_type(vector_ref(node.children,1),ast.TERM);return generator.write_set_excl(node,parse);}

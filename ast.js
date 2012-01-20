@@ -5,6 +5,7 @@ var TERM = 0;
 var STRING = 1;
 var NUMBER = 2;
 var LIST = 3;
+var BOOLEAN = 4;
 
 function node(type, data, children) {
     return {
@@ -30,6 +31,7 @@ function type_str(type) {
         case STRING: return 'string';
         case NUMBER: return 'number';
         case LIST: return 'list';
+        case BOOLEAN: return 'boolean';
     }
     return 'unknown';
 }
@@ -52,7 +54,7 @@ function pretty_print(ast, indent) {
     }
 
     var data = '';
-    if(ast.data) {
+    if(ast.data !== null) {
         data = ': ' + util.inspect(ast.data);
     }
 
@@ -75,6 +77,7 @@ module.exports = {
     NUMBER: NUMBER,
     STRING: STRING,
     LIST: LIST,
+    BOOLEAN: BOOLEAN,
 
     node: node,
     add_child: add_child,

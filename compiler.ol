@@ -54,28 +54,31 @@
 (define (expand node generator)
   (let ((name (vector-ref node.children 0)))
     (let ((func (get-macro name.data.str)))
-      (let ((res (nodify (func.apply null (map sourcify
-                                               (node.children.slice 1))))))
-        ;; maintain node links
-        (if res (set! res.link node.link))
-        res))))
+      (let ((src (func.apply null (map sourcify
+                                       (node.children.slice 1)))))
+        (let ((res (nodify src)))
+          ;;(pp src)
+          ;; maintain node links
+          (if res (set! res.link node.link))
+          res)))))
 
 (define (sourcify node)
   (cond
-   ((eq? node.type ast.NUMBER) (parseInt node.data))
+   ((eq? node.type ast.NUMBER) (parseFloat node.data))
    ((eq? node.type ast.TERM) node.data)
    ((eq? node.type ast.STRING) node.data)
+   ((eq? node.type ast.BOOLEAN) node.data)
    ((eq? node.type ast.LIST) (map sourcify node.children))))
 
 (define (nodify obj)
-  (if (not obj)
-      null
-      (cond
-       ((number? obj) (ast.node ast.NUMBER obj))
-       ((symbol? obj) (ast.node ast.TERM obj))
-       ((string? obj) (ast.node ast.STRING obj))
-       ((pair? obj) (ast.node ast.LIST null (map nodify obj)))
-       ((null? obj) (ast.node ast.LIST)))))
+  (cond
+   ((number? obj) (ast.node ast.NUMBER obj))
+   ((symbol? obj) (ast.node ast.TERM obj))
+   ((string? obj) (ast.node ast.STRING obj))
+   ((boolean? obj) (ast.node ast.BOOLEAN obj))
+   ((pair? obj) (ast.node ast.LIST null (map nodify obj)))
+   ((null? obj) (ast.node ast.LIST))
+   (else null)))
 
 ;; helpers
 
@@ -170,6 +173,10 @@
 (install-parser ast.TERM
                 (lambda (node parse generator)
                   (generator.write-term node)))
+
+(install-parser ast.BOOLEAN
+                (lambda (node parse generator)
+                  (generator.write-boolean node)))
 
 (install-parser
  ast.LIST

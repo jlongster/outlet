@@ -22,7 +22,7 @@
 ;; integers
 (test-read "4.0" 4)
 (test-read "4.0" 4)
-;;(test-read "-5.5" 5)
+(test-read "-5.5" -5.5)
 
 ;; strings
 (test-read "\"foo\"" "foo")
@@ -32,11 +32,11 @@
 buz")
 
 ;; booleans
-;; (test-read "#t" #t)
-;; (test-read "#f" #f)
-;; (test-eval #t (not #f))
-;; (test-eval #f (not #t))
-;; (test-eval #f (and #t #f))
+(test-read "#t" #t)
+(test-read "#f" #f)
+(test-eval (not #t) #f)
+(test-eval (not #f) #t)
+(test-eval (and #f #t) #f)
 
 ;; symbols
 (test-read "foo" 'foo)

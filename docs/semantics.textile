@@ -172,6 +172,29 @@ short-circuited so that evaluation stops at the first failure.
 (and x y (do-something x y)) ; returns #f, @do-something@ doesn't execute
 {% endcodeblock %}
 
+h3. Equality (eq?/equal?)
+
+To test equality, use the @eq?@ and @equal?@ forms.
+
+@eq?@ is a shallow comparison and will return @#t@ if two values are
+equal or if the values point to the same object. Two different objects
+(lists, arrays, dicts, etc) that are identical will return @#f@.
+Numbers, booleans, symbols, and strings are treated as values, not
+objects.
+
+@equal?@ does a deep comparison and will return @#t@ if two values or objects are
+identical. @equal?@ will compare elements of lists recursively, for example.
+
+{% codeblock lang:scheme eq? and equal? %}
+(eq? 3 3) ; -> #t
+(eq? 'foo 'foo) ; -> #t
+(eq? "foo" "foo") ; -> #t
+(eq? '(1 2) '(1 2)) ; -> #f
+
+(equal? 'foo 'foo) ; -> #t
+(equal? '(1 2) '(1 2)) ; -> #t
+{% endcodeblock %}
+
 h3. Conditional Constructs (if/cond/etc.)
 
 There are a few constructs to controlling the flow of the program
@@ -231,10 +254,8 @@ h3. Todo
 
 These are undocumented features/semantics that I need to document and test:
 
-* need to implement booleans and characters
+* macros (implemented, undocumented)
+* let (implemented, undocumented)
 * case
-* let
-* named lets
-* loops
+* named lets/loops
 * data structures (vectors, hashes)
-* macros
