@@ -7,7 +7,7 @@ var generator = require('./compiler-js')();
 var src = require('fs').readFileSync('test/compile.ol', 'utf-8');
 //util.puts(outlet.compile(src, 'nodejs'));
 
-var compiler = require('./compiler2');
+var compiler = require('./compiler');
 var reader = require('./parser');
 var grammar = require('./grammar');
 // ast.pretty_print(reader(grammar,
@@ -18,8 +18,8 @@ var n = reader(grammar,
                src,
                ast.node(ast.ROOT));
 compiler.parse(n, generator);
- util.puts(generator.get_code());
 
+util.puts(generator.get_code());
 
 //ast.pretty_print(compiler.read(src));
 //util.puts(outlet.compile("(define a (one two three))"));

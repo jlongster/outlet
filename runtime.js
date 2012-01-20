@@ -34,10 +34,24 @@ function inspect(obj) {
 }
 
 function eq_p_(v1, v2) {
+    if(symbol_p_(v1) && symbol_p_(v2)) {
+        return v1.str == v2.str;
+    }
+
     return v1 == v2;
 }
 
 function equal_p_(v1, v2) {
+    if(pair_p_(v1) && pair_p_(v2)) {
+        var good = true;        
+        for(var i=0, len=v1.length; i<len; i++) {
+            good = good && equal_p_(v1[i], v2[i]);
+        }
+        return good;
+    }
+    else if(symbol_p_(v1) && symbol_p_(v2)) {
+        return v1.str == v2.str;
+    }
     return v1 == v2;
 }
 
@@ -105,7 +119,7 @@ function boolean_p_(obj) {
 }
 
 function pair_p_(obj) {
-    return obj && obj.length;
+    return obj && typeof obj != 'string' && obj.length;
 }
 
 function __gt_string(obj) {
