@@ -59,6 +59,23 @@ outlet.compile takes a target language as the argument, but only 'js' is support
 
 See example.ol for example Outlet code.
 
+More sophisticated build tools will come soon. If you want to work on the compiler, Outlet comes with a Makefile. To compile your changes:
+
+::
+
+    make test
+
+That will recompile the compiler with itself and run all tests. If the compilation
+fails, you may need to `git checkout` the compiler js sources again since it may be half-compiled or compiled with the bugs. You always need a working Outlet compiler to compile the compiler. This setup is helpful if you are fixing tricky bugs that exist in all previous versions of the compiler.
+
+If it works better, you can checkout a stable version of the compiler in the directory `boot` and run:
+
+::
+
+    make BOOT=1 test
+
+That will compile the sources with the bootstrapped compiler in the `boot` directory. This is helpful if you are simply focusing on extending the language features.
+
 Status
 ------
 
