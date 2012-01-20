@@ -33,6 +33,11 @@ function inspect(obj) {
     return util.inspect(obj, null, 10);
 }
 
+function not(v) {
+    return (typeof(v) != 'number' &&
+            !v);
+}
+
 function eq_p_(v1, v2) {
     if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;

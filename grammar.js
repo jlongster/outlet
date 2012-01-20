@@ -9,16 +9,16 @@ function make_symbol(str) {
 
 function map(func, arr) {
     var r = [];
-    for(var i=0; i<arr.length; i++) {
+    for(var i = 0, len = arr.length; i < len; i++) {
         r.push(func(arr[i]));
     }
     return r;
 }
 
 function for_each(func, arr) {
-    for(var i=0; i<arr.length; i++) {
+    for(var i = 0, len = arr.length; i < len; i++) {
         func(arr[i]);
-    }    
+    }
 }
 
 function display(msg) {
@@ -33,15 +33,29 @@ function inspect(obj) {
     return util.inspect(obj, null, 10);
 }
 
-function eqp(v1, v2) {
+function eq_p_(v1, v2) {
+    if(symbol_p_(v1) && symbol_p_(v2)) {
+        return v1.str == v2.str;
+    }
+
     return v1 == v2;
 }
 
-function equalp(v1, v2) {
+function equal_p_(v1, v2) {
+    if(pair_p_(v1) && pair_p_(v2)) {
+        var good = true;        
+        for(var i=0, len=v1.length; i<len; i++) {
+            good = good && equal_p_(v1[i], v2[i]);
+        }
+        return good;
+    }
+    else if(symbol_p_(v1) && symbol_p_(v2)) {
+        return v1.str == v2.str;
+    }
     return v1 == v2;
 }
 
-function nullp(arr) {
+function null_p_(arr) {
     return arr.length !== undefined && arr.length == 0;
 }
 
@@ -68,7 +82,7 @@ function vector_ref(arr, i) {
     return arr[i];
 }
 
-function vector_set_excl(arr, i, v) {
+function vector_set_excl_(arr, i, v) {
     arr[i] = v;
 }
 
@@ -88,32 +102,62 @@ function object_ref(obj, key) {
     return obj[key];
 }
 
-function numberp(obj) {
+function number_p_(obj) {
     return typeof obj == 'number';
 }
 
-function symbolp(obj) {
-    return (obj.str && obj.symbol);
+function symbol_p_(obj) {
+    return obj && obj.str && obj.symbol;
 }
 
-function stringp(obj) {
+function string_p_(obj) {
     return typeof obj == 'string';
 }
 
-function pairp(obj) {
-    return obj.length;
+function boolean_p_(obj) {
+    return obj === true || obj === false;
+}
+
+function pair_p_(obj) {
+    return obj && typeof obj != 'string' && obj.length;
+}
+
+function __gt_string(obj) {
+    if(number_p_(obj)) {
+        return '' + obj;
+    }
+    else if(string_p_(obj)) {
+        return '"' + obj.replace(/"/g, "\\\"") + '"';
+    }
+    else if(symbol_p_(obj)) {
+        return obj.str;
+    }
+    else if(boolean_p_(obj)) {
+        if(obj) {
+            return '#t';
+        }
+        else {
+            return '#f';
+        }
+    }
+    else if(pair_p_(obj)) {
+        return '(' + 
+            map(function(obj) { return __gt_string(obj); },
+                obj).join(' ') +
+            ')';
+    }
 }
 
 function unquote_splice(arr) {
-    var res = [];
-    var i = 0;
+    var res = [], i = 0, len = arr.length, elem;
 
-    while(i<arr.length) {
-        if(arr[i].please_splice) {
-            res = res.concat(unquote_splice(arr[i].data));
+    while(i < len) {
+        elem = arr[i];
+        if(elem.please_splice) {
+            res = res.concat(unquote_splice(elem.data));
         }
         else {
-            res.push(arr[i]);
+            res.push(elem);
         }
 
         i++;
@@ -122,53 +166,38 @@ function unquote_splice(arr) {
     return res;
 }
 
-module.exports = {
-    make_symbol: make_symbol,
-    map: map,
-    for_each: for_each,
-    display: display,
-    pp: pp,
-    inspect: inspect,
-    eqp: eqp,
-    equalp: equalp,
-    nullp: nullp,
-    cons: cons,
-    car: car,
-    cdr: cdr,
-    vector_ref: vector_ref,
-    vector_set_excl: vector_set_excl,
-    vector_concat: vector_concat,
-    vector: vector,
-    object: object,
-    object_ref: object_ref,
-    numberp: numberp,
-    symbolp: symbolp,
-    stringp: stringp,
-    pairp: pairp,
-    unquote_splice: unquote_splice
-};
-
 var ast = require("./ast");
 var grammar = function(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after){
 var repeated = function(rule){
 return Y(function(seq){
 return any(all(rule,seq),rule);}
 );}
-;var space_char = " \t\n\r";var space = repeated(char(space_char));;var comment = all(optional(space),char(";"),repeated(not_char("\n")),space);;var number = capture(all(optional(char("-")),repeated(char("1234567890"))),function(text,state){
+;var space_char = " \n\t\r";var space = repeated(char(space_char));;var comment = all(optional(space),char(";"),repeated(not_char("\n")),space);;var number = capture(all(optional(char("-")),repeated(char("1234567890"))),function(text,state){
 return ast.node(ast.NUMBER,text);}
-);;var string = (function(capt,capt_special,capt_node,init){
-var content = any(capt_special(all(char("\\"),char("n")),"\n"),all(char("\\"),capt(not_char(""))),capt(not_char("\"")));;return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));}
+);;var string = (function(capt,capt_node,capt_special,init){
+var content = any(capt_special(all(char("\\"),not_char(""))),capt(not_char("\"")));;return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));}
 )(function(rule){
 return capture(rule,function(buf,state){
 return (state+buf)}
 );}
-,function(rule,char){
-return capture(rule,function(str,state){
-return (state+char)}
-);}
 ,function(rule){
 return capture(rule,function(str,state){
 return ast.node(ast.STRING,state);}
+);}
+,function(rule){
+return capture(rule,function(str,state){
+return (state+(function() {if(equal_p_(str,"\\n")) { return (function(){
+return "\n"}
+)();} else { return (function() {if(equal_p_(str,"\\t")) { return (function(){
+return "\t"}
+)();} else { return (function() {if(equal_p_(str,"\\r")) { return (function(){
+return "\r"}
+)();} else { return (function(){
+return str.charAt(1);}
+)();}})()
+}})()
+}})()
+)}
 );}
 ,function(rule){
 return before(rule,function(state){
@@ -183,13 +212,13 @@ return (function(special){
 return (function(q){
 return ast.node(ast.LIST,null,unquote_splice([q,node]));}
 )(ast.node(ast.TERM,make_symbol(special)));}
-)((function() {if(equalp(buf.substring(0,2),",@")) { return (function(){
+)((function() {if(equal_p_(buf.substring(0,2),",@")) { return (function(){
 return "unquote-splicing"}
-)();} else { return (function() {if(equalp(buf.charAt(0),",")) { return (function(){
+)();} else { return (function() {if(equal_p_(buf.charAt(0),",")) { return (function(){
 return "unquote"}
-)();} else { return (function() {if(equalp(buf.charAt(0),"'")) { return (function(){
+)();} else { return (function() {if(equal_p_(buf.charAt(0),"'")) { return (function(){
 return "quote"}
-)();} else { return (function() {if(equalp(buf.charAt(0),"`")) { return (function(){
+)();} else { return (function() {if(equal_p_(buf.charAt(0),"`")) { return (function(){
 return "quasiquote"}
 )();}})()
 }})()

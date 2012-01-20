@@ -65,6 +65,8 @@ function generator() {
         var str = node.data;
         str = str.replace(/\\/g, '\\\\');
         str = str.replace(/\n/g, '\\n');
+        str = str.replace(/\r/g, '\\r');
+        str = str.replace(/\t/g, '\\t');
         str = str.replace(/"/g, '\\"');
         write('"' + str  + '"');
     }
@@ -344,12 +346,6 @@ function generator() {
 
         'or': function(node, parse) {
             write_op('||', node, parse);
-        },
-
-        'not': function(node, parse) {
-            write('(');
-            parse_expr(parse, node, node.children[1]);
-            write(' === false)');
         },
 
         'require': function(node, parse) {

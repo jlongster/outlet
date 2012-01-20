@@ -5,7 +5,7 @@
     (Y (lambda (seq)
          (any (all rule seq) rule))))
 
-  (define space-char " \t\n\r")
+  (define space-char " \n\t\r")
   (define space (repeated (char space-char)))
 
   (define comment (all (optional space)
@@ -24,23 +24,27 @@
            (lambda (rule)
              (capture rule
                       (lambda (buf state) (+ state buf)))))
-          (capt_special
-           (lambda (rule char)
-             (capture rule
-                      (lambda (str state)
-                        (+ state char)))))
           (capt_node
            (lambda (rule)
              (capture rule
                       (lambda (str state)
                         (ast.node ast.STRING state)))))
+          (capt_special
+           (lambda (rule)
+             (capture rule
+                      (lambda (str state)
+                        (+ state
+                           (cond
+                            ((equal? str "\\n") "\n")
+                            ((equal? str "\\t") "\t")
+                            ((equal? str "\\r") "\r")
+                            (else (str.charAt 1))))))))
           (init
            (lambda (rule)
              (before rule (lambda (state) "")))))
       
       (define content
-        (any (capt_special (all (char "\\") (char "n")) "\n")
-             (all (char "\\") (capt (not-char "")))
+        (any (capt_special (all (char "\\") (not-char "")))
              (capt (not-char "\""))))
       
       (init (all (char "\"")
@@ -99,5 +103,15 @@
                  (ast.node ast.ROOT
                            null
                            (root.children.concat (list child))))))))
+
+;; (define (grammar all any capture char not-char optional Y eof terminator before after)
+;;   (define (repeated rule)
+;;     (Y (lambda (seq)
+;;          (any (all rule seq) rule))))
+
+;;   (capture (repeated (any (not-char "()' \t\n\r")))
+;;              (lambda (buf s)
+;;                (ast.node ast.TERM (make-symbol buf)))))
+
 
 (set! module.exports grammar)

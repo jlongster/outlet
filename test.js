@@ -17,9 +17,9 @@ generator.write_runtime('js');
 var n = reader(grammar,
                src,
                ast.node(ast.ROOT));
-compiler.parse(n, generator);
 
-util.puts(generator.get_code());
+compiler.parse(n, generator);
+eval(generator.get_code());
 
 //ast.pretty_print(compiler.read(src));
 //util.puts(outlet.compile("(define a (one two three))"));
