@@ -1,5 +1,6 @@
-(require (reader "./parser")
-         (util "util")
+(require (util "util")
+         (fs "fs")
+         (reader "./parser")
          (ast "./ast")
          (grammar "./grammar")
          (js "./compiler-js"))
@@ -23,6 +24,10 @@
 
 (define parsers '())
 
+(define (install-builtin-macros)
+  (let ((src (fs.readFileSync "macros.ol" "utf-8")))
+    (parse (read src) (create-generator))))
+
 (define (read src)
   (reader grammar src (ast.node ast.ROOT)))
 
@@ -33,9 +38,6 @@
   (current-generator.create_generator))
 
 (define (parse node generator)
-  (if (not current-generator)
-      (set! current-generator generator))
-  
   ;; check to see if it's a macro
   (if (macro? node)
       (parse (expand node generator)
@@ -48,6 +50,8 @@
                 generator))))
 
 (define (compile src generator)
+  (set! current-generator generator)
+  (install-builtin-macros)
   (parse (read src) generator)
   (generator.get_code))
 
@@ -57,7 +61,6 @@
       (let ((src (func.apply null (map sourcify
                                        (node.children.slice 1)))))
         (let ((res (nodify src)))
-          ;;(pp src)
           ;; maintain node links
           (if res (set! res.link node.link))
           res)))))
@@ -147,8 +150,9 @@
 
     ;; parse the macro node with a new generator so we can get the raw
     ;; generated code
-    (parse (define-to-lambda node) gen)
 
+    (parse (define-to-lambda node) gen)
+    
     (let ((name (vector-ref func-info.children 0)))
       ;; this eval is literally the javascript eval on the host
       ;; environment, so we are getting the macro function fo' real.
@@ -199,47 +203,6 @@
      (assert-type (vector-ref node.children 1) ast.TERM)
      (generator.write-set-excl node parse))
 
-    ((equal? term "let")
-     ;; transform a let into an inline lambda
-     
-     ;; (let ((foo 5)
-     ;;       (bar (do-something)))
-     ;;   body ...) ->
-     
-     ;; ((lambda (foo bar)
-     ;;    body ...) 5 (do-something))
-
-     (let ((vars (vector-ref node.children 1))
-           (body (node.children.splice 2)))
-       (assert-type vars ast.LIST)
-
-       (define (vars-to-nodes vars names exprs)
-         (if (null? vars)
-             (list names exprs)
-             (let ((_var (car vars)))
-               (assert-type _var ast.LIST)
-
-               (let ((name (vector-ref _var.children 0))
-                     (expr (vector-ref _var.children 1)))
-                 (assert-type name ast.TERM)
-
-                 (vars-to-nodes (cdr vars)
-                                (names.concat (list name))
-                                (exprs.concat (list expr)))))))
-
-       (let ((nodes (vars-to-nodes vars.children '() '())))
-         (let ((lambda-header (list (ast.node ast.TERM (make-symbol "lambda"))
-                                    (ast.node ast.LIST null (vector-ref nodes 0)))))
-           (let ((lambda-node (ast.node ast.LIST
-                              null
-                              (lambda-header.concat body))))
-             (let ((res (ast.node ast.LIST
-                        null
-                        (vector-concat (vector lambda-node) (vector-ref nodes 1)))))
-               ;; maintain node links
-               (set! res.link node.link)
-               (generator.write-func-call res parse)))))))
-
     ((equal? term "lambda")
      ;; do some ast structure verification, should look like:
      ;; (lambda (term1 term2 ...) expr ...)     
@@ -256,7 +219,8 @@
     ((equal? term "define")
      (generator.write-set (define-to-setlambda node) parse))
 
-    ((equal? term "define-macro") (parse-macro node generator))
+    ((equal? term "define-macro")
+     (parse-macro node generator))
 
     ((equal? term "quote")
      (generator.write-array
@@ -276,33 +240,6 @@
                           (node.children.slice 1))
                 parse))
 
-    ((equal? term "cond")
-     (define (transform i)
-       (if (or (> i node.children.length)
-               (eq? i node.children.length))
-           null
-           (let ((n (vector-ref node.children i)))
-             (let ((condition (vector-ref n.children 0))
-                   (res (ast.node ast.LIST
-                                  null
-                                  (vector-concat
-                                   (list (ast.node ast.TERM (make-symbol "begin")))
-                                   (n.children.slice 1)))))
-               (if (and (eq? condition.type ast.TERM)
-                        (equal? condition.data.str "else"))
-                   res
-                   (ast.add_child
-                    (ast.node ast.LIST
-                              null
-                              (list (ast.node ast.TERM (make-symbol "if"))
-                                    condition
-                                    res))
-                    (transform (+ i 1))))))))
-     (let ((res (transform 1)))
-       ;; maintain node links
-       (set! res.link node.link)
-       (parse res)))
-
     ((generator.has-hook term)
      (generator.run-hook term node parse))
 
@@ -313,24 +250,14 @@
                   (for-each (lambda (n) (parse n))
                             node.children)))
 
-(install-macro "begin"
-               (lambda body
-                 `((lambda () ,@body))))
-
-(install-macro "eval_outlet"
-               (lambda (form)
-                 ;; make generator, compile the code and eval it. this
-                 ;; is a macro so the eval happens in the right context
-                 `(let ((gen (create-generator)))
-                    (parse (nodify ,form) gen)
-                    (eval (gen.get_code)))))
-
 (set! module.exports (object))
 (set! module.exports.read read)
 (set! module.exports.parse parse)
 (set! module.exports.compile compile)
+(set! module.exports.install_builtin_macros install-builtin-macros)
 
 (set! module.exports.set-generator set-generator)
 (set! module.exports.create_generator create-generator)
 (set! module.exports.nodify nodify)
 (set! module.exports.sourcify sourcify)
+

@@ -17,7 +17,7 @@
   `(%test read ,src ,val ,@args))
 
 (define-macro (test-eval src val . args)
-  `(%test eval_outlet ',src ,val ,@args))
+  `(%test eval-outlet ',src ,val ,@args))
 
 ;; integers
 (test-read "4.0" 4)
@@ -92,4 +92,3 @@ buz")
             ((eq? x 2) 'two)
             (else 'none))
            'none)
-

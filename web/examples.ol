@@ -25,12 +25,17 @@
  (lambda (x) (display x))
  '(1 2 3 4))
 
+(display "\n")
+
 (define (print-n n)
   (cond
    ((> n 0) (display "positive"))
    ((< n 0) (display "negative"))
    ((= n 0) (display "0"))
    (else (display "wait, what?"))))
+
+(print-n 4)
+(display "\n")
 
 ;; macros
 
@@ -64,6 +69,7 @@
   (pp three))
 
 (baz "a" "b" "c" "d" "e" "f")
+(display "\n")
 
 ;; ->
 ;; var baz = function(one,two){
@@ -74,7 +80,8 @@
 
 ;; eval
 
-(pp (eval_outlet '(baz 1 2 3 4)))
+(eval_outlet '(baz 1 2 3 4))
+(display "\n")
 
 ;; ->
 ;; [ 3, 4 ]

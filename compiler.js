@@ -171,8 +171,9 @@ function unquote_splice(arr) {
     return res;
 }
 
-var reader = require("./parser");
 var util = require("util");
+var fs = require("fs");
+var reader = require("./parser");
 var ast = require("./ast");
 var grammar = require("./grammar");
 var js = require("./compiler-js");
@@ -181,14 +182,17 @@ return (function() {if(not(v)) { throw(msg);}})()
 }
 ;var assert_type = function(node,type,msg){
 return assert((node.type===type),("invalid type, expected "+type+": "+inspect(node)));}
-;var parsers = unquote_splice([]);var read = function(src){
+;var parsers = unquote_splice([]);var install_builtin_macros = function(){
+return (function(src){
+return parse(read(src),create_generator());}
+)(fs.readFileSync("macros.ol","utf-8"));}
+;var read = function(src){
 return reader(grammar,src,ast.node(ast.ROOT));}
 ;var set_generator = function(gen){
 return current_generator = gen;}
 ;var create_generator = function(){
 return current_generator.create_generator();}
 ;var parse = function(node,generator){
-(function() {if(not(current_generator)) { return current_generator = generator;}})()
 return (function() {if(macro_p_(node)) { return parse(expand(node,generator),generator);} else { return (function(parser){
 assert(parser,("No parser for node type:"+node.type));return parser(node,function(node){
 return parse(node,generator);}
@@ -196,7 +200,7 @@ return parse(node,generator);}
 )(vector_ref(parsers,node.type));}})()
 }
 ;var compile = function(src,generator){
-parse(read(src),generator);return generator.get_code();}
+current_generator = generator;install_builtin_macros();parse(read(src),generator);return generator.get_code();}
 ;var expand = function(node,generator){
 return (function(name){
 return (function(func){
@@ -219,7 +223,7 @@ return node.data}
 return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.LIST)) { return (function(){
 return map(sourcify,node.children);}
-)();}})()
+)();} else { return false}})()
 }})()
 }})()
 }})()
@@ -291,25 +295,6 @@ return generator.write_boolean(node);}
 );install_parser(ast.LIST,function(node,parse,generator){
 assert(not(null_p_(node.children)),"invalid form: empty list");var first = vector_ref(node.children,0);;assert((eq_p_(first.type,ast.TERM)||eq_p_(first.type,ast.LIST)),("operator is not a procedure: "+inspect(first)));var term = (first.data&&first.data.str);return (function() {if(equal_p_(term,"set!")) { return (function(){
 assert_type(vector_ref(node.children,1),ast.TERM);return generator.write_set_excl(node,parse);}
-)();} else { return (function() {if(equal_p_(term,"let")) { return (function(){
-return (function(vars,body){
-assert_type(vars,ast.LIST);var vars_to_nodes = function(vars,names,exprs){
-return (function() {if(null_p_(vars)) { return unquote_splice([names,exprs])} else { return (function(_var){
-assert_type(_var,ast.LIST);return (function(name,expr){
-assert_type(name,ast.TERM);return vars_to_nodes(cdr(vars),names.concat(unquote_splice([name])),exprs.concat(unquote_splice([expr])));}
-)(vector_ref(_var.children,0),vector_ref(_var.children,1));}
-)(car(vars));}})()
-}
-;return (function(nodes){
-return (function(lambda_header){
-return (function(lambda_node){
-return (function(res){
-res.link = node.link;return generator.write_func_call(res,parse);}
-)(ast.node(ast.LIST,null,vector_concat(vector(lambda_node),vector_ref(nodes,1))));}
-)(ast.node(ast.LIST,null,lambda_header.concat(body)));}
-)(unquote_splice([ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,vector_ref(nodes,0))]));}
-)(vars_to_nodes(vars.children,unquote_splice([]),unquote_splice([])));}
-)(vector_ref(node.children,1),node.children.splice(2));}
 )();} else { return (function() {if(equal_p_(term,"lambda")) { return (function(){
 var args = vector_ref(node.children,1);;(function() {if(eq_p_(args.type,ast.LIST)) { return for_each(function(n){
 return assert_type(n,ast.TERM);}
@@ -326,18 +311,6 @@ return generator.write_array(vector_ref(node.children,1),parse,"quote");}
 return generator.write_array(vector_ref(node.children,1),parse,"quasi");}
 )();} else { return (function() {if(equal_p_(term,"list")) { return (function(){
 return generator.write_array(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
-)();} else { return (function() {if(equal_p_(term,"cond")) { return (function(){
-var transform = function(i){
-return (function() {if(((i>node.children.length)||eq_p_(i,node.children.length))) { return null} else { return (function(n){
-return (function(condition,res){
-return (function() {if((eq_p_(condition.type,ast.TERM)&&equal_p_(condition.data.str,"else"))) { return res} else { return ast.add_child(ast.node(ast.LIST,null,unquote_splice([ast.node(ast.TERM,make_symbol("if")),condition,res])),transform((i+1)));}})()
-}
-)(vector_ref(n.children,0),ast.node(ast.LIST,null,vector_concat(unquote_splice([ast.node(ast.TERM,make_symbol("begin"))]),n.children.slice(1))));}
-)(vector_ref(node.children,i));}})()
-}
-;return (function(res){
-res.link = node.link;return parse(res);}
-)(transform(1));}
 )();} else { return (function() {if(generator.has_hook(term)) { return (function(){
 return generator.run_hook(term,node,parse);}
 )();} else { return (function(){
@@ -350,16 +323,9 @@ return generator.write_func_call(node,parse);}
 }})()
 }})()
 }})()
-}})()
-}})()
 }
 );install_parser(ast.ROOT,function(node,parse){
 return for_each(function(n){
 return parse(n);}
 ,node.children);}
-);install_macro("begin",function() {
-var body = Array.prototype.slice.call(arguments);
-return unquote_splice([unquote_splice([make_symbol("lambda"),unquote_splice([]),{ please_splice: true, data: body }])])}
-);install_macro("eval_outlet",function(form){
-return unquote_splice([make_symbol("let"),unquote_splice([unquote_splice([make_symbol("gen"),unquote_splice([make_symbol("create-generator")])])]),unquote_splice([make_symbol("parse"),unquote_splice([make_symbol("nodify"),form]),make_symbol("gen")]),unquote_splice([make_symbol("eval"),unquote_splice([make_symbol("gen.get_code")])])])}
-);module.exports = object();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;module.exports.sourcify = sourcify;
+);module.exports = object();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.install_builtin_macros = install_builtin_macros;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;module.exports.sourcify = sourcify;

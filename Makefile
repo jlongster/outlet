@@ -5,7 +5,7 @@ else
 	NODE_MAKE = node make.js
 endif
 
-all: compiler
+all: test
 
 parser.js: parser.ol
 	$(NODE_MAKE) parser.ol > parser2.js && mv parser2.js parser.js

@@ -232,28 +232,9 @@ function generator() {
                     return;
                 }
                 else if(term.data.str == 'unquote-splicing') {
-                    var lst = node.children[1];
-
-                    if(lst.type == ast.LIST) {
-                        // Splicing should put all the list elements into
-                        // the current element
-                        for(var i=0, len=lst.children.length; i<len; i++) {
-                            if(i > 0) {
-                                write(',');
-                            }
-
-                            parse_expr(parse, lst, lst.children[i]);
-                        }
-                    }
-                    else if(lst.type == ast.TERM) {
-                        // Need to do the splicing at runtime
-                        write('{ please_splice: true, data: ' + lst.data.str + ' }');
-                    }
-                    else {
-                        throw ("unquote-splicing expected a list or symbol, got " +
-                               ast.type_str(lst.type));
-                    }
-
+                    write('{ please_splice: true, data: ');
+                    parse_expr(parse, node, node.children[1]);
+                    write(' }');
                     return;
                 }
             }

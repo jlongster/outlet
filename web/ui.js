@@ -3,21 +3,28 @@ var util = require('util');
 var fs = require('fs');
 
 util.inspect = function(obj) {
-    return obj.toSource();
+    return obj && obj.toSource();
 }
 
 fs.readFileSync = function(src) { return ''; };
+
+function outlet_display(str) {
+    var output = document.getElementById('output');
+    var buffer = output.innerHTML;
+    output.innerHTML = buffer + ('' + str).replace(/\n/g, '<br />');
+}
 
 var JS = 0;
 var LUA = 1;
 
 function clear() {
+    document.getElementById('generated').innerHTML = '';
     document.getElementById('output').innerHTML = '';
     document.getElementById('result').innerHTML = '';
 }
 
 function print_code(code) {
-    document.getElementById('output').innerHTML = '<pre>' + code + '</pre>';
+    document.getElementById('generated').innerHTML = '<pre>' + code + '</pre>';
 }
 
 function print_result(res) {
@@ -29,7 +36,8 @@ function print_result(res) {
 
 function compile() {
     clear();
-    var lang = document.getElementById('lang').selectedIndex;
+    var lang_el = document.getElementById('lang');
+    var lang = lang_el && lang_el.selectedIndex;
     var code;
 
     try {
@@ -41,7 +49,7 @@ function compile() {
             print_result("can't evaluate non-js languages");
         }
         else {
-            code = outlet.compile(src, 'js');
+            code = outlet.compile(src, 'no-runtime');
             print_code(code);
             try {
                 print_result(eval(code));

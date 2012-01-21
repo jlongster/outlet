@@ -6,6 +6,7 @@
     <script type="text/javascript" src="web.js"></script>
     <script type="text/javascript" src="ui.js"></script>
     <script type="text/javascript" src="runtime.js"></script>
+    <script type="text/javascript" src="runtime-eval.js"></script>
 
     <script type="text/javascript" src="test.js"></script>
   </head>
@@ -20,13 +21,13 @@
       </p>
       <div class="repl-title">
         Type some outlet below:
-        <div class="lang">
-          Target:
-          <select name="lang" id="lang">
-            <option value="js">js</option>
-            <option value="lua">lua</option>
-          </select>
-        </div>
+        <!-- <div class="lang"> -->
+        <!--   Target: -->
+        <!--   <select name="lang" id="lang"> -->
+        <!--     <option value="js">js</option> -->
+        <!--     <option value="lua">lua</option> -->
+        <!--   </select> -->
+        <!-- </div> -->
       </div>
       <div class="input">
         <textarea id="src" rows="10" cols="50"></textarea>
@@ -36,8 +37,11 @@
       <div id="result"></div>
       <h4>output</h4>
       <div id="output"></div>
+      <h4>generated</h4>
+      <div id="generated"></div>
       <h2>Examples</h2>
-      <pre>(define foo 5)
+      <pre>
+(define foo 5)
 
 (define (bar x)
   (+ x 1))
@@ -59,14 +63,49 @@
    (lambda (f)
      (func f))))
 
-(define (string_split str c)
-  (str.split c))
-
-(string_split "hello\"world" "\"")
-
 (for-each
- (lambda (x) (console.log x))
+ (lambda (x) (display x))
  '(1 2 3 4))
+
+(define (print-n n)
+  (cond
+   ((> n 0) (display "positive"))
+   ((< n 0) (display "negative"))
+   ((= n 0) (display "0"))
+   (else (display "wait, what?"))))
+
+;; macros
+
+(define-macro (helper form)
+  `(,(car form) (< ,(car (cdr form)) 5)
+       (+ ,(car (cdr form))
+          ,(car (cdr (cdr form))))))
+
+(define (bar n)
+  (pp n))
+
+(define (foo)
+  (helper (if 1 2)))
+
+(define-macro (when cond . body)
+  `(if ,cond
+       (begin
+         ,@body)))
+
+;; rest parameters
+
+(define (baz one two . three)
+  (pp three))
+
+(baz "a" "b" "c" "d" "e" "f")
+
+;; eval
+
+(pp (eval_outlet '(baz 1 2 3 4)))
+
+;; ->string
+
+(display (->string '(foo 2 bar 4 "hel\nlo\"fdfsf")))
 </pre>
     </div>
   </body>

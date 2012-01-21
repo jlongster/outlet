@@ -9,7 +9,6 @@ var sourcify = compiler.sourcify;
 
 var compiler_js = require("./compiler-js");
 compiler.set_generator(compiler_js());
-compiler.install_builtin_macros();
 
 function read(str) {
     return sourcify(_read(str).children[0]);
