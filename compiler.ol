@@ -71,7 +71,8 @@
    ((eq? node.type ast.TERM) node.data)
    ((eq? node.type ast.STRING) node.data)
    ((eq? node.type ast.BOOLEAN) node.data)
-   ((eq? node.type ast.LIST) (vector-to-list (vector-map sourcify node.children)))))
+   ((eq? node.type ast.LIST) (vector-to-list (vector-map sourcify node.children)))
+   ((eq? node.type ast.VECTOR) (vector-map sourcify node.children))))
 
 (define (nodify obj)
   (cond
@@ -81,6 +82,7 @@
    ((boolean? obj) (ast.node ast.BOOLEAN obj))
    ((list? obj) (ast.node ast.LIST null (vector-map nodify (list-to-vector obj))))
    ((null? obj) (ast.node ast.LIST))
+   ((vector? obj) (ast.node ast.VECTOR null (vector-map nodify obj)))
    (else null)))
 
 ;; helpers
@@ -206,7 +208,7 @@
      ;; do some ast structure verification, should look like:
      ;; (lambda (term1 term2 ...) expr ...)     
      (define args (vector-ref node.children 1))
-
+     
      (if (eq? args.type ast.LIST)
          (vector-for-each (lambda (n) (assert-type n ast.TERM))
                           args.children)
@@ -221,7 +223,8 @@
     ((equal? term "define-macro")
      (parse-macro node generator))
 
-    ((equal? term "quote")
+    ((or (equal? term "quote")
+         (equal? term "quasiquote"))
      (let ((n (vector-ref node.children 1)))
        (let ((type (object-ref n "type")))
          (cond
@@ -229,18 +232,23 @@
            (generator.write-list
             (vector-ref node.children 1)
             parse
-            "quote"))
+            (if (equal? term "quote")
+                "quote"
+                "quasi")))
 
+          ((eq? type ast.VECTOR)
+           (generator.write-vector
+            (vector-ref node.children 1)
+            parse
+            (if (equal? term "quote")
+                "quote"
+                "quasi")))
+          
           ((eq? type ast.TERM)
            (generator.write-symbol n))
 
           (else
            (parse n))))))
-
-    ((equal? term "quasiquote")
-     (generator.write-list (vector-ref node.children 1)
-                            parse
-                            "quasi"))
 
     ((equal? term "list")
      (generator.write-list
@@ -254,9 +262,9 @@
 
     (else (generator.write-func-call node parse)))))
 
-;; (install-parser ast.VECTOR
-;;                 (lambda (node parse generator)
-;;                   (generator.write-vector node parse)))
+(install-parser ast.VECTOR
+                (lambda (node parse generator)
+                  (generator.write-vector node parse)))
 
 (install-parser ast.ROOT
                 (lambda (node parse)

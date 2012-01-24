@@ -86,6 +86,15 @@ function equal_p_(v1, v2) {
 
         return l(v1, v2);
     }
+    else if(vector_p_(v1) && vector_p_(v2)) {
+        var good = true;
+        for(var i=0, len=v1.length; i<len; i++) {
+            if(!equal_p_(v1[i], v2[i])) {
+                good = false;
+            }
+        }
+        return good;
+    }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
     }
@@ -190,6 +199,10 @@ function list_p_(obj) {
     return obj && obj.list;
 }
 
+function vector_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length !== undefined;
+}
+
 function __gt_string(obj) {
     if(number_p_(obj)) {
         return '' + obj;
@@ -214,6 +227,12 @@ function __gt_string(obj) {
                 obj).join(' ') +
             ')';
     }
+    else if(vector_p_(obj)) {
+        return '[' +
+            vector_map(function(obj) { return __gt_string(obj); },
+                       obj).join(' ') +
+            ']';
+    }
 }
 
 function list_append(lst1, lst2) {
@@ -235,9 +254,9 @@ function list_append(lst1, lst2) {
 }
 
 function unquote_splice(lst) {
-    if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
-        return lst;
-    }
+    // if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+    //     return lst;
+    // }
 
     if(null_p_(lst)) {
         return [];
@@ -256,6 +275,9 @@ function unquote_splice(lst) {
     }
 }
 
+function unquote_splice_vec(vec) {
+    return vec;
+}
 var util = require("util");
 var fs = require("fs");
 var reader = require("./parser");
@@ -310,7 +332,10 @@ return node.data}
 return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.LIST)) { return (function(){
 return vector_to_list(vector_map(sourcify,node.children));}
+)();} else { return (function() {if(eq_p_(node.type,ast.VECTOR)) { return (function(){
+return vector_map(sourcify,node.children);}
 )();} else { return false}})()
+}})()
 }})()
 }})()
 }})()
@@ -329,9 +354,12 @@ return ast.node(ast.BOOLEAN,obj);}
 return ast.node(ast.LIST,null,vector_map(nodify,list_to_vector(obj)));}
 )();} else { return (function() {if(null_p_(obj)) { return (function(){
 return ast.node(ast.LIST);}
+)();} else { return (function() {if(vector_p_(obj)) { return (function(){
+return ast.node(ast.VECTOR,null,vector_map(nodify,obj));}
 )();} else { return (function(){
 return null}
 )();}})()
+}})()
 }})()
 }})()
 }})()
@@ -392,22 +420,25 @@ return generator.write_lambda(node,parse);}
 return generator.write_set(define_to_setlambda(node),parse);}
 )();} else { return (function() {if(equal_p_(term,"define-macro")) { return (function(){
 return parse_macro(node,generator);}
-)();} else { return (function() {if(equal_p_(term,"quote")) { return (function(){
+)();} else { return (function() {if((equal_p_(term,"quote")||equal_p_(term,"quasiquote"))) { return (function(){
 return (function(n){
 return (function(type){
 return (function() {if(eq_p_(type,ast.LIST)) { return (function(){
-return generator.write_list(vector_ref(node.children,1),parse,"quote");}
+return generator.write_list(vector_ref(node.children,1),parse,(function() {if(equal_p_(term,"quote")) { return "quote"} else { return "quasi"}})()
+);}
+)();} else { return (function() {if(eq_p_(type,ast.VECTOR)) { return (function(){
+return generator.write_vector(vector_ref(node.children,1),parse,(function() {if(equal_p_(term,"quote")) { return "quote"} else { return "quasi"}})()
+);}
 )();} else { return (function() {if(eq_p_(type,ast.TERM)) { return (function(){
 return generator.write_symbol(n);}
 )();} else { return (function(){
 return parse(n);}
 )();}})()
 }})()
+}})()
 }
 )(object_ref(n,"type"));}
 )(vector_ref(node.children,1));}
-)();} else { return (function() {if(equal_p_(term,"quasiquote")) { return (function(){
-return generator.write_list(vector_ref(node.children,1),parse,"quasi");}
 )();} else { return (function() {if(equal_p_(term,"list")) { return (function(){
 return generator.write_list(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
 )();} else { return (function() {if(generator.has_hook(term)) { return (function(){
@@ -421,8 +452,9 @@ return generator.write_func_call(node,parse);}
 }})()
 }})()
 }})()
-}})()
 }
+);install_parser(ast.VECTOR,function(node,parse,generator){
+return generator.write_vector(node,parse);}
 );install_parser(ast.ROOT,function(node,parse){
 return vector_for_each(function(n){
 return parse(n);}

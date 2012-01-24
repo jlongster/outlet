@@ -86,6 +86,15 @@ function equal_p_(v1, v2) {
 
         return l(v1, v2);
     }
+    else if(vector_p_(v1) && vector_p_(v2)) {
+        var good = true;
+        for(var i=0, len=v1.length; i<len; i++) {
+            if(!equal_p_(v1[i], v2[i])) {
+                good = false;
+            }
+        }
+        return good;
+    }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
     }
@@ -190,6 +199,10 @@ function list_p_(obj) {
     return obj && obj.list;
 }
 
+function vector_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length !== undefined;
+}
+
 function __gt_string(obj) {
     if(number_p_(obj)) {
         return '' + obj;
@@ -214,6 +227,12 @@ function __gt_string(obj) {
                 obj).join(' ') +
             ')';
     }
+    else if(vector_p_(obj)) {
+        return '[' +
+            vector_map(function(obj) { return __gt_string(obj); },
+                       obj).join(' ') +
+            ']';
+    }
 }
 
 function list_append(lst1, lst2) {
@@ -235,9 +254,9 @@ function list_append(lst1, lst2) {
 }
 
 function unquote_splice(lst) {
-    if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
-        return lst;
-    }
+    // if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+    //     return lst;
+    // }
 
     if(null_p_(lst)) {
         return [];
@@ -256,6 +275,9 @@ function unquote_splice(lst) {
     }
 }
 
+function unquote_splice_vec(vec) {
+    return vec;
+}
 var parser = function(grammar){
 var Y = function(gen){
 return (function(f){

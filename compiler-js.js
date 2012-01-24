@@ -216,9 +216,14 @@ function generator() {
     }
 
     function write_vector(node, parse, context) {
-        write('{ vector: true, data : ');
-        write_list(node, parse, context);
-        write(' }');
+        write('[');
+        for(var i=0, len=node.children.length; i<len; i++) {
+            if(i > 0) {
+                write(',');
+            }
+            write_list_element(node, i, parse, context);
+        }
+        write(']');
     }
 
     function write_list(node, parse, context) {
@@ -278,6 +283,9 @@ function generator() {
             }
             else if(n.type == ast.LIST) {
                 write_list(n, parse, context);
+            }
+            else if(n.type == ast.VECTOR) {
+                write_vector(n, parse, context);
             }
         }
         else {

@@ -4,9 +4,7 @@
          (res (,hook ,src)))
      (if (not (comp res ,val))
          (throw (string-append "FAILURE with " (->string ',hook) ": "
-                               (if (eq? (car ',src) 'quote)
-                                   (->string ',(car (cdr src)))
-                                   (->string ',src))
+                               (->string ,src)
                                " got "
                                (->string res)
                                " but expected "
@@ -50,9 +48,6 @@ buz")
 (define four 4)
 (test-eval '(1 2 "three" four) (list 1 2 "three" 'four))
 (test-eval (list 1 2 3 four) (list 1 2 3 4))
-
-;; vectors
-;; (test-eval [1 2 3] '(1 2 3))
 
 ;; functions
 (define (foo x y z) (+ x y z))
@@ -106,4 +101,18 @@ buz")
             (else 'none))
            'none)
 
+;; quoting
+(test-eval '3 3)
 
+(test-eval `3 3)
+(test-eval '(1 2 3) (list 1 2 3))
+(test-eval [1 2 3] (vector 1 2 3))
+(test-eval `(1 2 3 ,4) (list 1 2 3 4))
+
+(define foo 4)
+(test-eval `(1 2 3 ,foo) '(1 2 3 4))
+(test-eval `(1 2 3 foo) '(1 2 3 foo))
+;;(test-eval `[1 2 3 ,foo] (vector 1 2 3 4))
+
+(define foo '(4 5))
+(test-eval `(1 2 3 ,@foo) '(1 2 3 4 5))
