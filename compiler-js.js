@@ -216,14 +216,14 @@ function generator() {
     }
 
     function write_vector(node, parse, context) {
-        write('[');
+        write('unquote_splice_vec([');
         for(var i=0, len=node.children.length; i<len; i++) {
             if(i > 0) {
                 write(',');
             }
             write_list_element(node, i, parse, context);
         }
-        write(']');
+        write('])');
     }
 
     function write_list(node, parse, context) {

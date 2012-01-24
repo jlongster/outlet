@@ -276,7 +276,19 @@ function unquote_splice(lst) {
 }
 
 function unquote_splice_vec(vec) {
-    return vec;
+    var ret = [];
+    for(var i=0, len=vec.length; i<len; i++) {
+        var obj = vec[i];
+
+        if(obj && obj.please_splice) {
+            ret = ret.concat(obj.data);
+        }
+        else {
+            ret.push(obj);
+        }
+    }
+
+    return ret;
 }
 var parser = function(grammar){
 var Y = function(gen){

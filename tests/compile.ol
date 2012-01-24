@@ -45,6 +45,10 @@ buz")
 (test-read "(1 2 3 4)" '(1 2 3 4))
 (test-read "(foo 2 3 4)" '(foo 2 3 4))
 
+;; vectors
+(test-read "[1 2 3]" '[1 2 3])
+(test-eval [1 2 3] (vector 1 2 3))
+
 (define four 4)
 (test-eval '(1 2 "three" four) (list 1 2 "three" 'four))
 (test-eval (list 1 2 3 four) (list 1 2 3 4))
@@ -101,18 +105,23 @@ buz")
             (else 'none))
            'none)
 
-;; quoting
+;; quoting and splicing
 (test-eval '3 3)
-
 (test-eval `3 3)
 (test-eval '(1 2 3) (list 1 2 3))
-(test-eval [1 2 3] (vector 1 2 3))
 (test-eval `(1 2 3 ,4) (list 1 2 3 4))
+(test-eval '[1 2 3] (vector 1 2 3))
+(test-eval `[1 2 3 ,4] (vector 1 2 3 4))
 
 (define foo 4)
+(define foo-lst '(4 5))
+(define foo-vec [4 5])
 (test-eval `(1 2 3 ,foo) '(1 2 3 4))
 (test-eval `(1 2 3 foo) '(1 2 3 foo))
-;;(test-eval `[1 2 3 ,foo] (vector 1 2 3 4))
+(test-eval `(1 2 3 ,@'(4 5)) '(1 2 3 4 5))
+(test-eval `(1 2 3 ,@foo-lst) '(1 2 3 4 5))
 
-(define foo '(4 5))
-(test-eval `(1 2 3 ,@foo) '(1 2 3 4 5))
+(test-eval `[1 2 3 ,foo] (vector 1 2 3 4))
+(test-eval `[1 2 3 foo] (vector 1 2 3 'foo))
+(test-eval `[1 2 3 ,@[4 5]] (vector 1 2 3 4 5))
+(test-eval `[1 2 3 ,@foo-vec] (vector 1 2 3 4 5))
