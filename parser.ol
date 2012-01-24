@@ -1,4 +1,6 @@
 
+;; todo: convert all text and state structures to vectors instead of lists
+
 (define (parser grammar)
   (define (Y gen)
     ((lambda (f) (f f))
@@ -6,33 +8,33 @@
        (gen
         (lambda args
           (let ((ff (f f)))
-            (ff.apply null args)))))))
+            (ff.apply null (list-to-vector args))))))))
 
   (define (optional func)
     (lambda (text state)
       (or (func text state)
-          (list text state))))
+          (vector text state))))
 
   (define (eof text state)
     (if (equal? text "")
-        (list text state)
+        (vector text state)
         null))
 
   (define (terminator text state)
-    (list "" state))
+    (vector "" state))
 
   (define (char alphabet)
     (lambda (text state)
       (if (and (> text.length 0)
                (> (alphabet.indexOf (text.charAt 0)) -1))
-          (list (text.substr 1) state)
+          (vector (text.substr 1) state)
           null)))
 
   (define (not-char alphabet)
     (lambda (text state)
       (if (and (> text.length 0)
                (eq? (alphabet.indexOf (text.charAt 0)) -1))
-          (list (text.substr 1) state)
+          (vector (text.substr 1) state)
           null)))
 
   (define any
@@ -51,21 +53,21 @@
         (define (run lst r)
           (if (null? lst)
               r
-              (let ((r ((car lst) (car r) (car (cdr r)))))
+              (let ((r ((car lst) (vector-ref r 0) (vector-ref r 1))))
                 (if (not r)
                     null
                     (run (cdr lst) r)))))
 
-        (run args (list text state)))))
+        (run args (vector text state)))))
 
   (define (capture func hook)
     (lambda (text state)
       (let ((r (func text state)))
         (if r
-            (let ((t (car r))
-                  (s (car (cdr r))))
-              (list t (hook (text.substr 0 (- text.length t.length))
-                            s)))
+            (let ((t (vector-ref r 0))
+                  (s (vector-ref r 1)))
+              (vector t (hook (text.substr 0 (- text.length t.length))
+                              s)))
             null))))
 
   (define (before func hook)
@@ -76,7 +78,8 @@
     (lambda (text state)
       (let ((r (func text state)))
         (if r
-            (list (car r) (hook state (car (cdr r))))
+            (vector (vector-ref r 0)
+                    (hook state (vector-ref r 1)))
             null))))
 
   (grammar all any capture char not-char optional Y eof terminator before after))
@@ -84,7 +87,7 @@
 (define (parse grammar text state)
   (let ((r ((parser grammar) text state)))
     (if r
-        (car (cdr r))
+        (vector-ref r 1)
         null)))
 
 (set! module.exports parse)

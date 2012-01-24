@@ -58,12 +58,12 @@
 (define (expand node generator)
   (let ((name (vector-ref node.children 0)))
     (let ((func (get-macro name.data.str)))
-      (let ((src (func.apply null (map sourcify
-                                       (node.children.slice 1)))))
-        (let ((res (nodify src)))
-          ;; maintain node links
-          (if res (set! res.link node.link))
-          res)))))
+      (let ((args (vector-map sourcify (node.children.slice 1))))
+        (let ((src (func.apply null args)))
+          (let ((res (nodify src)))
+            ;; maintain node links
+            (if res (set! res.link node.link))
+            res))))))
 
 (define (sourcify node)
   (cond
@@ -71,7 +71,7 @@
    ((eq? node.type ast.TERM) node.data)
    ((eq? node.type ast.STRING) node.data)
    ((eq? node.type ast.BOOLEAN) node.data)
-   ((eq? node.type ast.LIST) (map sourcify node.children))))
+   ((eq? node.type ast.LIST) (vector-to-list (vector-map sourcify node.children)))))
 
 (define (nodify obj)
   (cond
@@ -79,7 +79,7 @@
    ((symbol? obj) (ast.node ast.TERM obj))
    ((string? obj) (ast.node ast.STRING obj))
    ((boolean? obj) (ast.node ast.BOOLEAN obj))
-   ((pair? obj) (ast.node ast.LIST null (map nodify obj)))
+   ((list? obj) (ast.node ast.LIST null (vector-map nodify (list-to-vector obj))))
    ((null? obj) (ast.node ast.LIST))
    (else null)))
 
@@ -93,8 +93,8 @@
       ;; make a lambda node
       (ast.node ast.LIST null
                 (vector-concat
-                 (list (ast.node ast.TERM (make-symbol "lambda"))
-                       (ast.node ast.LIST null args))
+                 (vector (ast.node ast.TERM (make-symbol "lambda"))
+                         (ast.node ast.LIST null args))
                  body)))))
 
 (define (define-to-setlambda node)
@@ -121,9 +121,9 @@
         (set! expr _expr)))
 
   (ast.node ast.LIST null
-            (list (ast.node ast.TERM (make-symbol "set"))
-                  (ast.node ast.TERM name)
-                  expr)))
+            (vector (ast.node ast.TERM (make-symbol "set"))
+                    (ast.node ast.TERM name)
+                    expr)))
 
 ;; macros
 
@@ -150,9 +150,8 @@
 
     ;; parse the macro node with a new generator so we can get the raw
     ;; generated code
-
     (parse (define-to-lambda node) gen)
-    
+
     (let ((name (vector-ref func-info.children 0)))
       ;; this eval is literally the javascript eval on the host
       ;; environment, so we are getting the macro function fo' real.
@@ -209,8 +208,8 @@
      (define args (vector-ref node.children 1))
 
      (if (eq? args.type ast.LIST)
-         (for-each (lambda (n) (assert-type n ast.TERM))
-                   args.children)
+         (vector-for-each (lambda (n) (assert-type n ast.TERM))
+                          args.children)
          (if (not (eq? args.type ast.TERM))
              (throw "lambda must have a list of arguments or a binding term")))
 
@@ -223,18 +222,28 @@
      (parse-macro node generator))
 
     ((equal? term "quote")
-     (generator.write-array
-                (vector-ref node.children 1)
-                parse
-                "quote"))
+     (let ((n (vector-ref node.children 1)))
+       (let ((type (object-ref n "type")))
+         (cond
+          ((eq? type ast.LIST)
+           (generator.write-list
+            (vector-ref node.children 1)
+            parse
+            "quote"))
+
+          ((eq? type ast.TERM)
+           (generator.write-symbol n))
+
+          (else
+           (parse n))))))
 
     ((equal? term "quasiquote")
-     (generator.write-array (vector-ref node.children 1)
+     (generator.write-list (vector-ref node.children 1)
                             parse
                             "quasi"))
 
     ((equal? term "list")
-     (generator.write-array
+     (generator.write-list
                 (ast.node ast.LIST
                           null
                           (node.children.slice 1))
@@ -245,10 +254,14 @@
 
     (else (generator.write-func-call node parse)))))
 
+;; (install-parser ast.VECTOR
+;;                 (lambda (node parse generator)
+;;                   (generator.write-vector node parse)))
+
 (install-parser ast.ROOT
                 (lambda (node parse)
-                  (for-each (lambda (n) (parse n))
-                            node.children)))
+                  (vector-for-each (lambda (n) (parse n))
+                                   node.children)))
 
 (set! module.exports (object))
 (set! module.exports.read read)

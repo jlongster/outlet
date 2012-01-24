@@ -51,6 +51,9 @@ buz")
 (test-eval '(1 2 "three" four) (list 1 2 "three" 'four))
 (test-eval (list 1 2 3 four) (list 1 2 3 4))
 
+;; vectors
+;; (test-eval [1 2 3] '(1 2 3))
+
 ;; functions
 (define (foo x y z) (+ x y z))
 (test-eval (foo 1 2 3) 6)
@@ -61,6 +64,16 @@ buz")
 (test-eval ((lambda (x)
                (bar (+ x 2))) 5)
            42)
+
+;; lambda
+
+(define foo (lambda (x y z) (+ x y z)))
+(test-eval (foo 1 2 3) 6)
+
+(define foo (lambda args args))
+(test-eval (foo 1 2 3) '(1 2 3))
+
+
 
 ;; set!
 (test-eval ((lambda (x)
@@ -92,3 +105,5 @@ buz")
             ((eq? x 2) 'two)
             (else 'none))
            'none)
+
+

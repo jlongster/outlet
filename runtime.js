@@ -7,17 +7,36 @@ function make_symbol(str) {
     };
 }
 
-function map(func, arr) {
-    var r = [];
-    for(var i = 0, len = arr.length; i < len; i++) {
-        r.push(func(arr[i]));
+function map(func, lst) {
+    if(null_p_(lst)) {
+        return [];
     }
-    return r;
+    else {
+        return cons(func(car(lst)),
+                    map(func, cdr(lst)));
+    }
 }
 
-function for_each(func, arr) {
-    for(var i = 0, len = arr.length; i < len; i++) {
-        func(arr[i]);
+function for_each(func, lst) {
+    if(!null_p_(lst)) {
+        func(car(lst));
+        for_each(func, cdr(lst));
+    }
+}
+
+function vector_map(func, vec) {
+    var res = [];
+
+    for(var i=0, len=vec.length; i<len; i++) {
+        res.push(func(vec[i]));
+    }
+
+    return res;
+}
+
+function vector_for_each(func, vec) {
+    for(var i=0, len=vec.length; i<len; i++) {
+        func(vec[i]);
     }
 }
 
@@ -47,12 +66,25 @@ function eq_p_(v1, v2) {
 }
 
 function equal_p_(v1, v2) {
-    if(pair_p_(v1) && pair_p_(v2)) {
-        var good = true;        
-        for(var i=0, len=v1.length; i<len; i++) {
-            good = good && equal_p_(v1[i], v2[i]);
+    if(list_p_(v1) && list_p_(v2)) {
+        function l(lst1, lst2) {
+            var n1 = null_p_(lst1);
+            var n2 = null_p_(lst2);
+
+            if(n1 && n2) {
+                return true;
+            }
+            else if(n1 || n2) {
+                return false
+            }
+            else if(equal_p_(car(lst1), car(lst2))) {
+                return l(cdr(lst1), cdr(lst2));
+            }
+
+            return false;
         }
-        return good;
+
+        return l(v1, v2);
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -65,14 +97,9 @@ function null_p_(arr) {
 }
 
 function cons(v1, v2) {
-    // this is NOT a correct representation for pairs, but will do for
-    // now
-    if(v2.length) {
-        return [v1].concat(v2);
-    }
-    else {
-        return [v1, v2];
-    }
+    var lst = [v1, v2];
+    lst.list = true;
+    return lst;
 }
 
 function car(arr) {
@@ -80,7 +107,39 @@ function car(arr) {
 }
 
 function cdr(arr) {
-    return arr.slice(1);
+    return arr[1];
+}
+
+function make_list(arr) {
+    arr.list = true;
+    return arr;
+}
+
+function vector_to_list(vec) {
+    function l(v, i) {
+        if(i < v.length) {
+            return cons(v[i], l(v, i+1));
+        }
+        else {
+            return [];
+        }
+    }
+
+    return l(vec, 0);
+}
+
+function list_to_vector(lst) {
+    var res = [];
+
+    function m(lst) {
+        if(!null_p_(lst)) {
+            res.push(car(lst));
+            m(cdr(lst));
+        }
+    };
+
+    m(lst);
+    return res;
 }
 
 function vector_ref(arr, i) {
@@ -95,8 +154,12 @@ function vector_concat(arr1, arr2) {
     return arr1.concat(arr2);
 }
 
-function vector(v) {
-    return [v];
+function vector() {
+    return Array.prototype.slice.call(arguments);
+}
+
+function vector_push(vec, val) {
+    vec.push(val);
 }
 
 function object() {
@@ -123,8 +186,8 @@ function boolean_p_(obj) {
     return obj === true || obj === false;
 }
 
-function pair_p_(obj) {
-    return obj && typeof obj != 'string' && obj.length;
+function list_p_(obj) {
+    return obj && obj.list;
 }
 
 function __gt_string(obj) {
@@ -145,7 +208,7 @@ function __gt_string(obj) {
             return '#f';
         }
     }
-    else if(pair_p_(obj)) {
+    else if(list_p_(obj)) {
         return '(' + 
             map(function(obj) { return __gt_string(obj); },
                 obj).join(' ') +
@@ -153,20 +216,42 @@ function __gt_string(obj) {
     }
 }
 
-function unquote_splice(arr) {
-    var res = [], i = 0, len = arr.length, elem;
-
-    while(i < len) {
-        elem = arr[i];
-        if(elem.please_splice) {
-            res = res.concat(unquote_splice(elem.data));
+function list_append(lst1, lst2) {
+    function loop(lst) {
+        if(null_p_(lst)) {
+            return lst2;
         }
         else {
-            res.push(elem);
+            return cons(car(lst), loop(cdr(lst)));
         }
+    };
 
-        i++;
+    if(null_p_(lst1)) {
+        return lst2;
+    }
+    else {
+        return loop(lst1);
+    }
+}
+
+function unquote_splice(lst) {
+    if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+        return lst;
     }
 
-    return res;
+    if(null_p_(lst)) {
+        return [];
+    }
+    else {
+        var elem = car(lst);
+        var rest = unquote_splice(cdr(lst));
+
+        if(elem.please_splice) {
+            return list_append(unquote_splice(elem.data),
+                               rest);
+        }
+        else {
+            return cons(elem, rest);
+        }
+    }
 }

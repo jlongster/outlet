@@ -7,17 +7,36 @@ function make_symbol(str) {
     };
 }
 
-function map(func, arr) {
-    var r = [];
-    for(var i = 0, len = arr.length; i < len; i++) {
-        r.push(func(arr[i]));
+function map(func, lst) {
+    if(null_p_(lst)) {
+        return [];
     }
-    return r;
+    else {
+        return cons(func(car(lst)),
+                    map(func, cdr(lst)));
+    }
 }
 
-function for_each(func, arr) {
-    for(var i = 0, len = arr.length; i < len; i++) {
-        func(arr[i]);
+function for_each(func, lst) {
+    if(!null_p_(lst)) {
+        func(car(lst));
+        for_each(func, cdr(lst));
+    }
+}
+
+function vector_map(func, vec) {
+    var res = [];
+
+    for(var i=0, len=vec.length; i<len; i++) {
+        res.push(func(vec[i]));
+    }
+
+    return res;
+}
+
+function vector_for_each(func, vec) {
+    for(var i=0, len=vec.length; i<len; i++) {
+        func(vec[i]);
     }
 }
 
@@ -47,12 +66,25 @@ function eq_p_(v1, v2) {
 }
 
 function equal_p_(v1, v2) {
-    if(pair_p_(v1) && pair_p_(v2)) {
-        var good = true;        
-        for(var i=0, len=v1.length; i<len; i++) {
-            good = good && equal_p_(v1[i], v2[i]);
+    if(list_p_(v1) && list_p_(v2)) {
+        function l(lst1, lst2) {
+            var n1 = null_p_(lst1);
+            var n2 = null_p_(lst2);
+
+            if(n1 && n2) {
+                return true;
+            }
+            else if(n1 || n2) {
+                return false
+            }
+            else if(equal_p_(car(lst1), car(lst2))) {
+                return l(cdr(lst1), cdr(lst2));
+            }
+
+            return false;
         }
-        return good;
+
+        return l(v1, v2);
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -65,14 +97,9 @@ function null_p_(arr) {
 }
 
 function cons(v1, v2) {
-    // this is NOT a correct representation for pairs, but will do for
-    // now
-    if(v2.length) {
-        return [v1].concat(v2);
-    }
-    else {
-        return [v1, v2];
-    }
+    var lst = [v1, v2];
+    lst.list = true;
+    return lst;
 }
 
 function car(arr) {
@@ -80,7 +107,39 @@ function car(arr) {
 }
 
 function cdr(arr) {
-    return arr.slice(1);
+    return arr[1];
+}
+
+function make_list(arr) {
+    arr.list = true;
+    return arr;
+}
+
+function vector_to_list(vec) {
+    function l(v, i) {
+        if(i < v.length) {
+            return cons(v[i], l(v, i+1));
+        }
+        else {
+            return [];
+        }
+    }
+
+    return l(vec, 0);
+}
+
+function list_to_vector(lst) {
+    var res = [];
+
+    function m(lst) {
+        if(!null_p_(lst)) {
+            res.push(car(lst));
+            m(cdr(lst));
+        }
+    };
+
+    m(lst);
+    return res;
 }
 
 function vector_ref(arr, i) {
@@ -95,8 +154,12 @@ function vector_concat(arr1, arr2) {
     return arr1.concat(arr2);
 }
 
-function vector(v) {
-    return [v];
+function vector() {
+    return Array.prototype.slice.call(arguments);
+}
+
+function vector_push(vec, val) {
+    vec.push(val);
 }
 
 function object() {
@@ -123,8 +186,8 @@ function boolean_p_(obj) {
     return obj === true || obj === false;
 }
 
-function pair_p_(obj) {
-    return obj && typeof obj != 'string' && obj.length;
+function list_p_(obj) {
+    return obj && obj.list;
 }
 
 function __gt_string(obj) {
@@ -145,7 +208,7 @@ function __gt_string(obj) {
             return '#f';
         }
     }
-    else if(pair_p_(obj)) {
+    else if(list_p_(obj)) {
         return '(' + 
             map(function(obj) { return __gt_string(obj); },
                 obj).join(' ') +
@@ -153,22 +216,44 @@ function __gt_string(obj) {
     }
 }
 
-function unquote_splice(arr) {
-    var res = [], i = 0, len = arr.length, elem;
-
-    while(i < len) {
-        elem = arr[i];
-        if(elem.please_splice) {
-            res = res.concat(unquote_splice(elem.data));
+function list_append(lst1, lst2) {
+    function loop(lst) {
+        if(null_p_(lst)) {
+            return lst2;
         }
         else {
-            res.push(elem);
+            return cons(car(lst), loop(cdr(lst)));
         }
+    };
 
-        i++;
+    if(null_p_(lst1)) {
+        return lst2;
+    }
+    else {
+        return loop(lst1);
+    }
+}
+
+function unquote_splice(lst) {
+    if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+        return lst;
     }
 
-    return res;
+    if(null_p_(lst)) {
+        return [];
+    }
+    else {
+        var elem = car(lst);
+        var rest = unquote_splice(cdr(lst));
+
+        if(elem.please_splice) {
+            return list_append(unquote_splice(elem.data),
+                               rest);
+        }
+        else {
+            return cons(elem, rest);
+        }
+    }
 }
 
 var util = require("util");
@@ -204,12 +289,14 @@ current_generator = generator;install_builtin_macros();parse(read(src),generator
 ;var expand = function(node,generator){
 return (function(name){
 return (function(func){
+return (function(args){
 return (function(src){
 return (function(res){
 (function() {if(res) { return res.link = node.link;}})()
 return res}
 )(nodify(src));}
-)(func.apply(null,map(sourcify,node.children.slice(1))));}
+)(func.apply(null,args));}
+)(vector_map(sourcify,node.children.slice(1)));}
 )(get_macro(name.data.str));}
 )(vector_ref(node.children,0));}
 ;var sourcify = function(node){
@@ -222,7 +309,7 @@ return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.BOOLEAN)) { return (function(){
 return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.LIST)) { return (function(){
-return map(sourcify,node.children);}
+return vector_to_list(vector_map(sourcify,node.children));}
 )();} else { return false}})()
 }})()
 }})()
@@ -238,8 +325,8 @@ return ast.node(ast.TERM,obj);}
 return ast.node(ast.STRING,obj);}
 )();} else { return (function() {if(boolean_p_(obj)) { return (function(){
 return ast.node(ast.BOOLEAN,obj);}
-)();} else { return (function() {if(pair_p_(obj)) { return (function(){
-return ast.node(ast.LIST,null,map(nodify,obj));}
+)();} else { return (function() {if(list_p_(obj)) { return (function(){
+return ast.node(ast.LIST,null,vector_map(nodify,list_to_vector(obj)));}
 )();} else { return (function() {if(null_p_(obj)) { return (function(){
 return ast.node(ast.LIST);}
 )();} else { return (function(){
@@ -254,7 +341,7 @@ return null}
 ;var define_to_lambda = function(node){
 return (function(target){
 return (function(args,body){
-return ast.node(ast.LIST,null,vector_concat(unquote_splice([ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,args)]),body));}
+return ast.node(ast.LIST,null,vector_concat(vector(ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,args)),body));}
 )(target.children.slice(1),node.children.slice(2));}
 )(vector_ref(node.children,1));}
 ;var define_to_setlambda = function(node){
@@ -263,7 +350,7 @@ name = object_ref(vector_ref(target.children,0),"data");;return expr = define_to
 )();} else { return (function(_expr){
 name = target.data;return expr = _expr;}
 )(vector_ref(node.children,2));}})()
-return ast.node(ast.LIST,null,unquote_splice([ast.node(ast.TERM,make_symbol("set")),ast.node(ast.TERM,name),expr]));}
+return ast.node(ast.LIST,null,vector(ast.node(ast.TERM,make_symbol("set")),ast.node(ast.TERM,name),expr));}
 ;var macros = object();;var install_macro = function(name,func){
 return vector_set_excl_(macros,name,func);}
 ;var get_macro = function(name){
@@ -296,7 +383,7 @@ return generator.write_boolean(node);}
 assert(not(null_p_(node.children)),"invalid form: empty list");var first = vector_ref(node.children,0);;assert((eq_p_(first.type,ast.TERM)||eq_p_(first.type,ast.LIST)),("operator is not a procedure: "+inspect(first)));var term = (first.data&&first.data.str);return (function() {if(equal_p_(term,"set!")) { return (function(){
 assert_type(vector_ref(node.children,1),ast.TERM);return generator.write_set_excl(node,parse);}
 )();} else { return (function() {if(equal_p_(term,"lambda")) { return (function(){
-var args = vector_ref(node.children,1);;(function() {if(eq_p_(args.type,ast.LIST)) { return for_each(function(n){
+var args = vector_ref(node.children,1);;(function() {if(eq_p_(args.type,ast.LIST)) { return vector_for_each(function(n){
 return assert_type(n,ast.TERM);}
 ,args.children);} else { return (function() {if(not(eq_p_(args.type,ast.TERM))) { throw("lambda must have a list of arguments or a binding term");}})()
 }})()
@@ -306,11 +393,23 @@ return generator.write_set(define_to_setlambda(node),parse);}
 )();} else { return (function() {if(equal_p_(term,"define-macro")) { return (function(){
 return parse_macro(node,generator);}
 )();} else { return (function() {if(equal_p_(term,"quote")) { return (function(){
-return generator.write_array(vector_ref(node.children,1),parse,"quote");}
+return (function(n){
+return (function(type){
+return (function() {if(eq_p_(type,ast.LIST)) { return (function(){
+return generator.write_list(vector_ref(node.children,1),parse,"quote");}
+)();} else { return (function() {if(eq_p_(type,ast.TERM)) { return (function(){
+return generator.write_symbol(n);}
+)();} else { return (function(){
+return parse(n);}
+)();}})()
+}})()
+}
+)(object_ref(n,"type"));}
+)(vector_ref(node.children,1));}
 )();} else { return (function() {if(equal_p_(term,"quasiquote")) { return (function(){
-return generator.write_array(vector_ref(node.children,1),parse,"quasi");}
+return generator.write_list(vector_ref(node.children,1),parse,"quasi");}
 )();} else { return (function() {if(equal_p_(term,"list")) { return (function(){
-return generator.write_array(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
+return generator.write_list(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
 )();} else { return (function() {if(generator.has_hook(term)) { return (function(){
 return generator.run_hook(term,node,parse);}
 )();} else { return (function(){
@@ -325,7 +424,7 @@ return generator.write_func_call(node,parse);}
 }})()
 }
 );install_parser(ast.ROOT,function(node,parse){
-return for_each(function(n){
+return vector_for_each(function(n){
 return parse(n);}
 ,node.children);}
 );module.exports = object();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.install_builtin_macros = install_builtin_macros;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;module.exports.sourcify = sourcify;

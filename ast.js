@@ -6,6 +6,7 @@ var STRING = 1;
 var NUMBER = 2;
 var LIST = 3;
 var BOOLEAN = 4;
+var VECTOR = 5;
 
 function node(type, data, children) {
     return {
@@ -32,6 +33,7 @@ function type_str(type) {
         case NUMBER: return 'number';
         case LIST: return 'list';
         case BOOLEAN: return 'boolean';
+        case VECTOR: return 'vector';
     }
     return 'unknown';
 }
@@ -78,6 +80,7 @@ module.exports = {
     STRING: STRING,
     LIST: LIST,
     BOOLEAN: BOOLEAN,
+    VECTOR: VECTOR,
 
     node: node,
     add_child: add_child,

@@ -142,14 +142,14 @@ function generator() {
 
             if(capture_name) {
                 write('var ' + capture_name +
-                      ' = Array.prototype.slice.call(arguments, ' +
-                      (args_expr.children.length - 2) + ');', true);
+                      ' = vector_to_list(Array.prototype.slice.call(arguments, ' +
+                      (args_expr.children.length - 2) + '));', true);
             }
         }
         else {
             write('function() {', true);
             write('var ' + args_expr.data.str +
-                  ' = Array.prototype.slice.call(arguments);', true);
+                  ' = vector_to_list(Array.prototype.slice.call(arguments));', true);
         }
 
         for(var i=2, len=node.children.length; i<len; i++) {
@@ -215,63 +215,73 @@ function generator() {
         }
     }
 
-    function write_array(node, parse, context) {
-        // Handle quasiquoting specially here. This is hacky and not
-        // the right place to do it, but it works for now.
-        if(context == 'quasi') {
-            // If it's a list with a term in the front, check if it's
-            // an unquote or unquote-splicing and handle it specially
-            if(node.type == ast.LIST &&
-               node.children[0] &&
-               node.children[0].type == ast.TERM) {
+    function write_vector(node, parse, context) {
+        write('{ vector: true, data : ');
+        write_list(node, parse, context);
+        write(' }');
+    }
 
-                var term = node.children[0];
+    function write_list(node, parse, context) {
+        write('unquote_splice(');
+        _write_list(node, 0, parse, context);
+        write(')');
+    }
 
-                if(term.data.str == 'unquote') {
-                    parse_expr(parse, node, node.children[1]);
-                    return;
-                }
-                else if(term.data.str == 'unquote-splicing') {
-                    write('{ please_splice: true, data: ');
-                    parse_expr(parse, node, node.children[1]);
-                    write(' }');
-                    return;
-                }
-            }
-        }
-
-        if(node.type == ast.TERM) {
-            if(context == 'quote' || context == 'quasi') {
-                write_symbol(node);
-            }
-            else {
-                write_term(node);
-            }
-        }
-        else if(node.type == ast.NUMBER) {
-            write_number(node);
-        }
-        else if(node.type == ast.BOOLEAN) {
-            write_boolean(node);
-        }
-        else if(node.type == ast.STRING) {
-            write_string(node);
-        }
-        else if(node.type == ast.LIST) {
-            write('unquote_splice([');
-            for(var i=0, len=node.children.length; i<len; i++) {
-                if(i > 0) {
-                    write(',');
-                }
-
-                if(context == 'quote' || context == 'quasi') {
-                    write_array(node.children[i], parse, context);
-                }
-                else {
-                    parse_expr(parse, node, node.children[i]);
-                }
-            }
+    function _write_list(node, i, parse, context) {
+        if(i < node.children.length) {
+            write('make_list([');
+            write_list_element(node, i, parse, context);
+            write(',');
+            _write_list(node, i+1, parse, context);
             write('])');
+        }
+        else {
+            write('[]');
+        }
+    }
+
+    function write_list_element(node, i, parse, context) {
+        var n = node.children[i];
+
+        if(context == 'quote' || context == 'quasi') {
+            if(context == 'quasi') {
+                if(n.children[0] && n.children[0].type == ast.TERM) {
+                    // If it's a list with a term in the front, check if
+                    // it's an unquote or unquote-splicing and handle
+                    // it specially
+                    var term = n.children[0];
+
+                    if(term.data.str == 'unquote') {
+                        parse_expr(parse, n, n.children[1]);
+                        return;
+                    }
+                    else if(term.data.str == 'unquote-splicing') {
+                        write('{ please_splice: true, data: ');
+                        parse_expr(parse, n, n.children[1]);
+                        write(' }');
+                        return;
+                    }
+                }
+            }
+
+            if(n.type == ast.TERM) {
+                write_symbol(n);
+            }
+            else if(n.type == ast.NUMBER) {
+                write_number(n);
+            }
+            else if(n.type == ast.BOOLEAN) {
+                write_boolean(n);
+            }
+            else if(n.type == ast.STRING) {
+                write_string(n);
+            }
+            else if(n.type == ast.LIST) {
+                write_list(n, parse, context);
+            }
+        }
+        else {
+            parse_expr(parse, node, n);
         }
     }
 
@@ -371,7 +381,8 @@ function generator() {
         write_set_excl: write_set_excl,
         write_lambda: write_lambda,
         write_func_call: write_func_call,
-        write_array: write_array,
+        write_list: write_list,
+        write_vector: write_vector,
         write_symbol: write_symbol,
 
         get_code: function() {

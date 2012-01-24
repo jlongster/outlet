@@ -7,17 +7,36 @@ function make_symbol(str) {
     };
 }
 
-function map(func, arr) {
-    var r = [];
-    for(var i = 0, len = arr.length; i < len; i++) {
-        r.push(func(arr[i]));
+function map(func, lst) {
+    if(null_p_(lst)) {
+        return [];
     }
-    return r;
+    else {
+        return cons(func(car(lst)),
+                    map(func, cdr(lst)));
+    }
 }
 
-function for_each(func, arr) {
-    for(var i = 0, len = arr.length; i < len; i++) {
-        func(arr[i]);
+function for_each(func, lst) {
+    if(!null_p_(lst)) {
+        func(car(lst));
+        for_each(func, cdr(lst));
+    }
+}
+
+function vector_map(func, vec) {
+    var res = [];
+
+    for(var i=0, len=vec.length; i<len; i++) {
+        res.push(func(vec[i]));
+    }
+
+    return res;
+}
+
+function vector_for_each(func, vec) {
+    for(var i=0, len=vec.length; i<len; i++) {
+        func(vec[i]);
     }
 }
 
@@ -47,12 +66,25 @@ function eq_p_(v1, v2) {
 }
 
 function equal_p_(v1, v2) {
-    if(pair_p_(v1) && pair_p_(v2)) {
-        var good = true;        
-        for(var i=0, len=v1.length; i<len; i++) {
-            good = good && equal_p_(v1[i], v2[i]);
+    if(list_p_(v1) && list_p_(v2)) {
+        function l(lst1, lst2) {
+            var n1 = null_p_(lst1);
+            var n2 = null_p_(lst2);
+
+            if(n1 && n2) {
+                return true;
+            }
+            else if(n1 || n2) {
+                return false
+            }
+            else if(equal_p_(car(lst1), car(lst2))) {
+                return l(cdr(lst1), cdr(lst2));
+            }
+
+            return false;
         }
-        return good;
+
+        return l(v1, v2);
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -65,14 +97,9 @@ function null_p_(arr) {
 }
 
 function cons(v1, v2) {
-    // this is NOT a correct representation for pairs, but will do for
-    // now
-    if(v2.length) {
-        return [v1].concat(v2);
-    }
-    else {
-        return [v1, v2];
-    }
+    var lst = [v1, v2];
+    lst.list = true;
+    return lst;
 }
 
 function car(arr) {
@@ -80,7 +107,39 @@ function car(arr) {
 }
 
 function cdr(arr) {
-    return arr.slice(1);
+    return arr[1];
+}
+
+function make_list(arr) {
+    arr.list = true;
+    return arr;
+}
+
+function vector_to_list(vec) {
+    function l(v, i) {
+        if(i < v.length) {
+            return cons(v[i], l(v, i+1));
+        }
+        else {
+            return [];
+        }
+    }
+
+    return l(vec, 0);
+}
+
+function list_to_vector(lst) {
+    var res = [];
+
+    function m(lst) {
+        if(!null_p_(lst)) {
+            res.push(car(lst));
+            m(cdr(lst));
+        }
+    };
+
+    m(lst);
+    return res;
 }
 
 function vector_ref(arr, i) {
@@ -95,8 +154,12 @@ function vector_concat(arr1, arr2) {
     return arr1.concat(arr2);
 }
 
-function vector(v) {
-    return [v];
+function vector() {
+    return Array.prototype.slice.call(arguments);
+}
+
+function vector_push(vec, val) {
+    vec.push(val);
 }
 
 function object() {
@@ -123,8 +186,8 @@ function boolean_p_(obj) {
     return obj === true || obj === false;
 }
 
-function pair_p_(obj) {
-    return obj && typeof obj != 'string' && obj.length;
+function list_p_(obj) {
+    return obj && obj.list;
 }
 
 function __gt_string(obj) {
@@ -145,7 +208,7 @@ function __gt_string(obj) {
             return '#f';
         }
     }
-    else if(pair_p_(obj)) {
+    else if(list_p_(obj)) {
         return '(' + 
             map(function(obj) { return __gt_string(obj); },
                 obj).join(' ') +
@@ -153,22 +216,44 @@ function __gt_string(obj) {
     }
 }
 
-function unquote_splice(arr) {
-    var res = [], i = 0, len = arr.length, elem;
-
-    while(i < len) {
-        elem = arr[i];
-        if(elem.please_splice) {
-            res = res.concat(unquote_splice(elem.data));
+function list_append(lst1, lst2) {
+    function loop(lst) {
+        if(null_p_(lst)) {
+            return lst2;
         }
         else {
-            res.push(elem);
+            return cons(car(lst), loop(cdr(lst)));
         }
+    };
 
-        i++;
+    if(null_p_(lst1)) {
+        return lst2;
+    }
+    else {
+        return loop(lst1);
+    }
+}
+
+function unquote_splice(lst) {
+    if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+        return lst;
     }
 
-    return res;
+    if(null_p_(lst)) {
+        return [];
+    }
+    else {
+        var elem = car(lst);
+        var rest = unquote_splice(cdr(lst));
+
+        if(elem.please_splice) {
+            return list_append(unquote_splice(elem.data),
+                               rest);
+        }
+        else {
+            return cons(elem, rest);
+        }
+    }
 }
 
 var parser = function(grammar){
@@ -177,33 +262,33 @@ return (function(f){
 return f(f);}
 )(function(f){
 return gen(function() {
-var args = Array.prototype.slice.call(arguments);
+var args = vector_to_list(Array.prototype.slice.call(arguments));
 return (function(ff){
-return ff.apply(null,args);}
+return ff.apply(null,list_to_vector(args));}
 )(f(f));}
 );}
 );}
 ;var optional = function(func){
 return function(text,state){
-return (func(text,state)||unquote_splice([text,state]))}
+return (func(text,state)||vector(text,state))}
 }
 ;var eof = function(text,state){
-return (function() {if(equal_p_(text,"")) { return unquote_splice([text,state])} else { return null}})()
+return (function() {if(equal_p_(text,"")) { return vector(text,state);} else { return null}})()
 }
 ;var terminator = function(text,state){
-return unquote_splice(["",state])}
+return vector("",state);}
 ;var char = function(alphabet){
 return function(text,state){
-return (function() {if(((text.length>0)&&(alphabet.indexOf(text.charAt(0))>-1))) { return unquote_splice([text.substr(1),state])} else { return null}})()
+return (function() {if(((text.length>0)&&(alphabet.indexOf(text.charAt(0))>-1))) { return vector(text.substr(1),state);} else { return null}})()
 }
 }
 ;var not_char = function(alphabet){
 return function(text,state){
-return (function() {if(((text.length>0)&&eq_p_(alphabet.indexOf(text.charAt(0)),-1))) { return unquote_splice([text.substr(1),state])} else { return null}})()
+return (function() {if(((text.length>0)&&eq_p_(alphabet.indexOf(text.charAt(0)),-1))) { return vector(text.substr(1),state);} else { return null}})()
 }
 }
 ;var any = function() {
-var args = Array.prototype.slice.call(arguments);
+var args = vector_to_list(Array.prototype.slice.call(arguments));
 return function(text,state){
 var run = function(lst){
 return (function() {if(null_p_(lst)) { return null} else { return (function(r){
@@ -214,22 +299,22 @@ return (function() {if(r) { return r} else { return run(cdr(lst));}})()
 ;return run(args);}
 }
 ;var all = function() {
-var args = Array.prototype.slice.call(arguments);
+var args = vector_to_list(Array.prototype.slice.call(arguments));
 return function(text,state){
 var run = function(lst,r){
 return (function() {if(null_p_(lst)) { return r} else { return (function(r){
 return (function() {if(not(r)) { return null} else { return run(cdr(lst),r);}})()
 }
-)((car(lst))(car(r),car(cdr(r))));}})()
+)((car(lst))(vector_ref(r,0),vector_ref(r,1)));}})()
 }
-;return run(args,unquote_splice([text,state]));}
+;return run(args,vector(text,state));}
 }
 ;var capture = function(func,hook){
 return function(text,state){
 return (function(r){
 return (function() {if(r) { return (function(t,s){
-return unquote_splice([t,hook(text.substr(0,(text.length-t.length)),s)])}
-)(car(r),car(cdr(r)));} else { return null}})()
+return vector(t,hook(text.substr(0,(text.length-t.length)),s));}
+)(vector_ref(r,0),vector_ref(r,1));} else { return null}})()
 }
 )(func(text,state));}
 }
@@ -240,14 +325,14 @@ return func(text,hook(state));}
 ;var after = function(func,hook){
 return function(text,state){
 return (function(r){
-return (function() {if(r) { return unquote_splice([car(r),hook(state,car(cdr(r)))])} else { return null}})()
+return (function() {if(r) { return vector(vector_ref(r,0),hook(state,vector_ref(r,1)));} else { return null}})()
 }
 )(func(text,state));}
 }
 ;return grammar(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after);}
 ;var parse = function(grammar,text,state){
 return (function(r){
-return (function() {if(r) { return car(cdr(r));} else { return null}})()
+return (function() {if(r) { return vector_ref(r,1);} else { return null}})()
 }
 )((parser(grammar))(text,state));}
 ;module.exports = parse;
