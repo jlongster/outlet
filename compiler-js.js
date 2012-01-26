@@ -226,6 +226,43 @@ function generator() {
         write('])');
     }
 
+    function write_map(node, parse, context) {
+        write('unquote_splice_map({');
+
+        for(var i=0, len=node.children.length; i<len; i+=2) {
+            if(i>0) {
+                write(',');
+            }
+
+            var key = node.children[i];
+            var val_index = i+1;
+
+            var key_form = key.children[0];
+            if(key.type == ast.LIST && key_form.data) {
+                if(key_form.data.str == 'unquote-splicing') {
+                    key = '__unquote_splicing';
+                    val_index = i;
+                }
+                else if(key.children[0].data.str != 'quote') {
+                    throw "Invalid key for dict: " + key;
+                }
+                else {
+                    key = key.children[1].data.str;
+                }
+            }
+            else {
+                throw "Invalid key for dict: " + key;
+            }
+            
+            
+
+            write('"' + key + '": ');
+            write_list_element(node, val_index, parse, context);
+        }
+        
+        write('})');
+    }
+
     function write_list(node, parse, context) {
         write('unquote_splice(');
         _write_list(node, 0, parse, context);
@@ -391,6 +428,7 @@ function generator() {
         write_func_call: write_func_call,
         write_list: write_list,
         write_vector: write_vector,
+        write_map: write_map,
         write_symbol: write_symbol,
 
         get_code: function() {

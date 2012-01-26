@@ -60,11 +60,20 @@
       (init (all (char "\"")
                  (capt_node (optional (repeated content)))
                  (char "\"")))))
-  
-  (define term
-    (capture (repeated (any (not-char (+ "()[]'" space-char))))
+
+  (define raw_term
+    (capture (repeated (any (not-char (+ "{}()[]'" space-char))))
              (lambda (buf s)
                (ast.node ast.TERM (make-symbol buf)))))
+ 
+  (define raw_keyword
+    (capture (all (char ":") raw_term)
+             (lambda (buf node)
+               (let ((q (ast.node ast.TERM (make-symbol "quote"))))
+                 (ast.node ast.LIST null (vector q node))))))
+
+  (define term
+    (any raw_keyword raw_term))
 
   (define (elements lst)
     (define (quoting rule)
@@ -92,7 +101,10 @@
 
   (define lst
     (Y (lambda (lst)
-         (all (any (before (char "(")
+         (all (any (before (char "{")
+                           (lambda (state)
+                             (ast.node ast.MAP)))
+                   (before (char "(")
                            (lambda (state)
                              (ast.node ast.LIST)))
                    (before (char "[")
@@ -105,7 +117,7 @@
                      (after (elements lst)
                             (lambda (parent child)
                               (ast.add_child parent child))))))
-              (any (char ")") (char "]"))))))
+              (any (char "}") (char ")") (char "]"))))))
 
   (repeated
    (any space
@@ -115,15 +127,5 @@
                  (ast.node ast.ROOT
                            null
                            (root.children.concat (vector child))))))))
-
-;; (define (grammar all any capture char not-char optional Y eof terminator before after)
-;;   (define (repeated rule)
-;;     (Y (lambda (seq)
-;;          (any (all rule seq) rule))))
-
-;;   (capture (repeated (any (not-char "()' \t\n\r")))
-;;              (lambda (buf s)
-;;                (ast.node ast.TERM (make-symbol buf)))))
-
 
 (set! module.exports grammar)

@@ -18,5 +18,8 @@ compiler.js: compiler.ol
 
 compiler: compiler.js parser.js grammar.js compiler-js.js runtime.js
 
-test: compiler
-	node test.js
+test-basic: compiler
+	node test.js basic.ol
+
+test: compiler test-basic
+	node test.js compile.ol

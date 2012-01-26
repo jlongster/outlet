@@ -243,6 +243,21 @@
             (if (equal? term "quote")
                 "quote"
                 "quasi")))
+
+          ((eq? type ast.MAP)
+           ;; (define (unquote-keys i)
+           ;;   (if (< i n.children.length)
+           ;;       (let ((key (vector-ref n.children i)))
+           ;;         (assert-type key ast.LIST)
+           ;;         (let ((keyname (vector-ref key.children 1)))
+           ;;           (assert-type keyname ast.TERM)
+           ;;           (vector-set! n.children i keyname)
+           ;;           (unquote-keys (+ i 2))))))
+           ;; (unquote-keys 0)
+           (generator.write-map n parse 
+                                (if (equal? term "quote")
+                                    "quote"
+                                    "quasi")))
           
           ((eq? type ast.TERM)
            (generator.write-symbol n))
@@ -265,6 +280,10 @@
 (install-parser ast.VECTOR
                 (lambda (node parse generator)
                   (generator.write-vector node parse)))
+
+(install-parser ast.MAP
+                (lambda (node parse generator)
+                  (generator.write-map node parse)))
 
 (install-parser ast.ROOT
                 (lambda (node parse)

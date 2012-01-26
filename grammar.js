@@ -203,6 +203,10 @@ function vector_p_(obj) {
     return obj && typeof obj == 'object' && obj.length !== undefined;
 }
 
+function map_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length === undefined;
+}
+
 function __gt_string(obj) {
     if(number_p_(obj)) {
         return '' + obj;
@@ -266,8 +270,14 @@ function unquote_splice(lst) {
         var rest = unquote_splice(cdr(lst));
 
         if(elem.please_splice) {
-            return list_append(unquote_splice(elem.data),
-                               rest);
+            if(!list_p_(elem.data) && !null_p_(elem.data)) {
+                console.log(elem.data.list);
+                throw ("Lists can only splice lists, unexpected object: " +
+                       __gt_string(elem.data));
+            }
+
+            // do we need to unquote_splice elem.data?
+            return list_append(elem.data, rest);
         }
         else {
             return cons(elem, rest);
@@ -281,6 +291,10 @@ function unquote_splice_vec(vec) {
         var obj = vec[i];
 
         if(obj && obj.please_splice) {
+            if(!vector_p_(obj.data)) {
+                throw ("Vectors can only splice vectors, unexpected object: " +
+                       obj.data);
+            }
             ret = ret.concat(obj.data);
         }
         else {
@@ -289,6 +303,31 @@ function unquote_splice_vec(vec) {
     }
 
     return ret;
+}
+
+function unquote_splice_map(obj) {
+    // this is expensive, but I don't really care. this will all be
+    // rewritten soon enough anyway.
+    var res = {};
+
+    for(var k in obj) {
+        var prop = obj[k];
+        if(prop && prop.please_splice) {
+            if(!map_p_(prop.data)) {
+                throw ("Maps can only splice maps, unexpected object: " +
+                       prop.data);
+            }
+
+            for(j in prop.data) {
+                res[j] = prop.data[j];
+            }
+        }
+        else if(k != '__unquote_splicing') {
+            res[k] = prop;
+        }
+    }
+
+    return res;
 }
 var ast = require("./ast");
 var grammar = function(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after){
@@ -330,9 +369,13 @@ return str.charAt(1);}
 return before(rule,function(state){
 return ""}
 );}
-);;var term = capture(repeated(any(not_char(("()[]'"+space_char)))),function(buf,s){
+);;var raw_term = capture(repeated(any(not_char(("{}()[]'"+space_char)))),function(buf,s){
 return ast.node(ast.TERM,make_symbol(buf));}
-);;var elements = function(lst){
+);;var raw_keyword = capture(all(char(":"),raw_term),function(buf,node){
+return (function(q){
+return ast.node(ast.LIST,null,vector(q,node));}
+)(ast.node(ast.TERM,make_symbol("quote")));}
+);;var term = any(raw_keyword,raw_term);;var elements = function(lst){
 var quoting = function(rule){
 var capt = function(buf,node){
 return (function(special){
@@ -359,13 +402,15 @@ return capture(all(any(char("'"),char("`"),all(char(","),char("@")),char(",")),a
 return any(quoting(rule),rule);}
 )(any(lst,number,string,boolean,term));}
 ;var lst = Y(function(lst){
-return all(any(before(char("("),function(state){
+return all(any(before(char("{"),function(state){
+return ast.node(ast.MAP);}
+),before(char("("),function(state){
 return ast.node(ast.LIST);}
 ),before(char("["),function(state){
 return ast.node(ast.VECTOR);}
 )),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){
 return ast.add_child(parent,child);}
-)))),any(char(")"),char("]")));}
+)))),any(char("}"),char(")"),char("]")));}
 );;return repeated(any(space,comment,after(elements(lst),function(root,child){
 return ast.node(ast.ROOT,null,root.children.concat(vector(child)));}
 )));}

@@ -203,6 +203,10 @@ function vector_p_(obj) {
     return obj && typeof obj == 'object' && obj.length !== undefined;
 }
 
+function map_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length === undefined;
+}
+
 function __gt_string(obj) {
     if(number_p_(obj)) {
         return '' + obj;
@@ -266,8 +270,14 @@ function unquote_splice(lst) {
         var rest = unquote_splice(cdr(lst));
 
         if(elem.please_splice) {
-            return list_append(unquote_splice(elem.data),
-                               rest);
+            if(!list_p_(elem.data) && !null_p_(elem.data)) {
+                console.log(elem.data.list);
+                throw ("Lists can only splice lists, unexpected object: " +
+                       __gt_string(elem.data));
+            }
+
+            // do we need to unquote_splice elem.data?
+            return list_append(elem.data, rest);
         }
         else {
             return cons(elem, rest);
@@ -281,6 +291,10 @@ function unquote_splice_vec(vec) {
         var obj = vec[i];
 
         if(obj && obj.please_splice) {
+            if(!vector_p_(obj.data)) {
+                throw ("Vectors can only splice vectors, unexpected object: " +
+                       obj.data);
+            }
             ret = ret.concat(obj.data);
         }
         else {
@@ -289,4 +303,29 @@ function unquote_splice_vec(vec) {
     }
 
     return ret;
+}
+
+function unquote_splice_map(obj) {
+    // this is expensive, but I don't really care. this will all be
+    // rewritten soon enough anyway.
+    var res = {};
+
+    for(var k in obj) {
+        var prop = obj[k];
+        if(prop && prop.please_splice) {
+            if(!map_p_(prop.data)) {
+                throw ("Maps can only splice maps, unexpected object: " +
+                       prop.data);
+            }
+
+            for(j in prop.data) {
+                res[j] = prop.data[j];
+            }
+        }
+        else if(k != '__unquote_splicing') {
+            res[k] = prop;
+        }
+    }
+
+    return res;
 }
