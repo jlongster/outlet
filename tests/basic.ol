@@ -59,6 +59,11 @@ buz")
 (test-eval [1 2 3 foo] (vector 1 2 3 4))
 (test-eval (vector 1 2 3 foo) (vector 1 2 3 4))
 
+;; maps
+(define bar {:one 1 :two 2})
+(test-read "{:biz 5 :bazzle 6 :mumble foo}" {:biz 5 :bazzle 6 :mumble 'foo})
+(test-eval {:five 5 :six 6} (hash-map :five 5 :six 6))
+
 ;; quoting/splicing for lists and vectors
 (define foo 4)
 (define foo-lst '(4 5))

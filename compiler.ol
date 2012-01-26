@@ -72,7 +72,9 @@
    ((eq? node.type ast.STRING) node.data)
    ((eq? node.type ast.BOOLEAN) node.data)
    ((eq? node.type ast.LIST) (vector-to-list (vector-map sourcify node.children)))
-   ((eq? node.type ast.VECTOR) (vector-map sourcify node.children))))
+   ((eq? node.type ast.VECTOR) (vector-map sourcify node.children))
+   ((eq? node.type ast.MAP) (hash-map-map sourcify
+                                          (hash-map.apply null node.children)))))
 
 (define (nodify obj)
   (cond
@@ -83,6 +85,7 @@
    ((list? obj) (ast.node ast.LIST null (vector-map nodify (list-to-vector obj))))
    ((null? obj) (ast.node ast.LIST))
    ((vector? obj) (ast.node ast.VECTOR null (vector-map nodify obj)))
+   ((map? obj) (ast.node ast.MAP null (hash-map-to-vec (hash-map-map nodify obj))))
    (else null)))
 
 ;; helpers
@@ -129,7 +132,7 @@
 
 ;; macros
 
-(define macros (object))
+(define macros (hash-map))
 
 (define (install-macro name func)
   ;; yeah, we're relying on js hash semantics, and these function
@@ -290,7 +293,7 @@
                   (vector-for-each (lambda (n) (parse n))
                                    node.children)))
 
-(set! module.exports (object))
+(set! module.exports (hash-map))
 (set! module.exports.read read)
 (set! module.exports.parse parse)
 (set! module.exports.compile compile)

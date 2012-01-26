@@ -87,13 +87,20 @@ function equal_p_(v1, v2) {
         return l(v1, v2);
     }
     else if(vector_p_(v1) && vector_p_(v2)) {
-        var good = true;
         for(var i=0, len=v1.length; i<len; i++) {
             if(!equal_p_(v1[i], v2[i])) {
-                good = false;
+                return false;
             }
         }
-        return good;
+        return true;
+    }
+    else if(map_p_(v1) && map_p_(v2)) {
+        for(var k in v1) {
+            if(!equal_p_(v1[k], v2[k])) {
+                return false;
+            }
+        }
+        return true;
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -171,8 +178,45 @@ function vector_push(vec, val) {
     vec.push(val);
 }
 
-function object() {
-    return {};
+function hash_map() {
+    var keyvals = Array.prototype.slice.call(arguments);
+    var res = {};
+
+    for(var i=0, len=keyvals.length; i<len; i+=2) {
+        var key = keyvals[i];
+
+        // Ignore this, it's only to support the compiler for now...
+        if(key.children &&
+           key.children[0].data &&
+           key.children[0].data.str &&
+           key.children[0].data.str == 'quote') {
+            key = key.children[1].data.str;
+        }
+        else if(key.str) {
+            key = key.str;
+        }
+
+        res[key] = keyvals[i+1];
+    }
+
+    return res;
+}
+
+function hash_map_map(func, m) {
+    var res = {};
+    for(var k in m) {
+        res[k] = func(m[k]);
+    }
+    return res;
+}
+
+function hash_map_to_vec(obj) {
+    var res = [];
+    for(var k in obj) {
+        res.push(k);
+        res.push(obj);
+    }
+    return res;
 }
 
 function object_ref(obj, key) {
@@ -237,6 +281,13 @@ function __gt_string(obj) {
                        obj).join(' ') +
             ']';
     }
+    else if(map_p_(obj)) {
+        var res = [];
+        for(var k in obj) {
+            res.push(k + ': ' + util.inspect(obj[k], null, 10));
+        }
+        return '{' + res.join(', ') + '}';
+    }
 }
 
 function list_append(lst1, lst2) {
@@ -271,7 +322,6 @@ function unquote_splice(lst) {
 
         if(elem.please_splice) {
             if(!list_p_(elem.data) && !null_p_(elem.data)) {
-                console.log(elem.data.list);
                 throw ("Lists can only splice lists, unexpected object: " +
                        __gt_string(elem.data));
             }

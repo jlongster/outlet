@@ -87,13 +87,20 @@ function equal_p_(v1, v2) {
         return l(v1, v2);
     }
     else if(vector_p_(v1) && vector_p_(v2)) {
-        var good = true;
         for(var i=0, len=v1.length; i<len; i++) {
             if(!equal_p_(v1[i], v2[i])) {
-                good = false;
+                return false;
             }
         }
-        return good;
+        return true;
+    }
+    else if(map_p_(v1) && map_p_(v2)) {
+        for(var k in v1) {
+            if(!equal_p_(v1[k], v2[k])) {
+                return false;
+            }
+        }
+        return true;
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -171,8 +178,45 @@ function vector_push(vec, val) {
     vec.push(val);
 }
 
-function object() {
-    return {};
+function hash_map() {
+    var keyvals = Array.prototype.slice.call(arguments);
+    var res = {};
+
+    for(var i=0, len=keyvals.length; i<len; i+=2) {
+        var key = keyvals[i];
+
+        // Ignore this, it's only to support the compiler for now...
+        if(key.children &&
+           key.children[0].data &&
+           key.children[0].data.str &&
+           key.children[0].data.str == 'quote') {
+            key = key.children[1].data.str;
+        }
+        else if(key.str) {
+            key = key.str;
+        }
+
+        res[key] = keyvals[i+1];
+    }
+
+    return res;
+}
+
+function hash_map_map(func, m) {
+    var res = {};
+    for(var k in m) {
+        res[k] = func(m[k]);
+    }
+    return res;
+}
+
+function hash_map_to_vec(obj) {
+    var res = [];
+    for(var k in obj) {
+        res.push(k);
+        res.push(obj);
+    }
+    return res;
 }
 
 function object_ref(obj, key) {
@@ -237,6 +281,13 @@ function __gt_string(obj) {
                        obj).join(' ') +
             ']';
     }
+    else if(map_p_(obj)) {
+        var res = [];
+        for(var k in obj) {
+            res.push(k + ': ' + util.inspect(obj[k], null, 10));
+        }
+        return '{' + res.join(', ') + '}';
+    }
 }
 
 function list_append(lst1, lst2) {
@@ -271,7 +322,6 @@ function unquote_splice(lst) {
 
         if(elem.please_splice) {
             if(!list_p_(elem.data) && !null_p_(elem.data)) {
-                console.log(elem.data.list);
                 throw ("Lists can only splice lists, unexpected object: " +
                        __gt_string(elem.data));
             }
@@ -385,7 +435,10 @@ return node.data}
 return vector_to_list(vector_map(sourcify,node.children));}
 )();} else { return (function() {if(eq_p_(node.type,ast.VECTOR)) { return (function(){
 return vector_map(sourcify,node.children);}
+)();} else { return (function() {if(eq_p_(node.type,ast.MAP)) { return (function(){
+return hash_map_map(sourcify,hash_map.apply(null,node.children));}
 )();} else { return false}})()
+}})()
 }})()
 }})()
 }})()
@@ -407,9 +460,12 @@ return ast.node(ast.LIST,null,vector_map(nodify,list_to_vector(obj)));}
 return ast.node(ast.LIST);}
 )();} else { return (function() {if(vector_p_(obj)) { return (function(){
 return ast.node(ast.VECTOR,null,vector_map(nodify,obj));}
+)();} else { return (function() {if(map_p_(obj)) { return (function(){
+return ast.node(ast.MAP,null,hash_map_to_vec(hash_map_map(nodify,obj)));}
 )();} else { return (function(){
 return null}
 )();}})()
+}})()
 }})()
 }})()
 }})()
@@ -430,7 +486,7 @@ name = object_ref(vector_ref(target.children,0),"data");;return expr = define_to
 name = target.data;return expr = _expr;}
 )(vector_ref(node.children,2));}})()
 return ast.node(ast.LIST,null,vector(ast.node(ast.TERM,make_symbol("set")),ast.node(ast.TERM,name),expr));}
-;var macros = object();;var install_macro = function(name,func){
+;var macros = hash_map();;var install_macro = function(name,func){
 return vector_set_excl_(macros,name,func);}
 ;var get_macro = function(name){
 return vector_ref(macros,name);}
@@ -516,4 +572,4 @@ return generator.write_map(node,parse);}
 return vector_for_each(function(n){
 return parse(n);}
 ,node.children);}
-);module.exports = object();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.install_builtin_macros = install_builtin_macros;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;module.exports.sourcify = sourcify;
+);module.exports = hash_map();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.install_builtin_macros = install_builtin_macros;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;module.exports.sourcify = sourcify;
