@@ -21,10 +21,8 @@ Example
           n
           (+ n (fib (- n 1)))))
 
-    (define (Y func)
-      ((lambda (f) (f f))
-       (lambda (f)
-         (func f))))
+    (define obj {:foo 1 :bar 2})       ; maps
+    (define vec [1 2 3 4])             ; vectors
 
     (define (baz one two . three)      ; rest parameters
       (pp three))
