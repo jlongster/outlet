@@ -85,7 +85,7 @@
    ((list? obj) (ast.node ast.LIST null (vector-map nodify (list-to-vector obj))))
    ((null? obj) (ast.node ast.LIST))
    ((vector? obj) (ast.node ast.VECTOR null (vector-map nodify obj)))
-   ((map? obj) (ast.node ast.MAP null (hash-map-to-vec (hash-map-map nodify obj))))
+   ((map? obj) (ast.node ast.MAP null (vector-map nodify (hash-map-to-vec obj))))
    (else null)))
 
 ;; helpers

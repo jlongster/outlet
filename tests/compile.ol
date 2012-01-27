@@ -20,6 +20,15 @@
 (define-macro (test-eval src val . args)
   `(%test eval-outlet ',src ,val ,@args))
 
+;; data structures
+;;
+;; the main purpose of this section is to make sure literals are
+;; passed through macros correctly
+
+(test-eval '(1 2 3) (list 1 2 3))
+(test-eval [1 2 3] (vector 1 2 3))
+(test-eval {:foo 1 :bar 2} (hash-map :foo 1 :bar 2))
+
 ;; functions
 (define (foo x y z) (+ x y z))
 (test-eval (foo 1 2 3) 6)
@@ -71,3 +80,5 @@
             ((eq? x 2) 'two)
             (else 'none))
            'none)
+
+

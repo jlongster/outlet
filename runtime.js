@@ -187,6 +187,7 @@ function hash_map() {
 
         // Ignore this, it's only to support the compiler for now...
         if(key.children &&
+           key.children.length > 0 &&
            key.children[0].data &&
            key.children[0].data.str &&
            key.children[0].data.str == 'quote') {
@@ -213,8 +214,8 @@ function hash_map_map(func, m) {
 function hash_map_to_vec(obj) {
     var res = [];
     for(var k in obj) {
-        res.push(k);
-        res.push(obj);
+        res.push(vector_to_list([make_symbol('quote'), make_symbol(k)]));
+        res.push(obj[k]);
     }
     return res;
 }
