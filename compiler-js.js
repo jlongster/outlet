@@ -64,6 +64,16 @@ function generator() {
         }
     }
 
+    function transform_symbol(str) {
+        str = str.replace(/-/g, '_dash_');
+        str = str.replace(/\?/g, '_p_');
+        str = str.replace(/\!/g, '_excl_');
+        str = str.replace(/>/g, '_gt_');
+        str = str.replace(/</g, '_lt_');
+        str = str.replace(/%/g, '_per_');
+        return str;
+    }
+
     function write_number(node) {
         // NUMBER
         write(node.data);
@@ -82,19 +92,12 @@ function generator() {
 
     function write_term(node) {
         // TERM (variable, keyword, etc)
-        var term = node.data.str;
-        term = term.replace(/-/g, '_');
-        term = term.replace(/\?/g, '_p_');
-        term = term.replace(/\!/g, '_excl_');
-        term = term.replace(/>/g, '_gt_');
-        term = term.replace(/</g, '_lt_');
-        term = term.replace(/%/g, '_per_');
-        write(term);
+        write(transform_symbol(node.data.str));
     }
 
     function write_symbol(node) {
         // SYMBOL
-        write('make_symbol("' + node.data.str + '")');
+        write('string_dash__gt_symbol("' + transform_symbol(node.data.str) + '")');
     }
 
     function write_set(node, parse) {
@@ -125,8 +128,7 @@ function generator() {
 
                 // support for dot-style rest arguments
                 if(arg.data.str == '.') {
-                    var name = args_expr.children[i+1];
-                    capture_name = name.data.str;
+                    capture_name = args_expr.children[i+1];
                     break;
                 }
                 else {
@@ -141,15 +143,16 @@ function generator() {
             write('){', true);
 
             if(capture_name) {
-                write('var ' + capture_name +
-                      ' = vector_to_list(Array.prototype.slice.call(arguments, ' +
+                write('var ');
+                write_term(capture_name);
+                write(' = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, ' +
                       (args_expr.children.length - 2) + '));', true);
             }
         }
         else {
             write('function() {', true);
             write('var ' + args_expr.data.str +
-                  ' = vector_to_list(Array.prototype.slice.call(arguments));', true);
+                  ' = vector_dash_to_dash_list(Array.prototype.slice.call(arguments));', true);
         }
 
         for(var i=2, len=node.children.length; i<len; i++) {
@@ -256,7 +259,7 @@ function generator() {
             
             
 
-            write('"' + key + '": ');
+            write('"' + transform_symbol(key) + '": ');
             write_list_element(node, val_index, parse, context);
         }
         
@@ -271,14 +274,14 @@ function generator() {
 
     function _write_list(node, i, parse, context) {
         if(i < node.children.length) {
-            write('make_list([');
+            write('make_dash_list([');
             write_list_element(node, i, parse, context);
             write(',');
             _write_list(node, i+1, parse, context);
             write('])');
         }
         else {
-            write('[]');
+            write('_emptylst');
         }
     }
 
@@ -385,7 +388,14 @@ function generator() {
                 write('}');
             }
 
-            write('})()', true);
+            write('})()');
+
+            if(!node.link ||
+               (node.link && node.link.tag != 'expr')) {
+                write(';');
+            }
+
+            write('\n');
         },
 
         'and': function(node, parse) {

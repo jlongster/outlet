@@ -6,7 +6,12 @@ util.inspect = function(obj) {
     return obj && obj.toSource();
 }
 
-fs.readFileSync = function(src) { return ''; };
+fs.readFileSync = function(src) {
+    if(src == 'macros.ol') {
+        // Somehow we need to get the source for the macros file
+    }
+    return '10';
+};
 
 function outlet_display(str) {
     var output = document.getElementById('output');

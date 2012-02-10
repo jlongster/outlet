@@ -25,7 +25,7 @@
 (define parsers '())
 
 (define (install-builtin-macros)
-  (let ((src (fs.readFileSync "macros.ol" "utf-8")))
+  (let ((src (fs.readFileSync (+ __dirname "/macros.ol") "utf-8")))
     (parse (read src) (create-generator))))
 
 (define (read src)

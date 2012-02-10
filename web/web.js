@@ -350,17 +350,36 @@ function make_symbol(str) {
     };
 }
 
-function map(func, arr) {
-    var r = [];
-    for(var i = 0, len = arr.length; i < len; i++) {
-        r.push(func(arr[i]));
+function map(func, lst) {
+    if(null_p_(lst)) {
+        return [];
     }
-    return r;
+    else {
+        return cons(func(car(lst)),
+                    map(func, cdr(lst)));
+    }
 }
 
-function for_each(func, arr) {
-    for(var i = 0, len = arr.length; i < len; i++) {
-        func(arr[i]);
+function for_each(func, lst) {
+    if(!null_p_(lst)) {
+        func(car(lst));
+        for_each(func, cdr(lst));
+    }
+}
+
+function vector_map(func, vec) {
+    var res = [];
+
+    for(var i=0, len=vec.length; i<len; i++) {
+        res.push(func(vec[i]));
+    }
+
+    return res;
+}
+
+function vector_for_each(func, vec) {
+    for(var i=0, len=vec.length; i<len; i++) {
+        func(vec[i]);
     }
 }
 
@@ -390,12 +409,41 @@ function eq_p_(v1, v2) {
 }
 
 function equal_p_(v1, v2) {
-    if(pair_p_(v1) && pair_p_(v2)) {
-        var good = true;        
-        for(var i=0, len=v1.length; i<len; i++) {
-            good = good && equal_p_(v1[i], v2[i]);
+    if(list_p_(v1) && list_p_(v2)) {
+        function l(lst1, lst2) {
+            var n1 = null_p_(lst1);
+            var n2 = null_p_(lst2);
+
+            if(n1 && n2) {
+                return true;
+            }
+            else if(n1 || n2) {
+                return false
+            }
+            else if(equal_p_(car(lst1), car(lst2))) {
+                return l(cdr(lst1), cdr(lst2));
+            }
+
+            return false;
         }
-        return good;
+
+        return l(v1, v2);
+    }
+    else if(vector_p_(v1) && vector_p_(v2)) {
+        for(var i=0, len=v1.length; i<len; i++) {
+            if(!equal_p_(v1[i], v2[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    else if(map_p_(v1) && map_p_(v2)) {
+        for(var k in v1) {
+            if(!equal_p_(v1[k], v2[k])) {
+                return false;
+            }
+        }
+        return true;
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -408,14 +456,9 @@ function null_p_(arr) {
 }
 
 function cons(v1, v2) {
-    // this is NOT a correct representation for pairs, but will do for
-    // now
-    if(v2.length) {
-        return [v1].concat(v2);
-    }
-    else {
-        return [v1, v2];
-    }
+    var lst = [v1, v2];
+    lst.list = true;
+    return lst;
 }
 
 function car(arr) {
@@ -423,7 +466,39 @@ function car(arr) {
 }
 
 function cdr(arr) {
-    return arr.slice(1);
+    return arr[1];
+}
+
+function make_list(arr) {
+    arr.list = true;
+    return arr;
+}
+
+function vector_to_list(vec) {
+    function l(v, i) {
+        if(i < v.length) {
+            return cons(v[i], l(v, i+1));
+        }
+        else {
+            return [];
+        }
+    }
+
+    return l(vec, 0);
+}
+
+function list_to_vector(lst) {
+    var res = [];
+
+    function m(lst) {
+        if(!null_p_(lst)) {
+            res.push(car(lst));
+            m(cdr(lst));
+        }
+    };
+
+    m(lst);
+    return res;
 }
 
 function vector_ref(arr, i) {
@@ -438,12 +513,54 @@ function vector_concat(arr1, arr2) {
     return arr1.concat(arr2);
 }
 
-function vector(v) {
-    return [v];
+function vector() {
+    return Array.prototype.slice.call(arguments);
 }
 
-function object() {
-    return {};
+function vector_push(vec, val) {
+    vec.push(val);
+}
+
+function hash_map() {
+    var keyvals = Array.prototype.slice.call(arguments);
+    var res = {};
+
+    for(var i=0, len=keyvals.length; i<len; i+=2) {
+        var key = keyvals[i];
+
+        // Ignore this, it's only to support the compiler for now...
+        if(key.children &&
+           key.children.length > 0 &&
+           key.children[0].data &&
+           key.children[0].data.str &&
+           key.children[0].data.str == 'quote') {
+            key = key.children[1].data.str;
+        }
+        else if(key.str) {
+            key = key.str;
+        }
+
+        res[key] = keyvals[i+1];
+    }
+
+    return res;
+}
+
+function hash_map_map(func, m) {
+    var res = {};
+    for(var k in m) {
+        res[k] = func(m[k]);
+    }
+    return res;
+}
+
+function hash_map_to_vec(obj) {
+    var res = [];
+    for(var k in obj) {
+        res.push(vector_to_list([make_symbol('quote'), make_symbol(k)]));
+        res.push(obj[k]);
+    }
+    return res;
 }
 
 function object_ref(obj, key) {
@@ -466,8 +583,16 @@ function boolean_p_(obj) {
     return obj === true || obj === false;
 }
 
-function pair_p_(obj) {
-    return obj && typeof obj != 'string' && obj.length;
+function list_p_(obj) {
+    return obj && obj.list;
+}
+
+function vector_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length !== undefined;
+}
+
+function map_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length === undefined;
 }
 
 function __gt_string(obj) {
@@ -488,34 +613,119 @@ function __gt_string(obj) {
             return '#f';
         }
     }
-    else if(pair_p_(obj)) {
+    else if(list_p_(obj)) {
         return '(' + 
             map(function(obj) { return __gt_string(obj); },
                 obj).join(' ') +
             ')';
     }
+    else if(vector_p_(obj)) {
+        return '[' +
+            vector_map(function(obj) { return __gt_string(obj); },
+                       obj).join(' ') +
+            ']';
+    }
+    else if(map_p_(obj)) {
+        var res = [];
+        for(var k in obj) {
+            res.push(k + ': ' + util.inspect(obj[k], null, 10));
+        }
+        return '{' + res.join(', ') + '}';
+    }
 }
 
-function unquote_splice(arr) {
-    var res = [], i = 0, len = arr.length, elem;
-
-    while(i < len) {
-        elem = arr[i];
-        if(elem.please_splice) {
-            res = res.concat(unquote_splice(elem.data));
+function list_append(lst1, lst2) {
+    function loop(lst) {
+        if(null_p_(lst)) {
+            return lst2;
         }
         else {
-            res.push(elem);
+            return cons(car(lst), loop(cdr(lst)));
         }
+    };
 
-        i++;
+    if(null_p_(lst1)) {
+        return lst2;
+    }
+    else {
+        return loop(lst1);
+    }
+}
+
+function unquote_splice(lst) {
+    // if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+    //     return lst;
+    // }
+
+    if(null_p_(lst)) {
+        return [];
+    }
+    else {
+        var elem = car(lst);
+        var rest = unquote_splice(cdr(lst));
+
+        if(elem.please_splice) {
+            if(!list_p_(elem.data) && !null_p_(elem.data)) {
+                throw ("Lists can only splice lists, unexpected object: " +
+                       __gt_string(elem.data));
+            }
+
+            // do we need to unquote_splice elem.data?
+            return list_append(elem.data, rest);
+        }
+        else {
+            return cons(elem, rest);
+        }
+    }
+}
+
+function unquote_splice_vec(vec) {
+    var ret = [];
+    for(var i=0, len=vec.length; i<len; i++) {
+        var obj = vec[i];
+
+        if(obj && obj.please_splice) {
+            if(!vector_p_(obj.data)) {
+                throw ("Vectors can only splice vectors, unexpected object: " +
+                       obj.data);
+            }
+            ret = ret.concat(obj.data);
+        }
+        else {
+            ret.push(obj);
+        }
+    }
+
+    return ret;
+}
+
+function unquote_splice_map(obj) {
+    // this is expensive, but I don't really care. this will all be
+    // rewritten soon enough anyway.
+    var res = {};
+
+    for(var k in obj) {
+        var prop = obj[k];
+        if(prop && prop.please_splice) {
+            if(!map_p_(prop.data)) {
+                throw ("Maps can only splice maps, unexpected object: " +
+                       prop.data);
+            }
+
+            for(j in prop.data) {
+                res[j] = prop.data[j];
+            }
+        }
+        else if(k != '__unquote_splicing') {
+            res[k] = prop;
+        }
     }
 
     return res;
 }
-
-var reader = require("./parser");
 var util = require("util");
+var fs = require("fs");
+var reader = require("./parser");
 var ast = require("./ast");
 var grammar = require("./grammar");
 var js = require("./compiler-js");
@@ -524,14 +734,17 @@ return (function() {if(not(v)) { throw(msg);}})()
 }
 ;var assert_type = function(node,type,msg){
 return assert((node.type===type),("invalid type, expected "+type+": "+inspect(node)));}
-;var parsers = unquote_splice([]);var read = function(src){
+;var parsers = unquote_splice([]);var install_builtin_macros = function(){
+return (function(src){
+return parse(read(src),create_generator());}
+)(fs.readFileSync("macros.ol","utf-8"));}
+;var read = function(src){
 return reader(grammar,src,ast.node(ast.ROOT));}
 ;var set_generator = function(gen){
 return current_generator = gen;}
 ;var create_generator = function(){
 return current_generator.create_generator();}
 ;var parse = function(node,generator){
-(function() {if(not(current_generator)) { return current_generator = generator;}})()
 return (function() {if(macro_p_(node)) { return parse(expand(node,generator),generator);} else { return (function(parser){
 assert(parser,("No parser for node type:"+node.type));return parser(node,function(node){
 return parse(node,generator);}
@@ -539,16 +752,18 @@ return parse(node,generator);}
 )(vector_ref(parsers,node.type));}})()
 }
 ;var compile = function(src,generator){
-parse(read(src),generator);return generator.get_code();}
+current_generator = generator;install_builtin_macros();parse(read(src),generator);return generator.get_code();}
 ;var expand = function(node,generator){
 return (function(name){
 return (function(func){
+return (function(args){
 return (function(src){
 return (function(res){
 (function() {if(res) { return res.link = node.link;}})()
 return res}
 )(nodify(src));}
-)(func.apply(null,map(sourcify,node.children.slice(1))));}
+)(func.apply(null,args));}
+)(vector_map(sourcify,node.children.slice(1)));}
 )(get_macro(name.data.str));}
 )(vector_ref(node.children,0));}
 ;var sourcify = function(node){
@@ -561,8 +776,14 @@ return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.BOOLEAN)) { return (function(){
 return node.data}
 )();} else { return (function() {if(eq_p_(node.type,ast.LIST)) { return (function(){
-return map(sourcify,node.children);}
-)();}})()
+return vector_to_list(vector_map(sourcify,node.children));}
+)();} else { return (function() {if(eq_p_(node.type,ast.VECTOR)) { return (function(){
+return vector_map(sourcify,node.children);}
+)();} else { return (function() {if(eq_p_(node.type,ast.MAP)) { return (function(){
+return hash_map_map(sourcify,hash_map.apply(null,node.children));}
+)();} else { return false}})()
+}})()
+}})()
 }})()
 }})()
 }})()
@@ -577,13 +798,19 @@ return ast.node(ast.TERM,obj);}
 return ast.node(ast.STRING,obj);}
 )();} else { return (function() {if(boolean_p_(obj)) { return (function(){
 return ast.node(ast.BOOLEAN,obj);}
-)();} else { return (function() {if(pair_p_(obj)) { return (function(){
-return ast.node(ast.LIST,null,map(nodify,obj));}
+)();} else { return (function() {if(list_p_(obj)) { return (function(){
+return ast.node(ast.LIST,null,vector_map(nodify,list_to_vector(obj)));}
 )();} else { return (function() {if(null_p_(obj)) { return (function(){
 return ast.node(ast.LIST);}
+)();} else { return (function() {if(vector_p_(obj)) { return (function(){
+return ast.node(ast.VECTOR,null,vector_map(nodify,obj));}
+)();} else { return (function() {if(map_p_(obj)) { return (function(){
+return ast.node(ast.MAP,null,vector_map(nodify,hash_map_to_vec(obj)));}
 )();} else { return (function(){
 return null}
 )();}})()
+}})()
+}})()
 }})()
 }})()
 }})()
@@ -593,7 +820,7 @@ return null}
 ;var define_to_lambda = function(node){
 return (function(target){
 return (function(args,body){
-return ast.node(ast.LIST,null,vector_concat(unquote_splice([ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,args)]),body));}
+return ast.node(ast.LIST,null,vector_concat(vector(ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,args)),body));}
 )(target.children.slice(1),node.children.slice(2));}
 )(vector_ref(node.children,1));}
 ;var define_to_setlambda = function(node){
@@ -602,8 +829,8 @@ name = object_ref(vector_ref(target.children,0),"data");;return expr = define_to
 )();} else { return (function(_expr){
 name = target.data;return expr = _expr;}
 )(vector_ref(node.children,2));}})()
-return ast.node(ast.LIST,null,unquote_splice([ast.node(ast.TERM,make_symbol("set")),ast.node(ast.TERM,name),expr]));}
-;var macros = object();;var install_macro = function(name,func){
+return ast.node(ast.LIST,null,vector(ast.node(ast.TERM,make_symbol("set")),ast.node(ast.TERM,name),expr));}
+;var macros = hash_map();;var install_macro = function(name,func){
 return vector_set_excl_(macros,name,func);}
 ;var get_macro = function(name){
 return vector_ref(macros,name);}
@@ -634,27 +861,8 @@ return generator.write_boolean(node);}
 );install_parser(ast.LIST,function(node,parse,generator){
 assert(not(null_p_(node.children)),"invalid form: empty list");var first = vector_ref(node.children,0);;assert((eq_p_(first.type,ast.TERM)||eq_p_(first.type,ast.LIST)),("operator is not a procedure: "+inspect(first)));var term = (first.data&&first.data.str);return (function() {if(equal_p_(term,"set!")) { return (function(){
 assert_type(vector_ref(node.children,1),ast.TERM);return generator.write_set_excl(node,parse);}
-)();} else { return (function() {if(equal_p_(term,"let")) { return (function(){
-return (function(vars,body){
-assert_type(vars,ast.LIST);var vars_to_nodes = function(vars,names,exprs){
-return (function() {if(null_p_(vars)) { return unquote_splice([names,exprs])} else { return (function(_var){
-assert_type(_var,ast.LIST);return (function(name,expr){
-assert_type(name,ast.TERM);return vars_to_nodes(cdr(vars),names.concat(unquote_splice([name])),exprs.concat(unquote_splice([expr])));}
-)(vector_ref(_var.children,0),vector_ref(_var.children,1));}
-)(car(vars));}})()
-}
-;return (function(nodes){
-return (function(lambda_header){
-return (function(lambda_node){
-return (function(res){
-res.link = node.link;return generator.write_func_call(res,parse);}
-)(ast.node(ast.LIST,null,vector_concat(vector(lambda_node),vector_ref(nodes,1))));}
-)(ast.node(ast.LIST,null,lambda_header.concat(body)));}
-)(unquote_splice([ast.node(ast.TERM,make_symbol("lambda")),ast.node(ast.LIST,null,vector_ref(nodes,0))]));}
-)(vars_to_nodes(vars.children,unquote_splice([]),unquote_splice([])));}
-)(vector_ref(node.children,1),node.children.splice(2));}
 )();} else { return (function() {if(equal_p_(term,"lambda")) { return (function(){
-var args = vector_ref(node.children,1);;(function() {if(eq_p_(args.type,ast.LIST)) { return for_each(function(n){
+var args = vector_ref(node.children,1);;(function() {if(eq_p_(args.type,ast.LIST)) { return vector_for_each(function(n){
 return assert_type(n,ast.TERM);}
 ,args.children);} else { return (function() {if(not(eq_p_(args.type,ast.TERM))) { throw("lambda must have a list of arguments or a binding term");}})()
 }})()
@@ -663,24 +871,31 @@ return generator.write_lambda(node,parse);}
 return generator.write_set(define_to_setlambda(node),parse);}
 )();} else { return (function() {if(equal_p_(term,"define-macro")) { return (function(){
 return parse_macro(node,generator);}
-)();} else { return (function() {if(equal_p_(term,"quote")) { return (function(){
-return generator.write_array(vector_ref(node.children,1),parse,"quote");}
-)();} else { return (function() {if(equal_p_(term,"quasiquote")) { return (function(){
-return generator.write_array(vector_ref(node.children,1),parse,"quasi");}
+)();} else { return (function() {if((equal_p_(term,"quote")||equal_p_(term,"quasiquote"))) { return (function(){
+return (function(n){
+return (function(type){
+return (function() {if(eq_p_(type,ast.LIST)) { return (function(){
+return generator.write_list(vector_ref(node.children,1),parse,(function() {if(equal_p_(term,"quote")) { return "quote"} else { return "quasi"}})()
+);}
+)();} else { return (function() {if(eq_p_(type,ast.VECTOR)) { return (function(){
+return generator.write_vector(vector_ref(node.children,1),parse,(function() {if(equal_p_(term,"quote")) { return "quote"} else { return "quasi"}})()
+);}
+)();} else { return (function() {if(eq_p_(type,ast.MAP)) { return (function(){
+return generator.write_map(n,parse,(function() {if(equal_p_(term,"quote")) { return "quote"} else { return "quasi"}})()
+);}
+)();} else { return (function() {if(eq_p_(type,ast.TERM)) { return (function(){
+return generator.write_symbol(n);}
+)();} else { return (function(){
+return parse(n);}
+)();}})()
+}})()
+}})()
+}})()
+}
+)(object_ref(n,"type"));}
+)(vector_ref(node.children,1));}
 )();} else { return (function() {if(equal_p_(term,"list")) { return (function(){
-return generator.write_array(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
-)();} else { return (function() {if(equal_p_(term,"cond")) { return (function(){
-var transform = function(i){
-return (function() {if(((i>node.children.length)||eq_p_(i,node.children.length))) { return null} else { return (function(n){
-return (function(condition,res){
-return (function() {if((eq_p_(condition.type,ast.TERM)&&equal_p_(condition.data.str,"else"))) { return res} else { return ast.add_child(ast.node(ast.LIST,null,unquote_splice([ast.node(ast.TERM,make_symbol("if")),condition,res])),transform((i+1)));}})()
-}
-)(vector_ref(n.children,0),ast.node(ast.LIST,null,vector_concat(unquote_splice([ast.node(ast.TERM,make_symbol("begin"))]),n.children.slice(1))));}
-)(vector_ref(node.children,i));}})()
-}
-;return (function(res){
-res.link = node.link;return parse(res);}
-)(transform(1));}
+return generator.write_list(ast.node(ast.LIST,null,node.children.slice(1)),parse);}
 )();} else { return (function() {if(generator.has_hook(term)) { return (function(){
 return generator.run_hook(term,node,parse);}
 )();} else { return (function(){
@@ -692,25 +907,26 @@ return generator.write_func_call(node,parse);}
 }})()
 }})()
 }})()
-}})()
-}})()
-}})()
 }
+);install_parser(ast.VECTOR,function(node,parse,generator){
+return generator.write_vector(node,parse);}
+);install_parser(ast.MAP,function(node,parse,generator){
+return generator.write_map(node,parse);}
 );install_parser(ast.ROOT,function(node,parse){
-return for_each(function(n){
+return vector_for_each(function(n){
 return parse(n);}
 ,node.children);}
-);install_macro("begin",function() {
-var body = Array.prototype.slice.call(arguments);
-return unquote_splice([unquote_splice([make_symbol("lambda"),unquote_splice([]),{ please_splice: true, data: body }])])}
-);install_macro("eval_outlet",function(form){
-return unquote_splice([make_symbol("let"),unquote_splice([unquote_splice([make_symbol("gen"),unquote_splice([make_symbol("create-generator")])])]),unquote_splice([make_symbol("parse"),unquote_splice([make_symbol("nodify"),form]),make_symbol("gen")]),unquote_splice([make_symbol("eval"),unquote_splice([make_symbol("gen.get_code")])])])}
-);module.exports = object();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;module.exports.sourcify = sourcify;
+);module.exports = hash_map();;module.exports.read = read;module.exports.parse = parse;module.exports.compile = compile;module.exports.install_builtin_macros = install_builtin_macros;module.exports.set_generator = set_generator;module.exports.create_generator = create_generator;module.exports.nodify = nodify;module.exports.sourcify = sourcify;
 
 });
 
 require.define("util", function (require, module, exports, __dirname, __filename) {
     // todo
+
+});
+
+require.define("fs", function (require, module, exports, __dirname, __filename) {
+    // nothing to see here... no file methods for the browser
 
 });
 
@@ -724,17 +940,36 @@ function make_symbol(str) {
     };
 }
 
-function map(func, arr) {
-    var r = [];
-    for(var i = 0, len = arr.length; i < len; i++) {
-        r.push(func(arr[i]));
+function map(func, lst) {
+    if(null_p_(lst)) {
+        return [];
     }
-    return r;
+    else {
+        return cons(func(car(lst)),
+                    map(func, cdr(lst)));
+    }
 }
 
-function for_each(func, arr) {
-    for(var i = 0, len = arr.length; i < len; i++) {
-        func(arr[i]);
+function for_each(func, lst) {
+    if(!null_p_(lst)) {
+        func(car(lst));
+        for_each(func, cdr(lst));
+    }
+}
+
+function vector_map(func, vec) {
+    var res = [];
+
+    for(var i=0, len=vec.length; i<len; i++) {
+        res.push(func(vec[i]));
+    }
+
+    return res;
+}
+
+function vector_for_each(func, vec) {
+    for(var i=0, len=vec.length; i<len; i++) {
+        func(vec[i]);
     }
 }
 
@@ -764,12 +999,41 @@ function eq_p_(v1, v2) {
 }
 
 function equal_p_(v1, v2) {
-    if(pair_p_(v1) && pair_p_(v2)) {
-        var good = true;        
-        for(var i=0, len=v1.length; i<len; i++) {
-            good = good && equal_p_(v1[i], v2[i]);
+    if(list_p_(v1) && list_p_(v2)) {
+        function l(lst1, lst2) {
+            var n1 = null_p_(lst1);
+            var n2 = null_p_(lst2);
+
+            if(n1 && n2) {
+                return true;
+            }
+            else if(n1 || n2) {
+                return false
+            }
+            else if(equal_p_(car(lst1), car(lst2))) {
+                return l(cdr(lst1), cdr(lst2));
+            }
+
+            return false;
         }
-        return good;
+
+        return l(v1, v2);
+    }
+    else if(vector_p_(v1) && vector_p_(v2)) {
+        for(var i=0, len=v1.length; i<len; i++) {
+            if(!equal_p_(v1[i], v2[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    else if(map_p_(v1) && map_p_(v2)) {
+        for(var k in v1) {
+            if(!equal_p_(v1[k], v2[k])) {
+                return false;
+            }
+        }
+        return true;
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -782,14 +1046,9 @@ function null_p_(arr) {
 }
 
 function cons(v1, v2) {
-    // this is NOT a correct representation for pairs, but will do for
-    // now
-    if(v2.length) {
-        return [v1].concat(v2);
-    }
-    else {
-        return [v1, v2];
-    }
+    var lst = [v1, v2];
+    lst.list = true;
+    return lst;
 }
 
 function car(arr) {
@@ -797,7 +1056,39 @@ function car(arr) {
 }
 
 function cdr(arr) {
-    return arr.slice(1);
+    return arr[1];
+}
+
+function make_list(arr) {
+    arr.list = true;
+    return arr;
+}
+
+function vector_to_list(vec) {
+    function l(v, i) {
+        if(i < v.length) {
+            return cons(v[i], l(v, i+1));
+        }
+        else {
+            return [];
+        }
+    }
+
+    return l(vec, 0);
+}
+
+function list_to_vector(lst) {
+    var res = [];
+
+    function m(lst) {
+        if(!null_p_(lst)) {
+            res.push(car(lst));
+            m(cdr(lst));
+        }
+    };
+
+    m(lst);
+    return res;
 }
 
 function vector_ref(arr, i) {
@@ -812,12 +1103,54 @@ function vector_concat(arr1, arr2) {
     return arr1.concat(arr2);
 }
 
-function vector(v) {
-    return [v];
+function vector() {
+    return Array.prototype.slice.call(arguments);
 }
 
-function object() {
-    return {};
+function vector_push(vec, val) {
+    vec.push(val);
+}
+
+function hash_map() {
+    var keyvals = Array.prototype.slice.call(arguments);
+    var res = {};
+
+    for(var i=0, len=keyvals.length; i<len; i+=2) {
+        var key = keyvals[i];
+
+        // Ignore this, it's only to support the compiler for now...
+        if(key.children &&
+           key.children.length > 0 &&
+           key.children[0].data &&
+           key.children[0].data.str &&
+           key.children[0].data.str == 'quote') {
+            key = key.children[1].data.str;
+        }
+        else if(key.str) {
+            key = key.str;
+        }
+
+        res[key] = keyvals[i+1];
+    }
+
+    return res;
+}
+
+function hash_map_map(func, m) {
+    var res = {};
+    for(var k in m) {
+        res[k] = func(m[k]);
+    }
+    return res;
+}
+
+function hash_map_to_vec(obj) {
+    var res = [];
+    for(var k in obj) {
+        res.push(vector_to_list([make_symbol('quote'), make_symbol(k)]));
+        res.push(obj[k]);
+    }
+    return res;
 }
 
 function object_ref(obj, key) {
@@ -840,8 +1173,16 @@ function boolean_p_(obj) {
     return obj === true || obj === false;
 }
 
-function pair_p_(obj) {
-    return obj && typeof obj != 'string' && obj.length;
+function list_p_(obj) {
+    return obj && obj.list;
+}
+
+function vector_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length !== undefined;
+}
+
+function map_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length === undefined;
 }
 
 function __gt_string(obj) {
@@ -862,65 +1203,149 @@ function __gt_string(obj) {
             return '#f';
         }
     }
-    else if(pair_p_(obj)) {
+    else if(list_p_(obj)) {
         return '(' + 
             map(function(obj) { return __gt_string(obj); },
                 obj).join(' ') +
             ')';
     }
+    else if(vector_p_(obj)) {
+        return '[' +
+            vector_map(function(obj) { return __gt_string(obj); },
+                       obj).join(' ') +
+            ']';
+    }
+    else if(map_p_(obj)) {
+        var res = [];
+        for(var k in obj) {
+            res.push(k + ': ' + util.inspect(obj[k], null, 10));
+        }
+        return '{' + res.join(', ') + '}';
+    }
 }
 
-function unquote_splice(arr) {
-    var res = [], i = 0, len = arr.length, elem;
-
-    while(i < len) {
-        elem = arr[i];
-        if(elem.please_splice) {
-            res = res.concat(unquote_splice(elem.data));
+function list_append(lst1, lst2) {
+    function loop(lst) {
+        if(null_p_(lst)) {
+            return lst2;
         }
         else {
-            res.push(elem);
+            return cons(car(lst), loop(cdr(lst)));
         }
+    };
 
-        i++;
+    if(null_p_(lst1)) {
+        return lst2;
+    }
+    else {
+        return loop(lst1);
+    }
+}
+
+function unquote_splice(lst) {
+    // if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+    //     return lst;
+    // }
+
+    if(null_p_(lst)) {
+        return [];
+    }
+    else {
+        var elem = car(lst);
+        var rest = unquote_splice(cdr(lst));
+
+        if(elem.please_splice) {
+            if(!list_p_(elem.data) && !null_p_(elem.data)) {
+                throw ("Lists can only splice lists, unexpected object: " +
+                       __gt_string(elem.data));
+            }
+
+            // do we need to unquote_splice elem.data?
+            return list_append(elem.data, rest);
+        }
+        else {
+            return cons(elem, rest);
+        }
+    }
+}
+
+function unquote_splice_vec(vec) {
+    var ret = [];
+    for(var i=0, len=vec.length; i<len; i++) {
+        var obj = vec[i];
+
+        if(obj && obj.please_splice) {
+            if(!vector_p_(obj.data)) {
+                throw ("Vectors can only splice vectors, unexpected object: " +
+                       obj.data);
+            }
+            ret = ret.concat(obj.data);
+        }
+        else {
+            ret.push(obj);
+        }
+    }
+
+    return ret;
+}
+
+function unquote_splice_map(obj) {
+    // this is expensive, but I don't really care. this will all be
+    // rewritten soon enough anyway.
+    var res = {};
+
+    for(var k in obj) {
+        var prop = obj[k];
+        if(prop && prop.please_splice) {
+            if(!map_p_(prop.data)) {
+                throw ("Maps can only splice maps, unexpected object: " +
+                       prop.data);
+            }
+
+            for(j in prop.data) {
+                res[j] = prop.data[j];
+            }
+        }
+        else if(k != '__unquote_splicing') {
+            res[k] = prop;
+        }
     }
 
     return res;
 }
-
 var parser = function(grammar){
 var Y = function(gen){
 return (function(f){
 return f(f);}
 )(function(f){
 return gen(function() {
-var args = Array.prototype.slice.call(arguments);
+var args = vector_to_list(Array.prototype.slice.call(arguments));
 return (function(ff){
-return ff.apply(null,args);}
+return ff.apply(null,list_to_vector(args));}
 )(f(f));}
 );}
 );}
 ;var optional = function(func){
 return function(text,state){
-return (func(text,state)||unquote_splice([text,state]))}
+return (func(text,state)||vector(text,state))}
 }
 ;var eof = function(text,state){
-return (function() {if(equal_p_(text,"")) { return unquote_splice([text,state])} else { return null}})()
+return (function() {if(equal_p_(text,"")) { return vector(text,state);} else { return null}})()
 }
 ;var terminator = function(text,state){
-return unquote_splice(["",state])}
+return vector("",state);}
 ;var char = function(alphabet){
 return function(text,state){
-return (function() {if(((text.length>0)&&(alphabet.indexOf(text.charAt(0))>-1))) { return unquote_splice([text.substr(1),state])} else { return null}})()
+return (function() {if(((text.length>0)&&(alphabet.indexOf(text.charAt(0))>-1))) { return vector(text.substr(1),state);} else { return null}})()
 }
 }
 ;var not_char = function(alphabet){
 return function(text,state){
-return (function() {if(((text.length>0)&&eq_p_(alphabet.indexOf(text.charAt(0)),-1))) { return unquote_splice([text.substr(1),state])} else { return null}})()
+return (function() {if(((text.length>0)&&eq_p_(alphabet.indexOf(text.charAt(0)),-1))) { return vector(text.substr(1),state);} else { return null}})()
 }
 }
 ;var any = function() {
-var args = Array.prototype.slice.call(arguments);
+var args = vector_to_list(Array.prototype.slice.call(arguments));
 return function(text,state){
 var run = function(lst){
 return (function() {if(null_p_(lst)) { return null} else { return (function(r){
@@ -931,22 +1356,22 @@ return (function() {if(r) { return r} else { return run(cdr(lst));}})()
 ;return run(args);}
 }
 ;var all = function() {
-var args = Array.prototype.slice.call(arguments);
+var args = vector_to_list(Array.prototype.slice.call(arguments));
 return function(text,state){
 var run = function(lst,r){
 return (function() {if(null_p_(lst)) { return r} else { return (function(r){
 return (function() {if(not(r)) { return null} else { return run(cdr(lst),r);}})()
 }
-)((car(lst))(car(r),car(cdr(r))));}})()
+)((car(lst))(vector_ref(r,0),vector_ref(r,1)));}})()
 }
-;return run(args,unquote_splice([text,state]));}
+;return run(args,vector(text,state));}
 }
 ;var capture = function(func,hook){
 return function(text,state){
 return (function(r){
 return (function() {if(r) { return (function(t,s){
-return unquote_splice([t,hook(text.substr(0,(text.length-t.length)),s)])}
-)(car(r),car(cdr(r)));} else { return null}})()
+return vector(t,hook(text.substr(0,(text.length-t.length)),s));}
+)(vector_ref(r,0),vector_ref(r,1));} else { return null}})()
 }
 )(func(text,state));}
 }
@@ -957,14 +1382,14 @@ return func(text,hook(state));}
 ;var after = function(func,hook){
 return function(text,state){
 return (function(r){
-return (function() {if(r) { return unquote_splice([car(r),hook(state,car(cdr(r)))])} else { return null}})()
+return (function() {if(r) { return vector(vector_ref(r,0),hook(state,vector_ref(r,1)));} else { return null}})()
 }
 )(func(text,state));}
 }
 ;return grammar(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after);}
 ;var parse = function(grammar,text,state){
 return (function(r){
-return (function() {if(r) { return car(cdr(r));} else { return null}})()
+return (function() {if(r) { return vector_ref(r,1);} else { return null}})()
 }
 )((parser(grammar))(text,state));}
 ;module.exports = parse;
@@ -980,6 +1405,8 @@ var STRING = 1;
 var NUMBER = 2;
 var LIST = 3;
 var BOOLEAN = 4;
+var VECTOR = 5;
+var MAP = 6;
 
 function node(type, data, children) {
     return {
@@ -1006,6 +1433,8 @@ function type_str(type) {
         case NUMBER: return 'number';
         case LIST: return 'list';
         case BOOLEAN: return 'boolean';
+        case VECTOR: return 'vector';
+        case MAP: return 'map';
     }
     return 'unknown';
 }
@@ -1052,6 +1481,8 @@ module.exports = {
     STRING: STRING,
     LIST: LIST,
     BOOLEAN: BOOLEAN,
+    VECTOR: VECTOR,
+    MAP: MAP,
 
     node: node,
     add_child: add_child,
@@ -1070,17 +1501,36 @@ function make_symbol(str) {
     };
 }
 
-function map(func, arr) {
-    var r = [];
-    for(var i = 0, len = arr.length; i < len; i++) {
-        r.push(func(arr[i]));
+function map(func, lst) {
+    if(null_p_(lst)) {
+        return [];
     }
-    return r;
+    else {
+        return cons(func(car(lst)),
+                    map(func, cdr(lst)));
+    }
 }
 
-function for_each(func, arr) {
-    for(var i = 0, len = arr.length; i < len; i++) {
-        func(arr[i]);
+function for_each(func, lst) {
+    if(!null_p_(lst)) {
+        func(car(lst));
+        for_each(func, cdr(lst));
+    }
+}
+
+function vector_map(func, vec) {
+    var res = [];
+
+    for(var i=0, len=vec.length; i<len; i++) {
+        res.push(func(vec[i]));
+    }
+
+    return res;
+}
+
+function vector_for_each(func, vec) {
+    for(var i=0, len=vec.length; i<len; i++) {
+        func(vec[i]);
     }
 }
 
@@ -1110,12 +1560,41 @@ function eq_p_(v1, v2) {
 }
 
 function equal_p_(v1, v2) {
-    if(pair_p_(v1) && pair_p_(v2)) {
-        var good = true;        
-        for(var i=0, len=v1.length; i<len; i++) {
-            good = good && equal_p_(v1[i], v2[i]);
+    if(list_p_(v1) && list_p_(v2)) {
+        function l(lst1, lst2) {
+            var n1 = null_p_(lst1);
+            var n2 = null_p_(lst2);
+
+            if(n1 && n2) {
+                return true;
+            }
+            else if(n1 || n2) {
+                return false
+            }
+            else if(equal_p_(car(lst1), car(lst2))) {
+                return l(cdr(lst1), cdr(lst2));
+            }
+
+            return false;
         }
-        return good;
+
+        return l(v1, v2);
+    }
+    else if(vector_p_(v1) && vector_p_(v2)) {
+        for(var i=0, len=v1.length; i<len; i++) {
+            if(!equal_p_(v1[i], v2[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    else if(map_p_(v1) && map_p_(v2)) {
+        for(var k in v1) {
+            if(!equal_p_(v1[k], v2[k])) {
+                return false;
+            }
+        }
+        return true;
     }
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
@@ -1128,14 +1607,9 @@ function null_p_(arr) {
 }
 
 function cons(v1, v2) {
-    // this is NOT a correct representation for pairs, but will do for
-    // now
-    if(v2.length) {
-        return [v1].concat(v2);
-    }
-    else {
-        return [v1, v2];
-    }
+    var lst = [v1, v2];
+    lst.list = true;
+    return lst;
 }
 
 function car(arr) {
@@ -1143,7 +1617,39 @@ function car(arr) {
 }
 
 function cdr(arr) {
-    return arr.slice(1);
+    return arr[1];
+}
+
+function make_list(arr) {
+    arr.list = true;
+    return arr;
+}
+
+function vector_to_list(vec) {
+    function l(v, i) {
+        if(i < v.length) {
+            return cons(v[i], l(v, i+1));
+        }
+        else {
+            return [];
+        }
+    }
+
+    return l(vec, 0);
+}
+
+function list_to_vector(lst) {
+    var res = [];
+
+    function m(lst) {
+        if(!null_p_(lst)) {
+            res.push(car(lst));
+            m(cdr(lst));
+        }
+    };
+
+    m(lst);
+    return res;
 }
 
 function vector_ref(arr, i) {
@@ -1158,12 +1664,54 @@ function vector_concat(arr1, arr2) {
     return arr1.concat(arr2);
 }
 
-function vector(v) {
-    return [v];
+function vector() {
+    return Array.prototype.slice.call(arguments);
 }
 
-function object() {
-    return {};
+function vector_push(vec, val) {
+    vec.push(val);
+}
+
+function hash_map() {
+    var keyvals = Array.prototype.slice.call(arguments);
+    var res = {};
+
+    for(var i=0, len=keyvals.length; i<len; i+=2) {
+        var key = keyvals[i];
+
+        // Ignore this, it's only to support the compiler for now...
+        if(key.children &&
+           key.children.length > 0 &&
+           key.children[0].data &&
+           key.children[0].data.str &&
+           key.children[0].data.str == 'quote') {
+            key = key.children[1].data.str;
+        }
+        else if(key.str) {
+            key = key.str;
+        }
+
+        res[key] = keyvals[i+1];
+    }
+
+    return res;
+}
+
+function hash_map_map(func, m) {
+    var res = {};
+    for(var k in m) {
+        res[k] = func(m[k]);
+    }
+    return res;
+}
+
+function hash_map_to_vec(obj) {
+    var res = [];
+    for(var k in obj) {
+        res.push(vector_to_list([make_symbol('quote'), make_symbol(k)]));
+        res.push(obj[k]);
+    }
+    return res;
 }
 
 function object_ref(obj, key) {
@@ -1186,8 +1734,16 @@ function boolean_p_(obj) {
     return obj === true || obj === false;
 }
 
-function pair_p_(obj) {
-    return obj && typeof obj != 'string' && obj.length;
+function list_p_(obj) {
+    return obj && obj.list;
+}
+
+function vector_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length !== undefined;
+}
+
+function map_p_(obj) {
+    return obj && typeof obj == 'object' && obj.length === undefined;
 }
 
 function __gt_string(obj) {
@@ -1208,32 +1764,116 @@ function __gt_string(obj) {
             return '#f';
         }
     }
-    else if(pair_p_(obj)) {
+    else if(list_p_(obj)) {
         return '(' + 
             map(function(obj) { return __gt_string(obj); },
                 obj).join(' ') +
             ')';
     }
+    else if(vector_p_(obj)) {
+        return '[' +
+            vector_map(function(obj) { return __gt_string(obj); },
+                       obj).join(' ') +
+            ']';
+    }
+    else if(map_p_(obj)) {
+        var res = [];
+        for(var k in obj) {
+            res.push(k + ': ' + util.inspect(obj[k], null, 10));
+        }
+        return '{' + res.join(', ') + '}';
+    }
 }
 
-function unquote_splice(arr) {
-    var res = [], i = 0, len = arr.length, elem;
-
-    while(i < len) {
-        elem = arr[i];
-        if(elem.please_splice) {
-            res = res.concat(unquote_splice(elem.data));
+function list_append(lst1, lst2) {
+    function loop(lst) {
+        if(null_p_(lst)) {
+            return lst2;
         }
         else {
-            res.push(elem);
+            return cons(car(lst), loop(cdr(lst)));
         }
+    };
 
-        i++;
+    if(null_p_(lst1)) {
+        return lst2;
+    }
+    else {
+        return loop(lst1);
+    }
+}
+
+function unquote_splice(lst) {
+    // if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
+    //     return lst;
+    // }
+
+    if(null_p_(lst)) {
+        return [];
+    }
+    else {
+        var elem = car(lst);
+        var rest = unquote_splice(cdr(lst));
+
+        if(elem.please_splice) {
+            if(!list_p_(elem.data) && !null_p_(elem.data)) {
+                throw ("Lists can only splice lists, unexpected object: " +
+                       __gt_string(elem.data));
+            }
+
+            // do we need to unquote_splice elem.data?
+            return list_append(elem.data, rest);
+        }
+        else {
+            return cons(elem, rest);
+        }
+    }
+}
+
+function unquote_splice_vec(vec) {
+    var ret = [];
+    for(var i=0, len=vec.length; i<len; i++) {
+        var obj = vec[i];
+
+        if(obj && obj.please_splice) {
+            if(!vector_p_(obj.data)) {
+                throw ("Vectors can only splice vectors, unexpected object: " +
+                       obj.data);
+            }
+            ret = ret.concat(obj.data);
+        }
+        else {
+            ret.push(obj);
+        }
+    }
+
+    return ret;
+}
+
+function unquote_splice_map(obj) {
+    // this is expensive, but I don't really care. this will all be
+    // rewritten soon enough anyway.
+    var res = {};
+
+    for(var k in obj) {
+        var prop = obj[k];
+        if(prop && prop.please_splice) {
+            if(!map_p_(prop.data)) {
+                throw ("Maps can only splice maps, unexpected object: " +
+                       prop.data);
+            }
+
+            for(j in prop.data) {
+                res[j] = prop.data[j];
+            }
+        }
+        else if(k != '__unquote_splicing') {
+            res[k] = prop;
+        }
     }
 
     return res;
 }
-
 var ast = require("./ast");
 var grammar = function(all,any,capture,char,not_char,optional,Y,eof,terminator,before,after){
 var repeated = function(rule){
@@ -1274,14 +1914,18 @@ return str.charAt(1);}
 return before(rule,function(state){
 return ""}
 );}
-);;var term = capture(repeated(any(not_char(("()'"+space_char)))),function(buf,s){
+);;var raw_term = capture(repeated(any(not_char(("{}()[]'"+space_char)))),function(buf,s){
 return ast.node(ast.TERM,make_symbol(buf));}
-);;var elements = function(lst){
+);;var raw_keyword = capture(all(char(":"),raw_term),function(buf,node){
+return (function(q){
+return ast.node(ast.LIST,null,vector(q,node));}
+)(ast.node(ast.TERM,make_symbol("quote")));}
+);;var term = any(raw_keyword,raw_term);;var elements = function(lst){
 var quoting = function(rule){
 var capt = function(buf,node){
 return (function(special){
 return (function(q){
-return ast.node(ast.LIST,null,unquote_splice([q,node]));}
+return ast.node(ast.LIST,null,vector(q,node));}
 )(ast.node(ast.TERM,make_symbol(special)));}
 )((function() {if(equal_p_(buf.substring(0,2),",@")) { return (function(){
 return "unquote-splicing"}
@@ -1291,7 +1935,7 @@ return "unquote"}
 return "quote"}
 )();} else { return (function() {if(equal_p_(buf.charAt(0),"`")) { return (function(){
 return "quasiquote"}
-)();}})()
+)();} else { return false}})()
 }})()
 }})()
 }})()
@@ -1303,13 +1947,17 @@ return capture(all(any(char("'"),char("`"),all(char(","),char("@")),char(",")),a
 return any(quoting(rule),rule);}
 )(any(lst,number,string,boolean,term));}
 ;var lst = Y(function(lst){
-return before(all(char("("),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){
-return ast.add_child(parent,child);}
-)))),char(")")),function(state){
+return all(any(before(char("{"),function(state){
+return ast.node(ast.MAP);}
+),before(char("("),function(state){
 return ast.node(ast.LIST);}
-);}
+),before(char("["),function(state){
+return ast.node(ast.VECTOR);}
+)),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){
+return ast.add_child(parent,child);}
+)))),any(char("}"),char(")"),char("]")));}
 );;return repeated(any(space,comment,after(elements(lst),function(root,child){
-return ast.node(ast.ROOT,null,root.children.concat(unquote_splice([child])));}
+return ast.node(ast.ROOT,null,root.children.concat(vector(child)));}
 )));}
 ;module.exports = grammar;
 
@@ -1460,14 +2108,14 @@ function generator() {
 
             if(capture_name) {
                 write('var ' + capture_name +
-                      ' = Array.prototype.slice.call(arguments, ' +
-                      (args_expr.children.length - 2) + ');', true);
+                      ' = vector_to_list(Array.prototype.slice.call(arguments, ' +
+                      (args_expr.children.length - 2) + '));', true);
             }
         }
         else {
             write('function() {', true);
             write('var ' + args_expr.data.str +
-                  ' = Array.prototype.slice.call(arguments);', true);
+                  ' = vector_to_list(Array.prototype.slice.call(arguments));', true);
         }
 
         for(var i=2, len=node.children.length; i<len; i++) {
@@ -1533,82 +2181,118 @@ function generator() {
         }
     }
 
-    function write_array(node, parse, context) {
-        // Handle quasiquoting specially here. This is hacky and not
-        // the right place to do it, but it works for now.
-        if(context == 'quasi') {
-            // If it's a list with a term in the front, check if it's
-            // an unquote or unquote-splicing and handle it specially
-            if(node.type == ast.LIST &&
-               node.children[0] &&
-               node.children[0].type == ast.TERM) {
-
-                var term = node.children[0];
-
-                if(term.data.str == 'unquote') {
-                    parse_expr(parse, node, node.children[1]);
-                    return;
-                }
-                else if(term.data.str == 'unquote-splicing') {
-                    var lst = node.children[1];
-
-                    if(lst.type == ast.LIST) {
-                        // Splicing should put all the list elements into
-                        // the current element
-                        for(var i=0, len=lst.children.length; i<len; i++) {
-                            if(i > 0) {
-                                write(',');
-                            }
-
-                            parse_expr(parse, lst, lst.children[i]);
-                        }
-                    }
-                    else if(lst.type == ast.TERM) {
-                        // Need to do the splicing at runtime
-                        write('{ please_splice: true, data: ' + lst.data.str + ' }');
-                    }
-                    else {
-                        throw ("unquote-splicing expected a list or symbol, got " +
-                               ast.type_str(lst.type));
-                    }
-
-                    return;
-                }
+    function write_vector(node, parse, context) {
+        write('unquote_splice_vec([');
+        for(var i=0, len=node.children.length; i<len; i++) {
+            if(i > 0) {
+                write(',');
             }
+            write_list_element(node, i, parse, context);
         }
+        write('])');
+    }
 
-        if(node.type == ast.TERM) {
-            if(context == 'quote' || context == 'quasi') {
-                write_symbol(node);
+    function write_map(node, parse, context) {
+        write('unquote_splice_map({');
+
+        for(var i=0, len=node.children.length; i<len; i+=2) {
+            if(i>0) {
+                write(',');
             }
-            else {
-                write_term(node);
-            }
-        }
-        else if(node.type == ast.NUMBER) {
-            write_number(node);
-        }
-        else if(node.type == ast.BOOLEAN) {
-            write_boolean(node);
-        }
-        else if(node.type == ast.STRING) {
-            write_string(node);
-        }
-        else if(node.type == ast.LIST) {
-            write('unquote_splice([');
-            for(var i=0, len=node.children.length; i<len; i++) {
-                if(i > 0) {
-                    write(',');
+
+            var key = node.children[i];
+            var val_index = i+1;
+
+            var key_form = key.children[0];
+            if(key.type == ast.LIST && key_form.data) {
+                if(key_form.data.str == 'unquote-splicing') {
+                    key = '__unquote_splicing';
+                    val_index = i;
                 }
-
-                if(context == 'quote' || context == 'quasi') {
-                    write_array(node.children[i], parse, context);
+                else if(key.children[0].data.str != 'quote') {
+                    throw "Invalid key for dict: " + key;
                 }
                 else {
-                    parse_expr(parse, node, node.children[i]);
+                    key = key.children[1].data.str;
                 }
             }
+            else {
+                throw "Invalid key for dict: " + key;
+            }
+            
+            
+
+            write('"' + key + '": ');
+            write_list_element(node, val_index, parse, context);
+        }
+        
+        write('})');
+    }
+
+    function write_list(node, parse, context) {
+        write('unquote_splice(');
+        _write_list(node, 0, parse, context);
+        write(')');
+    }
+
+    function _write_list(node, i, parse, context) {
+        if(i < node.children.length) {
+            write('make_list([');
+            write_list_element(node, i, parse, context);
+            write(',');
+            _write_list(node, i+1, parse, context);
             write('])');
+        }
+        else {
+            write('[]');
+        }
+    }
+
+    function write_list_element(node, i, parse, context) {
+        var n = node.children[i];
+
+        if(context == 'quote' || context == 'quasi') {
+            if(context == 'quasi') {
+                if(n.children[0] && n.children[0].type == ast.TERM) {
+                    // If it's a list with a term in the front, check if
+                    // it's an unquote or unquote-splicing and handle
+                    // it specially
+                    var term = n.children[0];
+
+                    if(term.data.str == 'unquote') {
+                        parse_expr(parse, n, n.children[1]);
+                        return;
+                    }
+                    else if(term.data.str == 'unquote-splicing') {
+                        write('{ please_splice: true, data: ');
+                        parse_expr(parse, n, n.children[1]);
+                        write(' }');
+                        return;
+                    }
+                }
+            }
+
+            if(n.type == ast.TERM) {
+                write_symbol(n);
+            }
+            else if(n.type == ast.NUMBER) {
+                write_number(n);
+            }
+            else if(n.type == ast.BOOLEAN) {
+                write_boolean(n);
+            }
+            else if(n.type == ast.STRING) {
+                write_string(n);
+            }
+            else if(n.type == ast.LIST) {
+                write_list(n, parse, context);
+            }
+            else if(n.type == ast.VECTOR) {
+                write_vector(n, parse, context);
+            }
+        }
+        else {
+            parse_expr(parse, node, n);
         }
     }
 
@@ -1708,7 +2392,9 @@ function generator() {
         write_set_excl: write_set_excl,
         write_lambda: write_lambda,
         write_func_call: write_func_call,
-        write_array: write_array,
+        write_list: write_list,
+        write_vector: write_vector,
+        write_map: write_map,
         write_symbol: write_symbol,
 
         get_code: function() {
@@ -1718,11 +2404,6 @@ function generator() {
 };
 
 module.exports = generator;
-
-});
-
-require.define("fs", function (require, module, exports, __dirname, __filename) {
-    // nothing to see here... no file methods for the browser
 
 });
 

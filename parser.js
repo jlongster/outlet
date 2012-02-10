@@ -1,5 +1,7 @@
 var util = require('util');
 
+var _emptylst = [];
+
 function make_symbol(str) {
     return {
         str: str,
@@ -187,6 +189,7 @@ function hash_map() {
 
         // Ignore this, it's only to support the compiler for now...
         if(key.children &&
+           key.children.length > 0 &&
            key.children[0].data &&
            key.children[0].data.str &&
            key.children[0].data.str == 'quote') {
@@ -213,8 +216,8 @@ function hash_map_map(func, m) {
 function hash_map_to_vec(obj) {
     var res = [];
     for(var k in obj) {
-        res.push(k);
-        res.push(obj);
+        res.push(vector_to_list([make_symbol('quote'), make_symbol(k)]));
+        res.push(obj[k]);
     }
     return res;
 }
@@ -379,6 +382,205 @@ function unquote_splice_map(obj) {
 
     return res;
 }
+
+
+
+
+
+
+// updated
+
+function for_dash_each(func, lst) {
+    if(!null_p_(lst)) {
+        func(car(lst));
+        for_each(func, cdr(lst));
+    }
+}
+
+function make_dash_vector(i) {
+    return new Array(i);
+}
+
+function vector_dash_map(func, vec) {
+    var res = [];
+
+    for(var i=0, len=vec.length; i<len; i++) {
+        res.push(func(vec[i]));
+    }
+
+    return res;
+}
+
+function vector_dash_for_dash_each(func, vec) {
+    for(var i=0, len=vec.length; i<len; i++) {
+        func(vec[i]);
+    }
+}
+
+
+function make_dash_list(arr) {
+    arr.list = true;
+    return arr;
+}
+
+function vector_dash_to_dash_list(vec) {
+    function l(v, i) {
+        if(i < v.length) {
+            return cons(v[i], l(v, i+1));
+        }
+        else {
+            return _emptylst;
+        }
+    }
+
+    return l(vec, 0);
+}
+
+function list_dash_to_dash_vector(lst) {
+    var res = [];
+
+    function m(lst) {
+        if(!null_p_(lst)) {
+            res.push(car(lst));
+            m(cdr(lst));
+        }
+    };
+
+    m(lst);
+    return res;
+}
+
+function vector_dash_ref(arr, i) {
+    return arr[i];
+}
+
+function vector_dash_set_excl_(arr, i, v) {
+    arr[i] = v;
+}
+
+function vector_dash_concat(arr1, arr2) {
+    return arr1.concat(arr2);
+}
+
+function vector() {
+    return Array.prototype.slice.call(arguments);
+}
+
+function vector_dash_push(vec, val) {
+    vec.push(val);
+}
+
+function hash_dash_map() {
+    var keyvals = Array.prototype.slice.call(arguments);
+    var res = {};
+
+    for(var i=0, len=keyvals.length; i<len; i+=2) {
+        var key = keyvals[i];
+
+        // Ignore this, it's only to support the compiler for now...
+        if(key.children &&
+           key.children.length > 0 &&
+           key.children[0].data &&
+           key.children[0].data.str &&
+           key.children[0].data.str == 'quote') {
+            key = key.children[1].data.str;
+        }
+        else if(key.str) {
+            key = key.str;
+        }
+
+        res[key] = keyvals[i+1];
+    }
+
+    return res;
+}
+
+function hash_dash_map_dash_map(func, m) {
+    var res = {};
+    for(var k in m) {
+        res[k] = func(m[k]);
+    }
+    return res;
+}
+
+function hash_dash_map_dash_to_dash_vec(obj) {
+    var res = [];
+    for(var k in obj) {
+        res.push(vector_to_list([make_symbol('quote'), make_symbol(k)]));
+        res.push(obj[k]);
+    }
+    return res;
+}
+
+function object_dash_ref(obj, key) {
+    return obj[key];
+}
+
+
+function _dash__gt_string(obj) {
+    if(number_p_(obj)) {
+        return '' + obj;
+    }
+    else if(string_p_(obj)) {
+        return '"' + obj.replace(/"/g, "\\\"") + '"';
+    }
+    else if(symbol_p_(obj)) {
+        return obj.str;
+    }
+    else if(boolean_p_(obj)) {
+        if(obj) {
+            return '#t';
+        }
+        else {
+            return '#f';
+        }
+    }
+    else if(list_p_(obj)) {
+        return '(' + 
+            map(function(obj) { return __gt_string(obj); },
+                obj).join(' ') +
+            ')';
+    }
+    else if(vector_p_(obj)) {
+        return '[' +
+            vector_map(function(obj) { return __gt_string(obj); },
+                       obj).join(' ') +
+            ']';
+    }
+    else if(map_p_(obj)) {
+        var res = [];
+        for(var k in obj) {
+            res.push(k + ': ' + util.inspect(obj[k], null, 10));
+        }
+        return '{' + res.join(', ') + '}';
+    }
+}
+
+function list_dash_append(lst1, lst2) {
+    function loop(lst) {
+        if(null_p_(lst)) {
+            return lst2;
+        }
+        else {
+            return cons(car(lst), loop(cdr(lst)));
+        }
+    };
+
+    if(null_p_(lst1)) {
+        return lst2;
+    }
+    else {
+        return loop(lst1);
+    }
+}
+
+function string_dash__gt_symbol(str) {
+    return {
+        str: str,
+        symbol: true
+    };
+}
+
 var parser = function(grammar){
 var Y = function(gen){
 return (function(f){
