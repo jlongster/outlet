@@ -17,9 +17,6 @@
       (boolean? x)
       (null? x)))
 
-(define (keyword? x)
-  (eq? x 'set!))
-
 (define (application? form)
   (and (list? form)
        (not (expander? (car form)))))
