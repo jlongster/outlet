@@ -38,7 +38,7 @@ buz")
 (test-eval (not #t) #f)
 (test-eval (not #f) #t)
 (test-eval (and #f #t) #f)
-;; (test-eval (or #f #t) #t)
+(test-eval (or #f #t) #t)
 
 ;; symbols
 (test-read "foo" 'foo)

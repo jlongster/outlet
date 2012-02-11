@@ -20,12 +20,12 @@
           (if (not (equal? target "js-noeval"))
               (write (fs.readFileSync "runtime-eval.js" "utf-8") #t)))))
 
-  (define (comma-writer)
+  (define (inline-writer str)
     (let ((first #t))
       (lambda ()
         (if first
             (set! first #f)
-            (write ",")))))
+            (write str)))))
 
   (define (terminate-expr expr?)
     ;; this is important; if it's not an expression, terminate the
@@ -105,7 +105,7 @@
   (define (write-lambda args body expr? parse)
     (cond
      ((list? args)
-      (define comma (comma-writer))
+      (define comma (inline-writer ","))
       (define capture-name #f)
       
       (define (write-args args)
@@ -172,7 +172,7 @@
 
     ;; write the arguments
     (write "(")
-    (let ((comma (comma-writer)))
+    (let ((comma (inline-writer ",")))
       (for-each (lambda (arg)
                   (comma)
                   (parse arg #t))
@@ -181,17 +181,20 @@
 
     (terminate-expr expr?))
 
-  ;; literal list
-  (define (write-list lst expr? parse)
-    ;; a literal list is always quoted, so quote all of its elements
-    (write "list(")
-    (for-each (lambda (el)
-                (parse (cons 'quote el)))
-              lst)
-    (write ")")
+  (define (write-op op vals expr? parse)
+    (write "(")
+    (let ((op-writer (inline-writer
+                      (string-append " " op " "))))
+      (for-each (lambda (arg)
+                  (op-writer)
+                  (parse arg #t))
+                vals))
+    (write ")"))
 
-    (terminate-expr expr?))
-
+  (define (make-op-writer str)
+    (lambda (vals expr? parse)
+      (write-op str vals expr? parse)))
+  
   ;; literal vector
   (define (write-vector vec . quoted)
     #f)
@@ -199,6 +202,8 @@
   ;; literal hash
   (define (write-hash hash . quoted)
     #f)
+
+  
   
   {:write-runtime write-runtime
    :write-number write-number
@@ -212,6 +217,10 @@
    :write-if write-if
    :write-lambda write-lambda
    :write-func-call write-func-call
+   
+   :write-and (make-op-writer "&&")
+   :write-or (make-op-writer "||")
+   
    ;;:write-object write-object
    :get-code (lambda () (code.join ""))})
 

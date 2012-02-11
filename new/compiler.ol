@@ -56,6 +56,10 @@
 (define (symbol->string sym)
   sym.str)
 
+(define (assert cnd msg)
+  (if (not cnd)
+      (throw msg)))
+
 ;; expanders
 
 (define _expanders_ {})
@@ -199,16 +203,6 @@
                         (throw (string-append "invalid type of expression: "
                                               (inspect src))))))))
 
-(install-expander 'and
-                  (lambda (form e)
-                    (if (null? (cdr form))
-                        #t
-                        (let ((expr (cadr form))
-                              (rest (cddr form)))
-                          `(if ,expr
-                               ,(e (cons 'and rest) e)
-                               #f)))))
-
 ;; handle the `unquote-splicing` form within a `quasiquote` form
 (define (unquote-splice-expand lst e)
   (define (list-push lst item)
@@ -247,16 +241,39 @@
         (car res)
         (cons 'list-append (reverse res)))))
 
+;; natives
+;; natives are like macros for generating source code. it allows the
+;; generator to customize how certain forms look in the final output.
+;; these could have been macros that expand into basic forms, but we
+;; want readable output. natives are responsible for integrity checking
+;; of the form.
+
+(define _natives_ {})
+
+(define (native-function name)
+  (ref _natives_ name))
+
+(define (install-native name func)
+  (put! _natives_ (symbol->string name) func))
+
+(define (native? name)
+  (not (eq? (ref _natives_ name))
+       undefined))
+
+(install-native 'and
+                (lambda (form gen expr? parse)
+                  (assert (> (length form) 1)
+                          "`and` requires at least one operand")
+                  (gen.write-and (cdr form) expr? parse)))
+
+(install-native 'or
+                (lambda (form gen expr? parse)
+                  (assert (> (length form) 1)
+                          "`or` requires at least one operand")
+                  (gen.write-or (cdr form) expr? parse)))
+
 ;; compiler
 
-(define (assert cnd msg)
-  (if (not cnd)
-      (throw msg)))
-
-(define (read src)
-  (reader grammar src '[]))
-
-;; parse a form
 (define (parse form generator . expr?)
   (let ((expr? (opt expr? #f))
         (%parse (lambda (form . expr?)
@@ -335,14 +352,16 @@
                                 (inspect form)))))))
 
     (define (parse-list form)
-      (cond
-       ((or (eq? (car form) 'set!)
-            (eq? (car form) 'set))
-        (parse-set form))
-       ((eq? (car form) 'if) (parse-if form))
-       ((eq? (car form) 'lambda) (parse-lambda form))
-       ((eq? (car form) 'quote) (parse-quoted form))
-       (else (parse-func-call form))))
+      (let ((first (car form)))
+        (cond
+         ((eq? first 'if) (parse-if form))
+         ((eq? first 'lambda) (parse-lambda form))
+         ((eq? first 'quote) (parse-quoted form))
+         ((or (eq? first 'set!)
+              (eq? first 'set)) (parse-set form))
+         ((native? first)
+          ((native-function first) form generator expr? %parse))
+         (else (parse-func-call form)))))
 
     (cond
      ((symbol? form) (generator.write-term form))
@@ -353,33 +372,19 @@
      (else
       (throw (string-append "Unkown thing: " form))))))
 
+(define (read src)
+  (reader grammar src '[]))
+
 (define (compile src generator)
   (let ((f (expand (read src))))
+    ;; todo, figure when runtime should be written
     (generator.write-runtime "js")
-    ;; probably should make lambda generate code that doesn't put "return"
-    ;; if the last statement is a set!
-    (let ((lmb (car f)))
-      (if (not (eq? (car lmb) 'lambda))
-          (throw "WAT")
-          (for-each (lambda (form) (parse form generator))
-                    (cddr lmb))))
+    (compiler.parse f gen)
     (generator.get-code)))
 
-;; extra
+(set! module.exports {:read read
+                      :expand expand
+                      :parse parse
+                      :compile compile})
 
-;; (install-expander 'trace-applications
-;;                   (lambda (x e)
-;;                     (let ((e1 (lambda (x e2)
-;;                                 (if (application? x)
-;;                                     `(trace-form ',x
-;;                                                  (lambda ()
-;;                                                    ,(map (lambda (x) (e2 x e2)) x)))
-;;                                     (e x e2)))))
-;;                       (e1 (cadr x) e1))))
-
-(set! module.exports {})
-(set! module.exports.read read)
-(set! module.exports.expand expand)
-(set! module.exports.parse parse)
-(set! module.exports.compile compile)
 

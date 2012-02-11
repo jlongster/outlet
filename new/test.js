@@ -449,12 +449,6 @@ var js = require("./backends/js");
 (function() {if((process.argv.length<3)) { throw("must pass a filename");}})();
 (function(src,gen){
 gen.write_dash_runtime("js");return (function(f){
-(function() {if(list_p_(f)) { return (function(lmb){
-return (function() {if(not(eq_p_(car(lmb),string_dash__gt_symbol("lambda")))) { throw("WAT");} else { return for_dash_each(function(form){
-return compiler.parse(form,gen);}
-,cddr(lmb));}})();
-}
-)(car(f));} else { return compiler.parse(f,gen);}})();
-return eval(gen.get_dash_code());}
+compiler.parse(f,gen);return eval(gen.get_dash_code());}
 )(compiler.expand(compiler.read(src)));}
 )(fs.readFileSync(("tests/"+vector_dash_ref(process.argv,2)),"utf-8"),js());

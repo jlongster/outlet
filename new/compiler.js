@@ -451,8 +451,6 @@ var _gensym = 0;var gensym = function(){
 _gensym = (_gensym+1);return string_dash__gt_symbol(("o"+_gensym));}
 ;var literal_p_ = function(x){
 return (number_p_(x)||string_p_(x)||boolean_p_(x)||null_p_(x))}
-;var keyword_p_ = function(x){
-return eq_p_(x,string_dash__gt_symbol("set_excl_"));}
 ;var application_p_ = function(form){
 return (list_p_(form)&&not(expander_p_(car(form))))}
 ;var ref = function(obj,name){
@@ -485,6 +483,9 @@ return display(_dash__gt_string(lst));}
 );}
 ;var symbol_dash__gt_string = function(sym){
 return sym.str}
+;var assert = function(cnd,msg){
+return (function() {if(not(cnd)) { throw(msg);}})();
+}
 ;var _expanders_ = unquote_splice_map({});var expander_dash_function = function(name){
 return ref(_expanders_,name);}
 ;var install_dash_expander = function(name,func){
@@ -601,11 +602,6 @@ throw(("invalid type of expression: "+inspect(src)));}
 }})();
 }
 )(cadr(form));}
-);install_dash_expander(string_dash__gt_symbol("and"),function(form,e){
-return (function() {if(null_p_(cdr(form))) { return true} else { return (function(expr,rest){
-return unquote_splice(make_dash_list([string_dash__gt_symbol("if"),make_dash_list([expr,make_dash_list([e(cons(string_dash__gt_symbol("and"),rest),e),make_dash_list([false,_emptylst])])])]))}
-)(cadr(form),cddr(form));}})();
-}
 );var unquote_dash_splice_dash_expand = function(lst,e){
 var list_dash_push = function(lst,item){
 return (function() {if(null_p_(item)) { return lst} else { return cons(cons(string_dash__gt_symbol("list"),reverse(item)),lst);}})();
@@ -623,12 +619,17 @@ return quote_dash_splice(cdr(lst),cons(e(src,e),list_dash_push(lst_dash_acc,acc)
 return (function() {if(eq_p_(length(res),1)) { return car(res);} else { return cons(string_dash__gt_symbol("list_dash_append"),reverse(res));}})();
 }
 )(quote_dash_splice(lst,unquote_splice(_emptylst),unquote_splice(_emptylst)));}
-;var assert = function(cnd,msg){
-return (function() {if(not(cnd)) { throw(msg);}})();
-}
-;var read = function(src){
-return reader(grammar,src,unquote_splice_vec([]));}
-;var parse = function(form,generator){
+;var _natives_ = unquote_splice_map({});var native_dash_function = function(name){
+return ref(_natives_,name);}
+;var install_dash_native = function(name,func){
+return put_excl_(_natives_,symbol_dash__gt_string(name),func);}
+;var native_p_ = function(name){
+return not(eq_p_(ref(_natives_,name)),undefined);}
+;install_dash_native(string_dash__gt_symbol("and"),function(form,gen,expr_p_,parse){
+assert((length(form)>1),"`and` requires at least one operand");return gen.write_dash_and(cdr(form),expr_p_,parse);}
+);install_dash_native(string_dash__gt_symbol("or"),function(form,gen,expr_p_,parse){
+assert((length(form)>1),"`or` requires at least one operand");return gen.write_dash_or(cdr(form),expr_p_,parse);}
+);var parse = function(form,generator){
 var expr_p_ = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, 2));
 return (function(expr_p_,_per_parse){
 var parse_dash_literal = function(form){
@@ -674,21 +675,26 @@ throw(("unexpected type of object in quote, "+"literal expected: "+inspect(form)
 }
 )(cadr(form));}
 ;var parse_dash_list = function(form){
-return (function() {if((eq_p_(car(form),string_dash__gt_symbol("set_excl_"))||eq_p_(car(form),string_dash__gt_symbol("set")))) { return (function(){
-return parse_dash_set(form);}
-)();} else { return (function() {if(eq_p_(car(form),string_dash__gt_symbol("if"))) { return (function(){
+return (function(first){
+return (function() {if(eq_p_(first,string_dash__gt_symbol("if"))) { return (function(){
 return parse_dash_if(form);}
-)();} else { return (function() {if(eq_p_(car(form),string_dash__gt_symbol("lambda"))) { return (function(){
+)();} else { return (function() {if(eq_p_(first,string_dash__gt_symbol("lambda"))) { return (function(){
 return parse_dash_lambda(form);}
-)();} else { return (function() {if(eq_p_(car(form),string_dash__gt_symbol("quote"))) { return (function(){
+)();} else { return (function() {if(eq_p_(first,string_dash__gt_symbol("quote"))) { return (function(){
 return parse_dash_quoted(form);}
+)();} else { return (function() {if((eq_p_(first,string_dash__gt_symbol("set_excl_"))||eq_p_(first,string_dash__gt_symbol("set")))) { return (function(){
+return parse_dash_set(form);}
+)();} else { return (function() {if(native_p_(first)) { return (function(){
+return (native_dash_function(first))(form,generator,expr_p_,_per_parse);}
 )();} else { return (function(){
 return parse_dash_func_dash_call(form);}
 )();}})();
 }})();
 }})();
 }})();
+}})();
 }
+)(car(form));}
 ;return (function() {if(symbol_p_(form)) { return (function(){
 return generator.write_dash_term(form);}
 )();} else { return (function() {if(literal_p_(form)) { return (function(){
@@ -711,13 +717,10 @@ throw(("Unkown thing: "+form));}
 var expr_p_ = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, 1));
 return parse(form,generator,opt(expr_p_,false));}
 );}
+;var read = function(src){
+return reader(grammar,src,unquote_splice_vec([]));}
 ;var compile = function(src,generator){
 return (function(f){
-generator.write_dash_runtime("js");(function(lmb){
-return (function() {if(not(eq_p_(car(lmb),string_dash__gt_symbol("lambda")))) { throw("WAT");} else { return for_dash_each(function(form){
-return parse(form,generator);}
-,cddr(lmb));}})();
-}
-)(car(f));return generator.get_dash_code();}
+generator.write_dash_runtime("js");compiler.parse(f,gen);return generator.get_dash_code();}
 )(expand(read(src)));}
-;module.exports = unquote_splice_map({});module.exports.read = read;module.exports.expand = expand;module.exports.parse = parse;module.exports.compile = compile;
+;module.exports = unquote_splice_map({"read": read,"expand": expand,"parse": parse,"compile": compile});

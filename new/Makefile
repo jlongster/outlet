@@ -12,13 +12,13 @@ grammar.js: grammar.ol
 compiler.js: compiler.ol
 	$(NODE_MAKE) compiler.ol > compiler2.js && mv compiler2.js compiler.js
 
-util.js: util.ol
-	$(NODE_MAKE) util.ol > util2.js && mv util2.js util.js
-
 backends/js.js: backends/js.ol
 	$(NODE_MAKE) backends/js.ol > backends/js2.js && mv backends/js2.js backends/js.js
 
 test.js: test.ol
 	$(NODE_MAKE) test.ol > test2.js && mv test2.js test.js
 
-compiler: compiler.js parser.js grammar.js util.js backends/js.js test.js
+compiler: compiler.js parser.js grammar.js backends/js.js test.js
+
+test: compiler
+	node test basic.ol
