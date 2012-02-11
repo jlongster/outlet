@@ -84,6 +84,8 @@
   (cond
    ((symbol? form) form)
    ((literal? form) form)
+   ((vector? form) form)
+   ((dict? form) form)
    ((expander? (car form))
     ((expander-function (car form)) form e))
    (else (map (lambda (subform) (e subform e)) form))))
@@ -173,16 +175,16 @@
                       ;; out the quote, and symbols keep the quote.
                       ;; the parser implements the low-level `quote`
                       ;; form.
-                      (cond
-                       ((symbol? src) (list 'quote src))
-                       ((literal? src) src)
-                       ((list? src)
-                        (cons 'list (map (lambda (el)
-                                           (e (list 'quote el) e))
-                                         src)))
-                       (else
-                        (throw (string-append "invalid type of expression: "
-                                              (inspect src))))))))
+                      (let ((q (lambda (el) (e (list 'quote el) e))))
+                        (cond
+                         ((symbol? src) (list 'quote src))
+                         ((literal? src) src)
+                         ((vector? src) (vector-map q src))
+                         ((dict? src) (dict-map q src))
+                         ((list? src) (cons 'list (map q src)))
+                         (else
+                          (throw (string-append "invalid type of expression: "
+                                                (inspect src)))))))))
 
 (install-expander 'quasiquote
                   (lambda (form e)
@@ -363,12 +365,30 @@
           ((native-function first) form generator expr? %parse))
          (else (parse-func-call form)))))
 
+    (define (parse-vector vec)
+      (parse-list (cons 'vector (vector-to-list vec))))
+
+    (define (parse-dict dict)
+      (let ((lst (dict-to-list dict))
+            (i 0))
+        (let ((qlst (map (lambda (el)
+                           ;; quote the keys (this is hacky, will
+                           ;; replace when proper looping is
+                           ;; supported)
+
+                           (set! i (+ i 1))
+                           (if (eq? (% (- i 1) 2) 0)
+                               (list 'quote el)
+                               el))
+                         lst)))
+          (parse-list (cons 'dict qlst)))))
+    
     (cond
      ((symbol? form) (generator.write-term form))
      ((literal? form) (parse-literal form))
      ((list? form) (parse-list form))
-     ((vector? form) (generator.write-vector form #t))
-     ((hash? form) (generator.write-hash form #t))
+     ((vector? form) (parse-vector form))
+     ((dict? form) (parse-dict form))
      (else
       (throw (string-append "Unkown thing: " form))))))
 
@@ -376,11 +396,12 @@
   (reader grammar src '[]))
 
 (define (compile src generator)
-  (let ((f (expand (read src))))
-    ;; todo, figure when runtime should be written
-    (generator.write-runtime "js")
-    (compiler.parse f gen)
-    (generator.get-code)))
+  (let ((r (read src)))
+    (let ((f (expand r)))
+      ;; todo, figure when runtime should be written
+      (generator.write-runtime "js")
+      (compiler.parse f gen)
+      (generator.get-code))))
 
 (set! module.exports {:read read
                       :expand expand

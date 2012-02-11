@@ -67,7 +67,7 @@
   (define raw_keyword
     (capture (all (char ":") raw_term)
              (lambda (buf node)
-               (vector (string->symbol "quote") node))))
+               (list 'quote node))))
 
   (define term
     (any raw_keyword raw_term))
@@ -115,7 +115,26 @@
                               (vector-concat parent [child]))))))
               (any (before (char "}")
                            (lambda (state)
-                             (hash-map.apply null state)))
+                             (let ((i 0))
+                               (dict.apply
+                                null
+                                (vector-map
+                                 (lambda (el)
+                                   ;; unquote the keys. this is bad
+                                   ;; because the reader is now
+                                   ;; parsing the data, but since
+                                   ;; we don't have an AST we have
+                                   ;; to do it here. this will be
+                                   ;; fixed.
+
+                                   (set! i (+ i 1))
+                                   (if (eq? (% (- i 1) 2) 0)
+                                       (if (and (list? el)
+                                                (eq? (car el) 'quote))
+                                           (cadr el)
+                                           el)
+                                       el))
+                                 state)))))
                    (before (char ")")
                            (lambda (state)
                               (vector-to-list state)))

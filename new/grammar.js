@@ -107,7 +107,7 @@ function equal_p_(v1, v2) {
         }
         return true;
     }
-    else if(map_p_(v1) && map_p_(v2)) {
+    else if(dict_p_(v1) && dict_p_(v2)) {
         for(var k in v1) {
             if(!equal_p_(v1[k], v2[k])) {
                 return false;
@@ -235,22 +235,14 @@ function vector_dash_push(vec, val) {
     vec.push(val);
 }
 
-function hash_dash_map() {
+function dict() {
     var keyvals = Array.prototype.slice.call(arguments);
     var res = {};
 
     for(var i=0, len=keyvals.length; i<len; i+=2) {
         var key = keyvals[i];
 
-        // Ignore this, it's only to support the compiler for now...
-        if(key.children &&
-           key.children.length > 0 &&
-           key.children[0].data &&
-           key.children[0].data.str &&
-           key.children[0].data.str == 'quote') {
-            key = key.children[1].data.str;
-        }
-        else if(key.str) {
+        if(key.str) {
             key = key.str;
         }
 
@@ -260,13 +252,18 @@ function hash_dash_map() {
     return res;
 }
 
-function hash_dash_map_dash_map(func, m) {
+var hash_dash_map = dict;
+
+
+function dict_dash_map(func, dict) {
     var res = {};
-    for(var k in m) {
-        res[k] = func(m[k]);
+    for(var k in dct) {
+        res[k] = func(dict[k]);
     }
     return res;
 }
+
+var hash_dash_map_dash_map = dict_dash_map;
 
 function hash_dash_map_dash_to_dash_vec(obj) {
     var res = [];
@@ -276,6 +273,15 @@ function hash_dash_map_dash_to_dash_vec(obj) {
         res.push(obj[k]);
     }
     return res;
+}
+
+function dict_dash_to_dash_list(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(string_dash__gt_symbol(k));
+        res.push(dict[k]);
+    }
+    return vector_dash_to_dash_list(res);
 }
 
 function object_dash_ref(obj, key) {
@@ -303,10 +309,11 @@ function list_p_(obj) {
 }
 
 function vector_p_(obj) {
-    return obj && typeof obj == 'object' && obj.length !== undefined;
+    var v = obj && typeof obj == 'object' && obj.length !== undefined;
+    return !list_p_(obj) && v;
 }
 
-function map_p_(obj) {
+function dict_p_(obj) {
     return obj && typeof obj == 'object' && obj.length === undefined;
 }
 
@@ -340,7 +347,7 @@ function _dash__gt_string(obj) {
                        obj).join(' ') +
             ']';
     }
-    else if(map_p_(obj)) {
+    else if(dict_p_(obj)) {
         var res = [];
         for(var k in obj) {
             res.push(k + ': ' + __util.inspect(obj[k], null, 10));
@@ -426,7 +433,7 @@ function unquote_splice_map(obj) {
     for(var k in obj) {
         var prop = obj[k];
         if(prop && prop.please_splice) {
-            if(!map_p_(prop.data)) {
+            if(!dict_p_(prop.data)) {
                 throw ("Maps can only splice maps, unexpected object: " +
                        prop.data);
             }
@@ -484,7 +491,7 @@ return ""}
 );;var raw_term = capture(repeated(any(not_dash_char(("{}()[]'"+space_dash_char)))),function(buf,s){
 return string_dash__gt_symbol(buf);}
 );;var raw_keyword = capture(all(char(":"),raw_term),function(buf,node){
-return vector(string_dash__gt_symbol("quote"),node);}
+return unquote_splice(make_dash_list([string_dash__gt_symbol("quote"),make_dash_list([node,_emptylst])]))}
 );;var term = any(raw_keyword,raw_term);;var elements = function(lst){
 var quoting = function(rule){
 var capt = function(buf,node){
@@ -519,7 +526,13 @@ return unquote_splice_vec([])}
 )),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){
 return vector_dash_concat(parent,unquote_splice_vec([child]));}
 )))),any(before(char("}"),function(state){
-return hash_dash_map.apply(null,state);}
+return (function(i){
+return dict.apply(null,vector_dash_map(function(el){
+i = (i+1);return (function() {if(eq_p_(((i-1)%2),0)) { return (function() {if((list_p_(el)&&eq_p_(car(el),string_dash__gt_symbol("quote")))) { return cadr(el);} else { return el}})();
+} else { return el}})();
+}
+,state));}
+)(0);}
 ),before(char(")"),function(state){
 return vector_dash_to_dash_list(state);}
 ),char("]")));}

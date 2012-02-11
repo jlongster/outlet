@@ -189,21 +189,12 @@
                   (op-writer)
                   (parse arg #t))
                 vals))
-    (write ")"))
+    (write ")")
+    (terminate-expr expr?))
 
   (define (make-op-writer str)
     (lambda (vals expr? parse)
       (write-op str vals expr? parse)))
-  
-  ;; literal vector
-  (define (write-vector vec . quoted)
-    #f)
-
-  ;; literal hash
-  (define (write-hash hash . quoted)
-    #f)
-
-  
   
   {:write-runtime write-runtime
    :write-number write-number
