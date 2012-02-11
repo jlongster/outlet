@@ -192,6 +192,20 @@
                       (cond
                        ((symbol? src) (list 'quote src))
                        ((literal? src) src)
+                       ((vector? src) `(list-to-vector
+                                        ,(unquote-splice-expand (vector-to-list src) e)))
+                       ((dict? src)
+                        ;; dicts only support the `unquote` form in
+                        ;; the value position. `unquote-splicing`
+                        ;; isn't supported because of flaws in
+                        ;; the reader (need to convert it to use real
+                        ;; AST instead of native javascript types)
+                        (dict-map (lambda (el)
+                                    (if (and (list? el)
+                                             (eq? (car src) 'unquote))
+                                        (e (cadr el) e)
+                                        (e (list 'quasiquote el) e)))
+                                  src))
                        ((list? src)
                         ;; lists with `unquote` in car return the cadr
                         ;; as an unquoted & expanded expression
@@ -205,7 +219,8 @@
                         (throw (string-append "invalid type of expression: "
                                               (inspect src))))))))
 
-;; handle the `unquote-splicing` form within a `quasiquote` form
+;; handle the `unquote-splicing` form within a `quasiquote` form. only
+;; works with lists
 (define (unquote-splice-expand lst e)
   (define (list-push lst item)
     (if (null? item)
@@ -224,9 +239,22 @@
           (if (and (list? el)
                    (eq? (car el) 'unquote-splicing))
               ;; force the splice element into a list
-              (let ((src (if (literal? (cadr el))
-                             (list 'list (cadr el))
-                             (cadr el))))
+              (let ((src (cond
+                          ((literal? (cadr el)) (list 'list (cadr el)))
+                          ((vector? (cadr el))
+                           (list 'vector-to-list (cadr el)))
+                          ((dict? (cadr el))
+                           (pp el)
+                           (throw "cannot splice dict"))
+                          (else
+                           ;; big hack! we only work with lists, so if
+                           ;; it's a vector force it into a list. do
+                           ;; this at runtime since it might be a variable
+                           (let ((v (gensym)))
+                             `(let ((,v ,(cadr el)))
+                                (if (vector? ,v)
+                                    (vector-to-list ,v)
+                                    ,v)))))))
                 (quote-splice (cdr lst)
                               (cons (e src e)
                                     (list-push lst-acc acc))
@@ -235,7 +263,6 @@
                             lst-acc
                             (cons (e (list 'quasiquote el) e)
                                   acc))))))
-
   ;; cut the list into sublists and return a form that melds them back
   ;; together
   (let ((res (quote-splice lst '() '())))

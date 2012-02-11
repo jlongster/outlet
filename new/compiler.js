@@ -62,7 +62,7 @@ function pp(obj) {
 }
 
 function inspect(obj) {
-    return __util.inspect(obj, null, 20);
+    return __util.inspect(obj, null, 50);
 }
 
 function not(v) {
@@ -284,6 +284,30 @@ function dict_dash_to_dash_list(dict) {
     return vector_dash_to_dash_list(res);
 }
 
+function keys(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(k);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function vals(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(dict[k]);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function zip(keys, vals) {
+    var obj = {};
+    for(var i=0, len=keys.length; i<len; i++) {
+        obj[keys[i]] = vals[i];
+    }
+    return obj;
+}
+
 function object_dash_ref(obj, key) {
     return obj[key];
 }
@@ -314,7 +338,8 @@ function vector_p_(obj) {
 }
 
 function dict_p_(obj) {
-    return obj && typeof obj == 'object' && obj.length === undefined;
+    var d = obj && typeof obj == 'object' && obj.length === undefined;
+    return !symbol_p_(obj) && d;
 }
 
 function _dash__gt_string(obj) {
@@ -613,12 +638,21 @@ return (function() {if(symbol_p_(src)) { return (function(){
 return unquote_splice(make_dash_list([string_dash__gt_symbol("quote"),make_dash_list([src,_emptylst])]))}
 )();} else { return (function() {if(literal_p_(src)) { return (function(){
 return src}
+)();} else { return (function() {if(vector_p_(src)) { return (function(){
+return unquote_splice(make_dash_list([string_dash__gt_symbol("list_dash_to_dash_vector"),make_dash_list([unquote_dash_splice_dash_expand(vector_dash_to_dash_list(src),e),_emptylst])]))}
+)();} else { return (function() {if(dict_p_(src)) { return (function(){
+return dict_dash_map(function(el){
+return (function() {if((list_p_(el)&&eq_p_(car(src),string_dash__gt_symbol("unquote")))) { return e(cadr(el),e);} else { return e(unquote_splice(make_dash_list([string_dash__gt_symbol("quasiquote"),make_dash_list([el,_emptylst])])),e);}})();
+}
+,src);}
 )();} else { return (function() {if(list_p_(src)) { return (function(){
 return (function() {if(eq_p_(car(src),string_dash__gt_symbol("unquote"))) { return e(cadr(src),e);} else { return unquote_dash_splice_dash_expand(src,e);}})();
 }
 )();} else { return (function(){
 throw(("invalid type of expression: "+inspect(src)));}
 )();}})();
+}})();
+}})();
 }})();
 }})();
 }
@@ -631,7 +665,19 @@ return (function() {if(null_p_(item)) { return lst} else { return cons(cons(stri
 return (function() {if(null_p_(lst)) { return list_dash_push(lst_dash_acc,acc);} else { return (function(el){
 return (function() {if((list_p_(el)&&eq_p_(car(el),string_dash__gt_symbol("unquote_dash_splicing")))) { return (function(src){
 return quote_dash_splice(cdr(lst),cons(e(src,e),list_dash_push(lst_dash_acc,acc)),unquote_splice(_emptylst));}
-)((function() {if(literal_p_(cadr(el))) { return unquote_splice(make_dash_list([string_dash__gt_symbol("list"),make_dash_list([cadr(el),_emptylst])]))} else { return cadr(el);}})()
+)((function() {if(literal_p_(cadr(el))) { return (function(){
+return unquote_splice(make_dash_list([string_dash__gt_symbol("list"),make_dash_list([cadr(el),_emptylst])]))}
+)();} else { return (function() {if(vector_p_(cadr(el))) { return (function(){
+return unquote_splice(make_dash_list([string_dash__gt_symbol("vector_dash_to_dash_list"),make_dash_list([cadr(el),_emptylst])]))}
+)();} else { return (function() {if(dict_p_(cadr(el))) { return (function(){
+pp(el);throw("cannot splice dict");}
+)();} else { return (function(){
+return (function(v){
+return unquote_splice(make_dash_list([string_dash__gt_symbol("let"),make_dash_list([unquote_splice(make_dash_list([unquote_splice(make_dash_list([v,make_dash_list([cadr(el),_emptylst])])),_emptylst])),make_dash_list([unquote_splice(make_dash_list([string_dash__gt_symbol("if"),make_dash_list([unquote_splice(make_dash_list([string_dash__gt_symbol("vector_p_"),make_dash_list([v,_emptylst])])),make_dash_list([unquote_splice(make_dash_list([string_dash__gt_symbol("vector_dash_to_dash_list"),make_dash_list([v,_emptylst])])),make_dash_list([v,_emptylst])])])])),_emptylst])])]))}
+)(gensym());}
+)();}})();
+}})();
+}})()
 );} else { return quote_dash_splice(cdr(lst),lst_dash_acc,cons(e(unquote_splice(make_dash_list([string_dash__gt_symbol("quasiquote"),make_dash_list([el,_emptylst])])),e),acc));}})();
 }
 )(car(lst));}})();

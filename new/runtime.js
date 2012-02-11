@@ -62,7 +62,7 @@ function pp(obj) {
 }
 
 function inspect(obj) {
-    return __util.inspect(obj, null, 20);
+    return __util.inspect(obj, null, 50);
 }
 
 function not(v) {
@@ -284,6 +284,30 @@ function dict_dash_to_dash_list(dict) {
     return vector_dash_to_dash_list(res);
 }
 
+function keys(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(k);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function vals(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(dict[k]);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function zip(keys, vals) {
+    var obj = {};
+    for(var i=0, len=keys.length; i<len; i++) {
+        obj[keys[i]] = vals[i];
+    }
+    return obj;
+}
+
 function object_dash_ref(obj, key) {
     return obj[key];
 }
@@ -314,7 +338,8 @@ function vector_p_(obj) {
 }
 
 function dict_p_(obj) {
-    return obj && typeof obj == 'object' && obj.length === undefined;
+    var d = obj && typeof obj == 'object' && obj.length === undefined;
+    return !symbol_p_(obj) && d;
 }
 
 function _dash__gt_string(obj) {
