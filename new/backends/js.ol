@@ -9,7 +9,10 @@
 
 (define (generator)
   (define code [])
- 
+
+  (define (make-fresh)
+    (generator))
+  
   (define (write src . eol)
     (code.push (+ src (if (null? eol) "" "\n"))))
 
@@ -211,8 +214,15 @@
    
    :write-and (make-op-writer "&&")
    :write-or (make-op-writer "||")
-   
-   ;;:write-object write-object
+   :write-add (make-op-writer "+")
+   :write-substract (make-op-writer "-")
+   :write-multiply (make-op-writer "*")
+   :write-divide (make-op-writer "/")
+   :write-gt (make-op-writer ">")
+   :write-lt (make-op-writer "<")
+   :write-mod (make-op-writer "%")
+
+   :make-fresh make-fresh
    :get-code (lambda () (code.join ""))})
 
 (set! module.exports generator)

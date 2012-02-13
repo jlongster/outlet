@@ -11,8 +11,6 @@
                             "utf-8"))
       (gen (js)))
   (gen.write-runtime "js")
-
-  (let ((r (compiler.read src)))
-    (let ((f (compiler.expand r)))
-      (compiler.parse f gen)
-      (eval (gen.get-code)))))
+  (let ((output (compiler.compile src gen)))
+    ;;(util.puts output)
+    (eval output)))

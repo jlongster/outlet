@@ -79,6 +79,7 @@ function eq_p_(v1, v2) {
 }
 
 function equal_p_(v1, v2) {
+    pp(v1); pp(v2);
     if(list_p_(v1) && list_p_(v2)) {
         function l(lst1, lst2) {
             var n1 = null_p_(lst1);
@@ -122,7 +123,7 @@ function equal_p_(v1, v2) {
 }
 
 function null_p_(arr) {
-    return arr.length === 1 && arr[0] === null;
+    return arr.length !== undefined && arr.length === 1 && arr[0] === null;
 }
 
 function cons(v1, v2) {
@@ -333,12 +334,12 @@ function list_p_(obj) {
 }
 
 function vector_p_(obj) {
-    var v = obj && typeof obj == 'object' && obj.length !== undefined;
-    return !list_p_(obj) && v;
+    var v = (obj && typeof obj == 'object' && obj.length !== undefined);
+    return !list_p_(obj) && !null_p_(obj) && v;
 }
 
 function dict_p_(obj) {
-    var d = obj && typeof obj == 'object' && obj.length === undefined;
+    var d = (obj && typeof obj == 'object' && obj.length === undefined);
     return !symbol_p_(obj) && d;
 }
 
@@ -474,15 +475,19 @@ function unquote_splice_map(obj) {
 
     return res;
 }
+// needed for eval because it needs access to the compiler to compile
+// the expression and evaluate it inline to be in the right context.
+var __compiler = require("./compiler");
+var __generator = require("./backends/js");
+var read = __compiler.read;
+
 var fs = require("fs");
 var compiler = require("./compiler");
 var util = require("util");
 var js = require("./backends/js");
 (function() {if((process.argv.length<3)) { throw("must pass a filename");}})();
 (function(src,gen){
-gen.write_dash_runtime("js");return (function(r){
-return (function(f){
-compiler.parse(f,gen);return eval(gen.get_dash_code());}
-)(compiler.expand(r));}
-)(compiler.read(src));}
+gen.write_dash_runtime("js");return (function(output){
+return eval(output);}
+)(compiler.compile(src,gen));}
 )(fs.readFileSync(("tests/"+vector_dash_ref(process.argv,2)),"utf-8"),js());

@@ -1,4 +1,4 @@
-(require (sys-util "util")
+(require (util "util")
          (fs "fs")
          (reader "./parser")
          (grammar "./grammar")
@@ -95,25 +95,39 @@
 (install-expander 'define-macro
                   (lambda (form e)
                     (let ((sig (cadr form)))
-                      (let ((keyword (car sig))
+                      (let ((name (car sig))
                             (pattern (cdr sig))
                             (body (cddr form)))
-                        (e `(install-expander ',keyword
-                                              ,(make-macro pattern body))
-                           e)))))
+                        ;; install it during expand-time
+                        (install-macro name pattern body)
+                        #t))))
+
+
+(define macro-generator #f)
+
+(define (install-macro name pattern body)
+  (install-expander name (make-macro pattern body)))
 
 (define (make-macro pattern body)
   (let ((x (gensym))
         (e (gensym)))
-    `(lambda (,x ,e)
-       (,e (let ,(destructure pattern `(cdr ,x) '())
-             ,@body)
-           ,e))))
+    ;; compile the macro into native code and use the host's native
+    ;; eval to eval it into a function. we don't use outlet's eval
+    ;; because that only works outside the compiler (see comments on
+    ;; `eval-outlet`).
+    (eval
+     (compile
+      `(lambda (,x ,e)
+         (,e (let ,(destructure pattern `(cdr ,x) '())
+               ,@body)
+             ,e))
+      (macro-generator.make-fresh)))))
 
 (define (destructure pattern access bindings)
   (cond
    ((null? pattern) bindings)
-   ((eq? (car pattern) '.) (cons (list (cadr pattern) access) bindings))
+   ((eq? (car pattern) '.) (cons (list (cadr pattern) access)
+                                 bindings))
    (else
     (cons (list (car pattern) `(car ,access))
           (destructure (cdr pattern) `(cdr ,access)
@@ -134,11 +148,10 @@
                         (let ((forms (cdr form)))
                           (let ((f (car forms)))
                             (if (eq? (car f) 'else)
-                                `(begin ,@(map (lambda (s) (e s e)) (cdr f)))
-                                (begin
-                                  `(if ,(e (car f) e)
-                                       (begin ,@(map (lambda (s) (e s e)) (cdr f)))
-                                       ,(e `(cond ,@(cdr forms)) e)))))))))
+                                (e `(begin ,@(cdr f)) e)
+                                (e `(if ,(car f)
+                                        (begin ,@(cdr f))
+                                        (cond ,@(cdr forms))) e)))))))
 
 (install-expander 'begin
                   (lambda (form e)
@@ -270,7 +283,20 @@
         (car res)
         (cons 'list-append (reverse res)))))
 
+;; eval
+;;
+;; eval is a little tricky. it must be a macro that expands into the
+;; host's native eval so that it happens in the right context. it also
+;; depends on two builtins which represent the current compiler and
+;; generator.
+
+(install-expander 'eval-outlet
+                  (lambda (form e)
+                    `(eval
+                      (__compiler.compile ,(e (cadr form) e) (__generator)))))
+
 ;; natives
+;;
 ;; natives are like macros for generating source code. it allows the
 ;; generator to customize how certain forms look in the final output.
 ;; these could have been macros that expand into basic forms, but we
@@ -282,24 +308,31 @@
 (define (native-function name)
   (ref _natives_ name))
 
-(define (install-native name func)
-  (put! _natives_ (symbol->string name) func))
+(define (install-native name func validator)
+  (put! _natives_
+        (symbol->string name)
+        (lambda (form gen expr? parse)
+          (validator form)
+          ((ref gen func) (cdr form) expr? parse))))
 
 (define (native? name)
   (not (eq? (ref _natives_ name))
        undefined))
 
-(install-native 'and
-                (lambda (form gen expr? parse)
-                  (assert (> (length form) 1)
-                          "`and` requires at least one operand")
-                  (gen.write-and (cdr form) expr? parse)))
+(define (verify-not-single form)
+  (assert (> (length form) 1)
+          (string-append "form requires at least one operand:"
+                         (inspect form))))
 
-(install-native 'or
-                (lambda (form gen expr? parse)
-                  (assert (> (length form) 1)
-                          "`or` requires at least one operand")
-                  (gen.write-or (cdr form) expr? parse)))
+(install-native 'and 'write-and verify-not-single)
+(install-native 'or 'write-or verify-not-single)
+(install-native '+ 'write-add verify-not-single)
+(install-native '- 'write-subtract verify-not-single)
+(install-native '* 'write-multiply verify-not-single)
+(install-native '/ 'write-divide verify-not-single)
+(install-native '> 'write-gt verify-not-single)
+(install-native '< 'write-lt verify-not-single)
+(install-native '% 'write-mod verify-not-single)
 
 ;; compiler
 
@@ -411,7 +444,7 @@
           (parse-list (cons 'dict qlst)))))
     
     (cond
-     ((symbol? form) (generator.write-term form))
+     ((symbol? form) (generator.write-term form (not expr?)))
      ((literal? form) (parse-literal form))
      ((list? form) (parse-list form))
      ((vector? form) (parse-vector form))
@@ -423,16 +456,16 @@
   (reader grammar src '[]))
 
 (define (compile src generator)
-  (let ((r (read src)))
-    (let ((f (expand r)))
-      ;; todo, figure when runtime should be written
-      (generator.write-runtime "js")
-      (compiler.parse f gen)
-      (generator.get-code))))
+  ;; eval needs a code generator
+  (if (not macro-generator)
+      (set! macro-generator generator))
+  
+  (let ((f (expand (if (string? src) (read src) src))))
+    (parse f generator)
+    (generator.get-code)))
 
 (set! module.exports {:read read
                       :expand expand
                       :parse parse
-                      :compile compile})
-
-
+                      :compile compile
+                      :install-expander install-expander})

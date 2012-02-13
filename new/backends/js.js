@@ -62,7 +62,7 @@ function pp(obj) {
 }
 
 function inspect(obj) {
-    return __util.inspect(obj, null, 20);
+    return __util.inspect(obj, null, 50);
 }
 
 function not(v) {
@@ -257,7 +257,7 @@ var hash_dash_map = dict;
 
 function dict_dash_map(func, dict) {
     var res = {};
-    for(var k in dct) {
+    for(var k in dict) {
         res[k] = func(dict[k]);
     }
     return res;
@@ -277,11 +277,35 @@ function hash_dash_map_dash_to_dash_vec(obj) {
 
 function dict_dash_to_dash_list(dict) {
     var res = [];
-    for(var k in obj) {
+    for(var k in dict) {
         res.push(string_dash__gt_symbol(k));
-        res.push(obj[k]);
+        res.push(dict[k]);
     }
     return vector_dash_to_dash_list(res);
+}
+
+function keys(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(k);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function vals(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(dict[k]);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function zip(keys, vals) {
+    var obj = {};
+    for(var i=0, len=keys.length; i<len; i++) {
+        obj[keys[i]] = vals[i];
+    }
+    return obj;
 }
 
 function object_dash_ref(obj, key) {
@@ -310,11 +334,12 @@ function list_p_(obj) {
 
 function vector_p_(obj) {
     var v = obj && typeof obj == 'object' && obj.length !== undefined;
-    return !list_p_(obj) && v;
+    return !list_p_(obj) && !null_p_(obj) && v;
 }
 
 function dict_p_(obj) {
-    return obj && typeof obj == 'object' && obj.length === undefined;
+    var d = obj && typeof obj == 'object' && obj.length === undefined;
+    return !symbol_p_(obj) && d;
 }
 
 function _dash__gt_string(obj) {
@@ -453,7 +478,9 @@ var fs = require("fs");
 var should_dash_return_p_ = function(form){
 return not((list_p_(form)&&(eq_p_(car(form),string_dash__gt_symbol("throw"))||eq_p_(car(form),string_dash__gt_symbol("set_excl_"))||eq_p_(car(form),string_dash__gt_symbol("set")))));}
 ;var generator = function(){
-var code = unquote_splice_vec([]);var write = function(src){
+var code = unquote_splice_vec([]);var make_dash_fresh = function(){
+return generator();}
+;var write = function(src){
 var eol = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, 1));
 return code.push((src+(function() {if(null_p_(eol)) { return ""} else { return "\n"}})()
 ));}
@@ -547,7 +574,7 @@ op_dash_writer();return parse(arg,true);}
 return function(vals,expr_p_,parse){
 return write_dash_op(str,vals,expr_p_,parse);}
 }
-;return unquote_splice_map({"write_dash_runtime": write_dash_runtime,"write_dash_number": write_dash_number,"write_dash_string": write_dash_string,"write_dash_boolean": write_dash_boolean,"write_dash_term": write_dash_term,"write_dash_symbol": write_dash_symbol,"write_dash_empty_dash_list": write_dash_empty_dash_list,"write_dash_set": write_dash_set,"write_dash_set_excl_": write_dash_set_excl_,"write_dash_if": write_dash_if,"write_dash_lambda": write_dash_lambda,"write_dash_func_dash_call": write_dash_func_dash_call,"write_dash_and": make_dash_op_dash_writer("&&"),"write_dash_or": make_dash_op_dash_writer("||"),"get_dash_code": function(){
+;return unquote_splice_map({"write_dash_runtime": write_dash_runtime,"write_dash_number": write_dash_number,"write_dash_string": write_dash_string,"write_dash_boolean": write_dash_boolean,"write_dash_term": write_dash_term,"write_dash_symbol": write_dash_symbol,"write_dash_empty_dash_list": write_dash_empty_dash_list,"write_dash_set": write_dash_set,"write_dash_set_excl_": write_dash_set_excl_,"write_dash_if": write_dash_if,"write_dash_lambda": write_dash_lambda,"write_dash_func_dash_call": write_dash_func_dash_call,"write_dash_and": make_dash_op_dash_writer("&&"),"write_dash_or": make_dash_op_dash_writer("||"),"write_dash_add": make_dash_op_dash_writer("+"),"write_dash_substract": make_dash_op_dash_writer("-"),"write_dash_multiply": make_dash_op_dash_writer("*"),"write_dash_divide": make_dash_op_dash_writer("/"),"write_dash_gt": make_dash_op_dash_writer(">"),"write_dash_lt": make_dash_op_dash_writer("<"),"write_dash_mod": make_dash_op_dash_writer("%"),"make_dash_fresh": make_dash_fresh,"get_dash_code": function(){
 return code.join("");}
 })}
 ;module.exports = generator;

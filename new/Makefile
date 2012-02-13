@@ -22,3 +22,4 @@ compiler: compiler.js parser.js grammar.js backends/js.js test.js
 
 test: compiler
 	node test basic.ol
+	node test compile.ol

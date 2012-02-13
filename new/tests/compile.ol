@@ -33,6 +33,7 @@
 (define (foo x y z) (+ x y z))
 (test-eval (foo 1 2 3) 6)
 
+
 (define (bar t) (* (foo 1 2 3) t))
 (test-eval (bar 5) 30)
 
@@ -41,14 +42,11 @@
            42)
 
 ;; lambda
-
 (define foo (lambda (x y z) (+ x y z)))
 (test-eval (foo 1 2 3) 6)
 
 (define foo (lambda args args))
 (test-eval (foo 1 2 3) '(1 2 3))
-
-
 
 ;; set!
 (test-eval ((lambda (x)
@@ -57,8 +55,8 @@
            100)
 
 ;; if
-(test-eval (if true 1 2) 1)
-(test-eval (if false 1 2) 2)
+(test-eval (if #t 1 2) 1)
+(test-eval (if #f 1 2) 2)
 (test-eval (if true
                 (begin
                   (define a 5)
@@ -81,4 +79,48 @@
             (else 'none))
            'none)
 
+;; types
+(define foo-lst '(1 2 3))
+(define foo-vec [1 2 3])
+(define foo-dict {:one 1})
 
+;; this is a macro so failures report the right failed form
+(define-macro (ensure-type val truthy)
+  (cons 'begin
+        (map (lambda (func)
+               `(test-eval (,func ,val)
+                           ,(eq? func truthy)))
+             '(boolean?
+               number?
+               symbol?
+               string?
+               list?
+               vector?
+               dict?))))
+
+(ensure-type 5 number?)
+(ensure-type #t boolean?)
+(ensure-type 'foo symbol?)
+(ensure-type "foo" string?)
+(ensure-type '(1 2 3) list?)
+(ensure-type [1 2 3] vector?)
+(ensure-type {:one 1} dict?)
+
+;; test code following an `if`
+(define (func)
+  (if #t "yes" "no")
+  (+ 1 2))
+(test-eval (func) 3)
+
+;; test set! as last expression
+(define (faz)
+  (let ((x 1))
+    (+ 2 3)
+    (set! x 3)))
+(test-eval (faz) undefined)
+
+;; test define as last expression (this won't be valid in the future)
+(define (buz)
+  (+ 2 3)
+  (define a 4))
+(test-eval (buz) undefined)
