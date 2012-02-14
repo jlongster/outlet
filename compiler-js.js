@@ -362,6 +362,10 @@ function generator() {
             write_op('<', node, parse);
         },
 
+        '%': function(node, parse) {
+            write_op('%', node, parse);
+        },
+
         'if': function (node, parse) {
             // (function() { if(EXPR1) { return EXPR2; } else { return EXPR3; }})()
             write('(function() {');
