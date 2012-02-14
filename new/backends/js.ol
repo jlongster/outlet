@@ -198,6 +198,15 @@
   (define (make-op-writer str)
     (lambda (vals expr? parse)
       (write-op str vals expr? parse)))
+
+  (define (write-require args expr? parse)
+    (for-each (lambda (el)
+                (write "var ")
+                (write-term (car el))
+                (write " = require(")
+                (write-string (cadr el))
+                (write ");"))
+              args))
   
   {:write-runtime write-runtime
    :write-number write-number
@@ -211,11 +220,13 @@
    :write-if write-if
    :write-lambda write-lambda
    :write-func-call write-func-call
-   
+
+   ;; specials
+   :write-require write-require
    :write-and (make-op-writer "&&")
    :write-or (make-op-writer "||")
    :write-add (make-op-writer "+")
-   :write-substract (make-op-writer "-")
+   :write-subtract (make-op-writer "-")
    :write-multiply (make-op-writer "*")
    :write-divide (make-op-writer "/")
    :write-gt (make-op-writer ">")

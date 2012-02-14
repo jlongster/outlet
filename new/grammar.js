@@ -62,7 +62,7 @@ function pp(obj) {
 }
 
 function inspect(obj) {
-    return __util.inspect(obj, null, 20);
+    return __util.inspect(obj, null, 50);
 }
 
 function not(v) {
@@ -78,7 +78,7 @@ function eq_p_(v1, v2) {
     return v1 === v2;
 }
 
-function equal_p_(v1, v2) {
+function equal_p_(v1, v2) {    
     if(list_p_(v1) && list_p_(v2)) {
         function l(lst1, lst2) {
             var n1 = null_p_(lst1);
@@ -118,11 +118,15 @@ function equal_p_(v1, v2) {
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
     }
+
     return v1 == v2;
 }
 
 function null_p_(arr) {
-    return arr.length === 1 && arr[0] === null;
+    return (arr &&
+            arr.length !== undefined &&
+            arr.length === 1 &&
+            arr[0] === null);
 }
 
 function cons(v1, v2) {
@@ -257,7 +261,7 @@ var hash_dash_map = dict;
 
 function dict_dash_map(func, dict) {
     var res = {};
-    for(var k in dct) {
+    for(var k in dict) {
         res[k] = func(dict[k]);
     }
     return res;
@@ -284,6 +288,30 @@ function dict_dash_to_dash_list(dict) {
     return vector_dash_to_dash_list(res);
 }
 
+function keys(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(k);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function vals(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(dict[k]);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function zip(keys, vals) {
+    var obj = {};
+    for(var i=0, len=keys.length; i<len; i++) {
+        obj[keys[i]] = vals[i];
+    }
+    return obj;
+}
+
 function object_dash_ref(obj, key) {
     return obj[key];
 }
@@ -293,7 +321,7 @@ function number_p_(obj) {
 }
 
 function symbol_p_(obj) {
-    return obj && obj.str && obj.symbol;
+    return obj && obj.str != undefined && obj.symbol != undefined;
 }
 
 function string_p_(obj) {
@@ -305,16 +333,17 @@ function boolean_p_(obj) {
 }
 
 function list_p_(obj) {
-    return obj && obj.list;
+    return obj && obj.list !== undefined;
 }
 
 function vector_p_(obj) {
-    var v = obj && typeof obj == 'object' && obj.length !== undefined;
-    return !list_p_(obj) && v;
+    var v = (obj && typeof obj == 'object' && obj.length !== undefined);
+    return !list_p_(obj) && !null_p_(obj) && v;
 }
 
 function dict_p_(obj) {
-    return obj && typeof obj == 'object' && obj.length === undefined;
+    var d = (obj && typeof obj == 'object' && obj.length === undefined);
+    return !symbol_p_(obj) && d;
 }
 
 function _dash__gt_string(obj) {
@@ -449,99 +478,132 @@ function unquote_splice_map(obj) {
 
     return res;
 }
-var grammar = function(all,any,capture,char,not_dash_char,optional,Y,eof,terminator,before,after){
-var repeated = function(rule){
-return Y(function(seq){
-return any(all(rule,seq),rule);}
-);}
-;var space_dash_char = " \n\t\r";var space = repeated(char(space_dash_char));;var comment = all(optional(space),char(";"),repeated(not_dash_char("\n")),space);;var number = capture(all(optional(char("-")),repeated(char("1234567890")),optional(all(char("."),repeated(char("1234567890"))))),function(text,state){
-return parseFloat(text);}
-);;var boolean = capture(any(all(char("#"),char("f")),all(char("#"),char("t"))),function(text,state){
-return (function() {if(equal_p_(text,"#f")) { return false} else { return true}})();
-}
-);;var string = (function(capt,capt_node,capt_special,init){
-var content = any(capt_special(all(char("\\"),not_dash_char(""))),capt(not_dash_char("\"")));;return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));}
-)(function(rule){
-return capture(rule,function(buf,state){
-return (state+buf)}
-);}
-,function(rule){
-return capture(rule,function(str,state){
-return state}
-);}
-,function(rule){
-return capture(rule,function(str,state){
-return (state+(function() {if(equal_p_(str,"\\n")) { return (function(){
-return "\n"}
-)();} else { return (function() {if(equal_p_(str,"\\t")) { return (function(){
-return "\t"}
-)();} else { return (function() {if(equal_p_(str,"\\r")) { return (function(){
-return "\r"}
-)();} else { return (function(){
-return str.charAt(1);}
-)();}})();
-}})();
+((function() {var grammar = (function(all,any,capture,char,not_dash_char,optional,Y,eof,terminator,before,after){
+var repeated = (function(rule){
+return Y((function(seq){
+return any(all(rule,seq),rule);
+}));
+});
+var space_dash_char = " \n\t\r";
+var space = repeated(char(space_dash_char));
+var comment = all(optional(space),char(";"),repeated(not_dash_char("\n")),space);
+var number = capture(all(optional(char("-")),repeated(char("1234567890")),optional(all(char("."),repeated(char("1234567890"))))),(function(text,state){
+return parseFloat(text);
+}));
+var boolean = capture(any(all(char("#"),char("f")),all(char("#"),char("t"))),(function(text,state){
+return (function() {if(equal_p_(text,"#f")) {return false;
+} else {return true;
 }})()
-)}
-);}
-,function(rule){
-return before(rule,function(state){
-return ""}
-);}
-);;var raw_term = capture(repeated(any(not_dash_char(("{}()[]'"+space_dash_char)))),function(buf,s){
-return string_dash__gt_symbol(buf);}
-);;var raw_keyword = capture(all(char(":"),raw_term),function(buf,node){
-return unquote_splice(make_dash_list([string_dash__gt_symbol("quote"),make_dash_list([node,_emptylst])]))}
-);;var term = any(raw_keyword,raw_term);;var elements = function(lst){
-var quoting = function(rule){
-var capt = function(buf,node){
-return (function(special){
-return unquote_splice(make_dash_list([string_dash__gt_symbol(special),make_dash_list([node,_emptylst])]))}
-)((function() {if(equal_p_(buf.substring(0,2),",@")) { return (function(){
-return "unquote-splicing"}
-)();} else { return (function() {if(equal_p_(buf.charAt(0),",")) { return (function(){
-return "unquote"}
-)();} else { return (function() {if(equal_p_(buf.charAt(0),"'")) { return (function(){
-return "quote"}
-)();} else { return (function() {if(equal_p_(buf.charAt(0),"`")) { return (function(){
-return "quasiquote"}
-)();} else { return false}})();
-}})();
-}})();
+;
+}));
+var string = ((function(capt,capt_node,capt_special,init){
+var content = any(capt_special(all(char("\\"),not_dash_char(""))),capt(not_dash_char("\"")));
+return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));
+}))((function(rule){
+return capture(rule,(function(buf,state){
+return (state + buf);
+}));
+}),(function(rule){
+return capture(rule,(function(str,state){
+return state;
+}));
+}),(function(rule){
+return capture(rule,(function(str,state){
+return (state + (function() {if(equal_p_(str,"\\n")) {return ((function() {return "\n";
+}))();
+} else {return (function() {if(equal_p_(str,"\\t")) {return ((function() {return "\t";
+}))();
+} else {return (function() {if(equal_p_(str,"\\r")) {return ((function() {return "\r";
+}))();
+} else {return ((function() {return str.charAt(1);
+}))();
 }})()
-);}
-;return Y(function(q){
-return capture(all(any(char("'"),char("`"),all(char(","),char("@")),char(",")),any(q,rule)),capt);}
-);}
-;return (function(rule){
-return any(quoting(rule),rule);}
-)(any(lst,number,string,boolean,term));}
-;var lst = Y(function(lst){
-return all(any(before(char("{"),function(state){
-return unquote_splice_vec([])}
-),before(char("("),function(state){
-return unquote_splice_vec([])}
-),before(char("["),function(state){
-return unquote_splice_vec([])}
-)),optional(repeated(any(space,comment,after(elements(lst),function(parent,child){
-return vector_dash_concat(parent,unquote_splice_vec([child]));}
-)))),any(before(char("}"),function(state){
-return (function(i){
-return dict.apply(null,vector_dash_map(function(el){
-i = (i+1);return (function() {if(eq_p_(((i-1)%2),0)) { return (function() {if((list_p_(el)&&eq_p_(car(el),string_dash__gt_symbol("quote")))) { return cadr(el);} else { return el}})();
-} else { return el}})();
-}
-,state));}
-)(0);}
-),before(char(")"),function(state){
-return vector_dash_to_dash_list(state);}
-),char("]")));}
-);;return after(repeated(any(space,comment,after(elements(any(lst)),function(root,child){
-return root.concat(vector(child));}
-))),function(_,root){
-return (function(lst){
-return (function() {if(eq_p_(length(lst),1)) { return car(lst);} else { return cons(string_dash__gt_symbol("begin"),lst);}})();
-}
-)(vector_dash_to_dash_list(root));}
-);}
-;module.exports = grammar;
+;
+}})()
+;
+}})()
+);
+}));
+}),(function(rule){
+return before(rule,(function(state){
+return "";
+}));
+}));
+var raw_term = capture(repeated(any(not_dash_char(("{}()[]'" + space_dash_char)))),(function(buf,s){
+return string_dash__gt_symbol(buf);
+}));
+var raw_keyword = capture(all(char(":"),raw_term),(function(buf,node){
+return list(string_dash__gt_symbol("quote"),node);
+}));
+var term = any(raw_keyword,raw_term);
+var elements = (function(lst){
+var quoting = (function(rule){
+var capt = (function(buf,node){
+return ((function(special){
+return list(string_dash__gt_symbol(special),node);
+}))((function() {if(equal_p_(buf.substring(0,2),",@")) {return ((function() {return "unquote-splicing";
+}))();
+} else {return (function() {if(equal_p_(buf.charAt(0),",")) {return ((function() {return "unquote";
+}))();
+} else {return (function() {if(equal_p_(buf.charAt(0),"'")) {return ((function() {return "quote";
+}))();
+} else {return (function() {if(equal_p_(buf.charAt(0),"`")) {return ((function() {return "quasiquote";
+}))();
+} else {return false;
+}})()
+;
+}})()
+;
+}})()
+;
+}})()
+);
+});
+return Y((function(q){
+return capture(all(any(char("'"),char("`"),all(char(","),char("@")),char(",")),any(q,rule)),capt);
+}));
+});
+return ((function(rule){
+return any(quoting(rule),rule);
+}))(any(lst,number,string,boolean,term));
+});
+var lst = Y((function(lst){
+return all(any(before(char("{"),(function(state){
+return vector();
+})),before(char("("),(function(state){
+return vector();
+})),before(char("["),(function(state){
+return vector();
+}))),optional(repeated(any(space,comment,after(elements(lst),(function(parent,child){
+return vector_dash_concat(parent,vector(child));
+}))))),any(before(char("}"),(function(state){
+return ((function(i){
+return dict.apply(null,vector_dash_map((function(el){
+i = (i + 1);
+return (function() {if(eq_p_(((i - 1) % 2),0)) {return (function() {if((list_p_(el) && eq_p_(car(el),string_dash__gt_symbol("quote")))) {return cadr(el);
+} else {return el;
+}})()
+;
+} else {return el;
+}})()
+;
+}),state));
+}))(0);
+})),before(char(")"),(function(state){
+return vector_dash_to_dash_list(state);
+})),char("]")));
+}));
+return after(repeated(any(space,comment,after(elements(any(lst)),(function(root,child){
+return root.concat(vector(child));
+})))),(function(_,root){
+return ((function(lst){
+return (function() {if(eq_p_(length(lst),1)) {return car(lst);
+} else {return cons(string_dash__gt_symbol("begin"),lst);
+}})()
+;
+}))(vector_dash_to_dash_list(root));
+}));
+});
+module.exports = grammar;
+}))();
+

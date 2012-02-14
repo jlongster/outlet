@@ -334,6 +334,18 @@
 (install-native '< 'write-lt verify-not-single)
 (install-native '% 'write-mod verify-not-single)
 
+(install-native 'require 'write-require
+                (lambda (form)
+                  (verify-not-single form)
+                  (for-each
+                   (lambda (el)
+                     (assert (and (list? el)
+                                  (eq? (length el) 2))
+                             (string-append "require needs a list of "
+                                            "2 element lists: "
+                                            (inspect el))))
+                   (cdr form))))
+
 ;; compiler
 
 (define (parse form generator . expr?)

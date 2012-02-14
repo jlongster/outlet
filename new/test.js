@@ -78,8 +78,7 @@ function eq_p_(v1, v2) {
     return v1 === v2;
 }
 
-function equal_p_(v1, v2) {
-    pp(v1); pp(v2);
+function equal_p_(v1, v2) {    
     if(list_p_(v1) && list_p_(v2)) {
         function l(lst1, lst2) {
             var n1 = null_p_(lst1);
@@ -119,11 +118,15 @@ function equal_p_(v1, v2) {
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
     }
+
     return v1 == v2;
 }
 
 function null_p_(arr) {
-    return arr.length !== undefined && arr.length === 1 && arr[0] === null;
+    return (arr &&
+            arr.length !== undefined &&
+            arr.length === 1 &&
+            arr[0] === null);
 }
 
 function cons(v1, v2) {
@@ -318,7 +321,7 @@ function number_p_(obj) {
 }
 
 function symbol_p_(obj) {
-    return obj && obj.str && obj.symbol;
+    return obj && obj.str != undefined && obj.symbol != undefined;
 }
 
 function string_p_(obj) {
@@ -330,7 +333,7 @@ function boolean_p_(obj) {
 }
 
 function list_p_(obj) {
-    return obj && obj.list;
+    return obj && obj.list !== undefined;
 }
 
 function vector_p_(obj) {
@@ -481,13 +484,15 @@ var __compiler = require("./compiler");
 var __generator = require("./backends/js");
 var read = __compiler.read;
 
-var fs = require("fs");
-var compiler = require("./compiler");
-var util = require("util");
-var js = require("./backends/js");
-(function() {if((process.argv.length<3)) { throw("must pass a filename");}})();
-(function(src,gen){
-gen.write_dash_runtime("js");return (function(output){
-return eval(output);}
-)(compiler.compile(src,gen));}
-)(fs.readFileSync(("tests/"+vector_dash_ref(process.argv,2)),"utf-8"),js());
+((function() {var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
+} else {return false;
+}})()
+;
+return ((function(src,gen){
+gen.write_dash_runtime("js");
+return ((function(output){
+return eval(output);
+}))(compiler.compile(src,gen));
+}))(fs.readFileSync(string_dash_append("tests/",vector_dash_ref(process.argv,2)),"utf-8"),js());
+}))();
+

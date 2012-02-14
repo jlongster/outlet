@@ -124,3 +124,14 @@
   (+ 2 3)
   (define a 4))
 (test-eval (buz) undefined)
+
+;; math
+(test-eval (+ 1 2) 3)
+(test-eval (- 1 2) -1)
+(test-eval (* 3 4) 12)
+(test-eval (/ 10 4) 2.5)
+(test-eval (% 12 10) 2)
+(test-eval (< 1 2) #t)
+(test-eval (< 5 4) #f)
+(test-eval (> 2 1) #t)
+(test-eval (> 4 5) #f)

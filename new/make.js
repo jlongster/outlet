@@ -1,8 +1,8 @@
 var util = require('util');
 var fs = require('fs');
 
-var compiler = require('../compiler');
-var js_generator = require('../compiler-js');
+var compiler = require('./compiler');
+var js_generator = require('./backends/js');
 var srcfile = process.argv[2];
 
 var runtime = fs.readFileSync('runtime.js', 'utf-8');
