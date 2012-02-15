@@ -1,3 +1,13 @@
+'installing...define_dash_expander'
+'installing...define_dash_macro'
+'installing...lambda'
+'installing...cond'
+'installing...begin'
+'installing...define'
+'installing...let'
+'installing...quote'
+'installing...quasiquote'
+'installing...eval_dash_outlet'
 var __util = require('util');
 
 var _emptylst = [null];
@@ -548,9 +558,11 @@ var expander_dash_function = (function(name){
 return ref(_expanders_,name);
 });
 var install_dash_expander = (function(name,func){
+pp(string_dash_append("installing...",symbol_dash__gt_string(name)));
 return put_excl_(_expanders_,symbol_dash__gt_string(name),func);
 });
 var expander_p_ = (function(name){
+pp(string_dash_append("expander? ",symbol_dash__gt_string(name)));
 return not(eq_p_(ref(_expanders_,name),undefined));
 });
 var expand = (function(form){
@@ -587,6 +599,23 @@ return e(subform,e);
 }})()
 ;
 });
+install_dash_expander(string_dash__gt_symbol("define_dash_expander"),(function(form,e){
+return ((function(sig){
+return ((function(name,arg_dash_names,body){
+install_dash_expander(name,make_dash_expander(arg_dash_names,body));
+return true;
+}))(car(sig),cdr(sig),cddr(form));
+}))(cadr(form));
+}));
+var make_dash_expander = (function(arg_dash_names,body){
+assert(eq_p_(length(arg_dash_names),2),"define-expander functions must take two arguments");
+return eval(compile(list_dash_append(list(string_dash__gt_symbol("lambda"),arg_dash_names),((function(o1){
+return (function() {if(vector_p_(o1)) {return vector_dash_to_dash_list(o1);
+} else {return o1;
+}})()
+;
+}))(body)),macro_dash_generator.make_dash_fresh()));
+});
 install_dash_expander(string_dash__gt_symbol("define_dash_macro"),(function(form,e){
 return ((function(sig){
 return ((function(name,pattern,body){
@@ -601,9 +630,9 @@ return install_dash_expander(name,make_dash_macro(pattern,body));
 });
 var make_dash_macro = (function(pattern,body){
 return ((function(x,e){
-return eval(compile(list(string_dash__gt_symbol("lambda"),list(x,e),list(e,list_dash_append(list(string_dash__gt_symbol("let"),destructure(pattern,list(string_dash__gt_symbol("cdr"),x),_emptylst)),((function(o1){
-return (function() {if(vector_p_(o1)) {return vector_dash_to_dash_list(o1);
-} else {return o1;
+return eval(compile(list(string_dash__gt_symbol("lambda"),list(x,e),list(e,list_dash_append(list(string_dash__gt_symbol("let"),destructure(pattern,list(string_dash__gt_symbol("cdr"),x),_emptylst)),((function(o2){
+return (function() {if(vector_p_(o2)) {return vector_dash_to_dash_list(o2);
+} else {return o2;
 }})()
 ;
 }))(body)),e)),macro_dash_generator.make_dash_fresh()));
@@ -622,9 +651,9 @@ return (function() {if(null_p_(pattern)) {return ((function() {return bindings;
 ;
 });
 install_dash_expander(string_dash__gt_symbol("lambda"),(function(form,e){
-return list_dash_append(list(string_dash__gt_symbol("lambda"),car(cdr(form))),((function(o2){
-return (function() {if(vector_p_(o2)) {return vector_dash_to_dash_list(o2);
-} else {return o2;
+return list_dash_append(list(string_dash__gt_symbol("lambda"),car(cdr(form))),((function(o3){
+return (function() {if(vector_p_(o3)) {return vector_dash_to_dash_list(o3);
+} else {return o3;
 }})()
 ;
 }))(map((function(subform){
@@ -635,20 +664,20 @@ install_dash_expander(string_dash__gt_symbol("cond"),(function(form,e){
 return (function() {if(null_p_(cdr(form))) {return false;
 } else {return ((function(forms){
 return ((function(f){
-return (function() {if(eq_p_(car(f),string_dash__gt_symbol("else"))) {return e(list_dash_append(list(string_dash__gt_symbol("begin")),((function(o3){
-return (function() {if(vector_p_(o3)) {return vector_dash_to_dash_list(o3);
-} else {return o3;
-}})()
-;
-}))(cdr(f))),e);
-} else {return e(list(string_dash__gt_symbol("if"),car(f),list_dash_append(list(string_dash__gt_symbol("begin")),((function(o4){
+return (function() {if(eq_p_(car(f),string_dash__gt_symbol("else"))) {return e(list_dash_append(list(string_dash__gt_symbol("begin")),((function(o4){
 return (function() {if(vector_p_(o4)) {return vector_dash_to_dash_list(o4);
 } else {return o4;
 }})()
 ;
-}))(cdr(f))),list_dash_append(list(string_dash__gt_symbol("cond")),((function(o5){
+}))(cdr(f))),e);
+} else {return e(list(string_dash__gt_symbol("if"),car(f),list_dash_append(list(string_dash__gt_symbol("begin")),((function(o5){
 return (function() {if(vector_p_(o5)) {return vector_dash_to_dash_list(o5);
 } else {return o5;
+}})()
+;
+}))(cdr(f))),list_dash_append(list(string_dash__gt_symbol("cond")),((function(o6){
+return (function() {if(vector_p_(o6)) {return vector_dash_to_dash_list(o6);
+} else {return o6;
 }})()
 ;
 }))(cdr(forms)))),e);
@@ -660,18 +689,18 @@ return (function() {if(vector_p_(o5)) {return vector_dash_to_dash_list(o5);
 ;
 }));
 install_dash_expander(string_dash__gt_symbol("begin"),(function(form,e){
-return e(list(list_dash_append(list(string_dash__gt_symbol("lambda"),_emptylst),((function(o6){
-return (function() {if(vector_p_(o6)) {return vector_dash_to_dash_list(o6);
-} else {return o6;
+return e(list(list_dash_append(list(string_dash__gt_symbol("lambda"),_emptylst),((function(o7){
+return (function() {if(vector_p_(o7)) {return vector_dash_to_dash_list(o7);
+} else {return o7;
 }})()
 ;
 }))(cdr(form)))),e);
 }));
 install_dash_expander(string_dash__gt_symbol("define"),(function(form,e){
 return ((function(sig){
-return (function() {if(list_p_(sig)) {return ((function() {return e(list(string_dash__gt_symbol("set"),car(sig),list_dash_append(list(string_dash__gt_symbol("lambda"),cdr(sig)),((function(o7){
-return (function() {if(vector_p_(o7)) {return vector_dash_to_dash_list(o7);
-} else {return o7;
+return (function() {if(list_p_(sig)) {return ((function() {return e(list(string_dash__gt_symbol("set"),car(sig),list_dash_append(list(string_dash__gt_symbol("lambda"),cdr(sig)),((function(o8){
+return (function() {if(vector_p_(o8)) {return vector_dash_to_dash_list(o8);
+} else {return o8;
 }})()
 ;
 }))(cddr(form)))),e);
@@ -688,14 +717,14 @@ return (function() {if(vector_p_(o7)) {return vector_dash_to_dash_list(o7);
 }));
 install_dash_expander(string_dash__gt_symbol("let"),(function(form,e){
 return ((function(forms,body){
-return e(list_dash_append(list(list_dash_append(list(string_dash__gt_symbol("lambda"),map(car,forms)),((function(o8){
-return (function() {if(vector_p_(o8)) {return vector_dash_to_dash_list(o8);
-} else {return o8;
-}})()
-;
-}))(body))),((function(o9){
+return e(list_dash_append(list(list_dash_append(list(string_dash__gt_symbol("lambda"),map(car,forms)),((function(o9){
 return (function() {if(vector_p_(o9)) {return vector_dash_to_dash_list(o9);
 } else {return o9;
+}})()
+;
+}))(body))),((function(o10){
+return (function() {if(vector_p_(o10)) {return vector_dash_to_dash_list(o10);
+} else {return o10;
 }})()
 ;
 }))(map(cadr,forms))),e);

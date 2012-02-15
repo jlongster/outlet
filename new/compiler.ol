@@ -90,6 +90,24 @@
     ((expander-function (car form)) form e))
    (else (map (lambda (subform) (e subform e)) form))))
 
+(install-expander 'define-expander
+                  (lambda (form e)
+                    (let ((sig (cadr form)))
+                      (let ((name (car sig))
+                            (arg-names (cdr sig))
+                            (body (cddr form)))
+                        (install-expander name (make-expander arg-names body))
+                        #t))))
+
+(define (make-expander arg-names body)
+  (assert (eq? (length arg-names) 2)
+          "define-expander functions must take two arguments")
+  (eval
+   (compile
+    `(lambda ,arg-names
+       ,@body)
+    (macro-generator.make-fresh))))
+
 ;; define-macro implementation on top of expanders
 
 (install-expander 'define-macro
