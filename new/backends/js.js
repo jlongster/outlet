@@ -333,7 +333,7 @@ function boolean_p_(obj) {
 }
 
 function list_p_(obj) {
-    return obj && obj.list !== undefined;
+    return !!obj && obj.list !== undefined;
 }
 
 function vector_p_(obj) {

@@ -135,3 +135,6 @@
 (test-eval (< 5 4) #f)
 (test-eval (> 2 1) #t)
 (test-eval (> 4 5) #f)
+
+;; test a few edge cases
+(test-eval (not (list? 0)) #t)

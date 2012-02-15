@@ -3,3 +3,4 @@
 var __compiler = require("./compiler");
 var __generator = require("./backends/js");
 var read = __compiler.read;
+var pretty = __compiler.pretty;

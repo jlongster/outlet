@@ -80,6 +80,19 @@
 (define (expand-once form)
   (initial-expander form (lambda (x e) x)))
 
+(define (expand-nth form n)
+  (let ((i 0))
+    (initial-expander
+     form
+     (lambda (form e)
+       (let ((e1 (lambda (x e2)
+                   (if (not (< i n))
+                       x
+                       (begin
+                         (set! i (+ i 1))
+                         (e x e2))))))
+         (e1 form e1))))))
+
 (define (initial-expander form e)
   (cond
    ((symbol? form) form)
@@ -88,7 +101,8 @@
    ((dict? form) form)
    ((expander? (car form))
     ((expander-function (car form)) form e))
-   (else (map (lambda (subform) (e subform e)) form))))
+   (else
+    (map (lambda (subform) (e subform e)) form))))
 
 (install-expander 'define-expander
                   (lambda (form e)
@@ -102,6 +116,7 @@
 (define (make-expander arg-names body)
   (assert (eq? (length arg-names) 2)
           "define-expander functions must take two arguments")
+  ;; see notes in make-macro, does the same thing
   (eval
    (compile
     `(lambda ,arg-names
@@ -498,4 +513,15 @@
                       :expand expand
                       :parse parse
                       :compile compile
-                      :install-expander install-expander})
+                      :install-expander install-expander
+                      :expand-once expand-once
+                      :expand-nth expand-nth
+                      :pretty pretty
+                      
+                      :expander? expander?
+                      :expander-function expander-function
+                      :literal? literal?
+                      :set-macro-generator
+                      (lambda (g)
+                        (if (not macro-generator)
+                            (set! macro-generator g)))})

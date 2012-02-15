@@ -333,7 +333,7 @@ function boolean_p_(obj) {
 }
 
 function list_p_(obj) {
-    return obj && obj.list !== undefined;
+    return !!obj && obj.list !== undefined;
 }
 
 function vector_p_(obj) {
@@ -483,16 +483,61 @@ function unquote_splice_map(obj) {
 var __compiler = require("./compiler");
 var __generator = require("./backends/js");
 var read = __compiler.read;
+var pretty = __compiler.pretty;
 
 ((function() {var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
 } else {return false;
 }})()
 ;
+var initial_dash_expander = (function(form,e){
+return (function() {if(symbol_p_(form)) {return ((function() {return form;
+}))();
+} else {return (function() {if(compiler.literal_p_(form)) {return ((function() {return form;
+}))();
+} else {return (function() {if(vector_p_(form)) {return ((function() {return form;
+}))();
+} else {return (function() {if(dict_p_(form)) {return ((function() {return form;
+}))();
+} else {return (function() {if(compiler.expander_p_(car(form))) {return ((function() {return compiler.expander_dash_function(car(form))(form,e);
+}))();
+} else {return ((function() {return map((function(subform){
+return e(subform,e);
+}),form);
+}))();
+}})()
+;
+}})()
+;
+}})()
+;
+}})()
+;
+}})()
+;
+});
+var expand_dash_nth = (function(form,n){
+return ((function(i){
+return ((function(e1){
+return e1(form,e1);
+}))((function(x,e2){
+return (function() {if(not((i < n))) {return x;
+} else {return ((function() {(function() {if((list_p_(x) && compiler.expander_p_(car(x)) && not(eq_p_(car(x),string_dash__gt_symbol("lambda"))))) {i = (i + 1);
+} else {return false;
+}})()
+;
+return initial_dash_expander(x,e2);
+}))();
+}})()
+;
+}));
+}))(0);
+});
 return ((function(src,gen){
-gen.write_dash_runtime("js");
-return ((function(output){
-return eval(output);
-}))(compiler.compile(src,gen));
+compiler.set_dash_macro_dash_generator(gen);
+return ((function(f){
+compiler.parse(f,gen);
+return eval(gen.get_dash_code());
+}))(expand_dash_nth(read(src),1000));
 }))(fs.readFileSync(string_dash_append("tests/",vector_dash_ref(process.argv,2)),"utf-8"),js());
 }))();
 

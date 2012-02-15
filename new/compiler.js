@@ -333,7 +333,7 @@ function boolean_p_(obj) {
 }
 
 function list_p_(obj) {
-    return obj && obj.list !== undefined;
+    return !!obj && obj.list !== undefined;
 }
 
 function vector_p_(obj) {
@@ -529,7 +529,7 @@ return display(")");
 ;
 }})()
 ;
-}))((function() {if(null_p_(i)) {0;
+}))((function() {if(null_p_(i)) {return 0;
 } else {return car(i);
 }})()
 );
@@ -560,6 +560,22 @@ var expand_dash_once = (function(form){
 return initial_dash_expander(form,(function(x,e){
 return x;
 }));
+});
+var expand_dash_nth = (function(form,n){
+return ((function(i){
+return initial_dash_expander(form,(function(form,e){
+return ((function(e1){
+return e1(form,e1);
+}))((function(x,e2){
+return (function() {if(not((i < n))) {return x;
+} else {return ((function() {i = (i + 1);
+return e(x,e2);
+}))();
+}})()
+;
+}));
+}));
+}))(0);
 });
 var initial_dash_expander = (function(form,e){
 return (function() {if(symbol_p_(form)) {return ((function() {return form;
@@ -1008,6 +1024,11 @@ return generator.get_dash_code();
 }})()
 ));
 });
-module.exports = dict(string_dash__gt_symbol("read"),read,string_dash__gt_symbol("expand"),expand,string_dash__gt_symbol("parse"),parse,string_dash__gt_symbol("compile"),compile,string_dash__gt_symbol("install_dash_expander"),install_dash_expander);
+module.exports = dict(string_dash__gt_symbol("read"),read,string_dash__gt_symbol("expand"),expand,string_dash__gt_symbol("parse"),parse,string_dash__gt_symbol("compile"),compile,string_dash__gt_symbol("install_dash_expander"),install_dash_expander,string_dash__gt_symbol("expand_dash_once"),expand_dash_once,string_dash__gt_symbol("expand_dash_nth"),expand_dash_nth,string_dash__gt_symbol("pretty"),pretty,string_dash__gt_symbol("expander_p_"),expander_p_,string_dash__gt_symbol("expander_dash_function"),expander_dash_function,string_dash__gt_symbol("literal_p_"),literal_p_,string_dash__gt_symbol("set_dash_macro_dash_generator"),(function(g){
+return (function() {if(not(macro_dash_generator)) {macro_dash_generator = g;
+} else {return false;
+}})()
+;
+}));
 }))();
 
