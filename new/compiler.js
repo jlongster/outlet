@@ -1,13 +1,3 @@
-'installing...define_dash_expander'
-'installing...define_dash_macro'
-'installing...lambda'
-'installing...cond'
-'installing...begin'
-'installing...define'
-'installing...let'
-'installing...quote'
-'installing...quasiquote'
-'installing...eval_dash_outlet'
 var __util = require('util');
 
 var _emptylst = [null];
@@ -558,11 +548,9 @@ var expander_dash_function = (function(name){
 return ref(_expanders_,name);
 });
 var install_dash_expander = (function(name,func){
-pp(string_dash_append("installing...",symbol_dash__gt_string(name)));
 return put_excl_(_expanders_,symbol_dash__gt_string(name),func);
 });
 var expander_p_ = (function(name){
-pp(string_dash_append("expander? ",symbol_dash__gt_string(name)));
 return not(eq_p_(ref(_expanders_,name),undefined));
 });
 var expand = (function(form){
