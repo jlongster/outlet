@@ -46,8 +46,6 @@ Example
 Using
 -----
 
-A complete rewrite is underway in `new/`. This compiler is not bootstrapped yet so it depends on the previous version of the compiler.
-
 To get started:
 
 ::
