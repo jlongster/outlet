@@ -60,12 +60,11 @@ This is a rough interface, and will improve when build tools are worked on.
 
 See the tests in `tests` for examples.
 
-More sophisticated build tools will come soon. If you want to work on the compiler, Outlet comes with a Makefile. To compile your changes:
+More sophisticated build tools will come soon. If you want to work on the compiler, Outlet comes with a Makefile. To compile your changes and run all tests:
 
 ::
 
-    cd new
-    make
+    make test
 
 Status
 ------
