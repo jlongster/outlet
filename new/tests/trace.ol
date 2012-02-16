@@ -19,24 +19,26 @@
 
 (define level 0)
 (define (trace-form src k)
-  (print-trace level src)
+  (define (pad n s)
+    (vector-for-each (lambda (_) (display s))
+                     (make-vector (* n 2)))
+    (if (> n 0)
+        (display " ")))
+
+  (pad level "-")
+  (pretty src)
+  (display "\n")
+
   (set! level (+ level 1))
   (let ((value (k)))
     (set! level (- level 1))
-    (print-trace level value)
+
+    (pad level ">")
+    (display "RESULT: ")
+    (pretty value)
+    (display "\n")
+    
     value))
-
-(define (print-trace level obj)
-  (define (pad n)
-    (vector-for-each (lambda (_) (display "|"))
-                     (make-vector (* n 4))))
-
-  (pad level)
-  (if (list? obj)
-      (pretty obj)
-      (display (inspect obj)))
-  (display "\n"))
 
 (trace-source (let ((i (+ 4 5)))
                 (+ i (* 2 (/ 3 4)))))
-
