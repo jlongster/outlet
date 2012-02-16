@@ -1,11 +1,7 @@
 
-ifeq ($(BOOT),1)
-	NODE_MAKE = node make.js _boot
-else
-	NODE_MAKE = node make.js
-endif
+NODE_MAKE = node make.js
 
-all: test
+all: compiler
 
 parser.js: parser.ol
 	$(NODE_MAKE) parser.ol > parser2.js && mv parser2.js parser.js
@@ -16,10 +12,14 @@ grammar.js: grammar.ol
 compiler.js: compiler.ol
 	$(NODE_MAKE) compiler.ol > compiler2.js && mv compiler2.js compiler.js
 
-compiler: compiler.js parser.js grammar.js compiler-js.js runtime.js
+backends/js.js: backends/js.ol
+	$(NODE_MAKE) backends/js.ol > backends/js2.js && mv backends/js2.js backends/js.js
 
-test-basic: compiler
-	node test.js basic.ol
+test.js: test.ol
+	$(NODE_MAKE) test.ol > test2.js && mv test2.js test.js
 
-test: compiler test-basic
-	node test.js compile.ol
+compiler: compiler.js parser.js grammar.js backends/js.js test.js
+
+test: compiler
+	node test basic.ol
+	node test compile.ol

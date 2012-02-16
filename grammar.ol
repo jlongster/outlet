@@ -1,4 +1,3 @@
-(require (ast "./ast"))
 
 (define (grammar all any capture char not-char optional Y eof terminator before after)
   (define (repeated rule)
@@ -19,15 +18,15 @@
                   (optional (all (char ".")
                                  (repeated (char "1234567890")))))
              (lambda (text state)
-               (ast.node ast.NUMBER text))))
+               (parseFloat text))))
 
   (define boolean
     (capture (any (all (char "#") (char "f"))
                   (all (char "#") (char "t")))
              (lambda (text state)
-               (ast.node ast.BOOLEAN (if (equal? text "#f")
-                                         false
-                                         true)))))
+               (if (equal? text "#f")
+                   false
+                   true))))
   
   (define string
     (let ((capt
@@ -37,8 +36,7 @@
           (capt_node
            (lambda (rule)
              (capture rule
-                      (lambda (str state)
-                        (ast.node ast.STRING state)))))
+                      (lambda (str state) state))))
           (capt_special
            (lambda (rule)
              (capture rule
@@ -64,13 +62,12 @@
   (define raw_term
     (capture (repeated (any (not-char (+ "{}()[]'" space-char))))
              (lambda (buf s)
-               (ast.node ast.TERM (make-symbol buf)))))
+               (string->symbol buf))))
  
   (define raw_keyword
     (capture (all (char ":") raw_term)
              (lambda (buf node)
-               (let ((q (ast.node ast.TERM (make-symbol "quote"))))
-                 (ast.node ast.LIST null (vector q node))))))
+               (list 'quote node))))
 
   (define term
     (any raw_keyword raw_term))
@@ -84,8 +81,7 @@
                 ((equal? (buf.charAt 0) ",") "unquote")
                 ((equal? (buf.charAt 0) "'") "quote")
                 ((equal? (buf.charAt 0) "`") "quasiquote"))))
-          (let ((q (ast.node ast.TERM (make-symbol special))))
-            (ast.node ast.LIST null (vector q node)))))
+          (list (string->symbol special) node)))
       
       (Y (lambda (q)
            (capture (all (any (char "'")
@@ -103,29 +99,57 @@
     (Y (lambda (lst)
          (all (any (before (char "{")
                            (lambda (state)
-                             (ast.node ast.MAP)))
+                             []))
                    (before (char "(")
                            (lambda (state)
-                             (ast.node ast.LIST)))
+                             []))
                    (before (char "[")
                            (lambda (state)
-                             (ast.node ast.VECTOR))))
+                             [])))
               (optional
                (repeated
                 (any space
                      comment
                      (after (elements lst)
                             (lambda (parent child)
-                              (ast.add_child parent child))))))
-              (any (char "}") (char ")") (char "]"))))))
+                              (vector-concat parent [child]))))))
+              (any (before (char "}")
+                           (lambda (state)
+                             (let ((i 0))
+                               (dict.apply
+                                null
+                                (vector-map
+                                 (lambda (el)
+                                   ;; unquote the keys. this is bad
+                                   ;; because the reader is now
+                                   ;; parsing the data, but since
+                                   ;; we don't have an AST we have
+                                   ;; to do it here. this will be
+                                   ;; fixed.
 
-  (repeated
-   (any space
-        comment
-        (after (elements lst)
-               (lambda (root child)
-                 (ast.node ast.ROOT
-                           null
-                           (root.children.concat (vector child))))))))
+                                   (set! i (+ i 1))
+                                   (if (eq? (% (- i 1) 2) 0)
+                                       (if (and (list? el)
+                                                (eq? (car el) 'quote))
+                                           (cadr el)
+                                           el)
+                                       el))
+                                 state)))))
+                   (before (char ")")
+                           (lambda (state)
+                              (vector-to-list state)))
+                   (char "]"))))))
+  (after
+   (repeated
+    (any space
+         comment
+         (after (elements (any lst))
+                (lambda (root child)
+                  (root.concat (vector child))))))
+   (lambda (_ root)
+     (let ((lst (vector-to-list root)))
+       (if (eq? (length lst) 1)
+           (car lst)
+           (cons 'begin lst))))))
 
 (set! module.exports grammar)

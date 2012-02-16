@@ -38,6 +38,7 @@ buz")
 (test-eval (not #t) #f)
 (test-eval (not #f) #t)
 (test-eval (and #f #t) #f)
+(test-eval (or #f #t) #t)
 
 ;; symbols
 (test-read "foo" 'foo)
@@ -62,15 +63,14 @@ buz")
 ;; maps
 (define foo 4)
 (define bar {:one 1 :two 2})
-(test-read "{:biz foo :bazzle bar}" (hash-map :biz 'foo :bazzle 'bar))
+(test-read "{:biz foo :bazzle bar}" (dict :biz 'foo :bazzle 'bar))
 (test-eval {:five 5 :six 6} (hash-map :five 5 :six 6))
-(test-eval '{:foo foo :bar bar} {:foo 'foo :bar 'bar})
 (test-eval {:foo foo} {:foo 4})
-(test-eval `{:three 3 ,@bar} {:one 1 :two 2 :three 3})
 
-;; quoting/splicing for lists and vectors
+;; quoting/splicing for lists, vectors, and dicts
 (define foo 4)
 (define foo-lst '(4 5))
+
 (define foo-vec [4 5])
 (test-eval '3 3)
 (test-eval `3 3)
@@ -88,8 +88,8 @@ buz")
 (test-eval `[1 2 3 foo] (vector 1 2 3 'foo))
 (test-eval '[1 2 3 foo] (vector 1 2 3 'foo))
 (test-eval `[1 2 3 ,@[4 5]] (vector 1 2 3 4 5))
-
-
-
 (test-eval `[1 2 3 ,@foo-vec] (vector 1 2 3 4 5))
 
+(test-eval '{:foo foo :bar bar} (dict :foo 'foo :bar 'bar))
+(test-eval `{:three 3 :four ,4} {:three 3 :four 4})
+(test-eval `{:three 3 :four ,foo} {:three 3 :four 4})

@@ -46,48 +46,40 @@ Example
 Using
 -----
 
+A complete rewrite is underway in `new/`. This compiler is not bootstrapped yet so it depends on the previous version of the compiler.
+
 To get started:
 
 ::
 
-    var outlet = require('./outlet');
-    outlet.compile('(define foo 5)'); // returns javascript source
+    var compiler = require('./compiler');
+    var js = require('./backends/js');
+    compiler.compile('(define foo 5)', js()); // returns javascript source
 
-outlet.compile takes a target language as the argument, but only 'js' is supported right now. Lua will be supported soon.
+This is a rough interface, and will improve when build tools are worked on.
 
-See example.ol for example Outlet code.
+See the tests in `tests` for examples.
 
 More sophisticated build tools will come soon. If you want to work on the compiler, Outlet comes with a Makefile. To compile your changes:
 
 ::
 
-    make test
-
-That will recompile the compiler with itself and run all tests. If the compilation
-fails, you may need to `git checkout` the compiler js sources again since it may be half-compiled or compiled with the bugs. You always need a working Outlet compiler to compile the compiler. This setup is helpful if you are fixing tricky bugs that exist in all previous versions of the compiler.
-
-If it works better, you can checkout a stable version of the compiler in the directory `boot` and run:
-
-::
-
-    make BOOT=1 test
-
-That will compile the sources with the bootstrapped compiler in the `boot` directory. This is helpful if you are simply focusing on extending the language features.
+    cd new
+    make
 
 Status
 ------
 
-Outlet is new and undergoing major rewrites weekly. The compiler is mostly bootstrapped so as the language advances the compiler will naturally be rewritten to take advantage of the new features. The early stages of the compiler is intentionally hack-ish since it will be rewritten in proper Outlet over time.
+The compiler is written 100% in Outlet except for the javascript runtime. It was bootstrapped, but has since forked off the original compiler and gone through a total rewrite. The new version has not achieve full bootstrapping yet. (This means that the new version depends on the old version).
 
 Todo
 ----
 
 * Named lets: this lets you do looping with (let loop ((var val)) ... (loop))
 * `letrec`: allows you to references other variables within the same `let`
-* `eval`: the current implementation of `eval` seems to work pretty well. The scoping of an `eval` inside a macro doesn't work as expected. Top-level defines should introduce variables into a global macro scope, but it's scoped within the macro right now. This semantic is standard in Scheme. It might be worth simply introducing another form for defining macro-level variables.
-* % syntax: provide a syntax that bypasses all macro expansion and other transformations; (%eval ...) is guaranteed to call javascript's "eval"
+* `eval` is not implemented in the new rewrite
+* `define-macro` is implemented, but it evalutes the macros in the wrong context. Currently it simply transforms into a `install-expander` expression which makes it available for code which is evaluated. The macro needs to be available for the current source code, not for evaluated code one level above.
 * raw code: provide a way to output raw javascript, possibly something like (%js "return obj.props[val]"). this is just temporary until Outlet evolves more.
-* Macros: the current macro system is completely a hack to get `define-macro` style macros to use within the Outlet compiler. The future macro system is yet to be determined, but it will be something more powerful, along the lines of EPS or `define-syntax`.
 * Build system: make it easier to compile multi-file programs
 * Tools: make it easy to use Outlet on the web or on the CLI
 
