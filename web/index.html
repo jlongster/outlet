@@ -30,7 +30,10 @@
       <div class="input">
         <textarea id="src" rows="10" cols="50"></textarea>
       </div>
-      <div class="run"><input type="submit" value="Run" onclick="compile();" /></div>
+      <div class="buttons">
+        <input class="run" type="submit" value="Run" onclick="compile();" />
+        <input class="share" type="submit" value="Share" onclick="share();" />
+      </div>
       <h4>result</h4>
       <div id="result"></div>
       <h4>output</h4>
@@ -52,43 +55,13 @@
     (add_1 y)))
 
 (define (fib n)
-  (if (= n 0)
+  (if (eq? n 0)
       n
       (+ n (fib (- n 1)))))
-
-(define (Y func)
-  ((lambda (f) (f f))
-   (lambda (f)
-     (func f))))
 
 (for-each
  (lambda (x) (display x))
  '(1 2 3 4))
-
-(define (print-n n)
-  (cond
-   ((> n 0) (display "positive"))
-   ((< n 0) (display "negative"))
-   ((= n 0) (display "0"))
-   (else (display "wait, what?"))))
-
-;; macros
-
-(define-macro (helper form)
-  `(,(car form) (< ,(car (cdr form)) 5)
-       (+ ,(car (cdr form))
-          ,(car (cdr (cdr form))))))
-
-(define (bar n)
-  (pp n))
-
-(define (foo)
-  (helper (if 1 2)))
-
-(define-macro (when cond . body)
-  `(if ,cond
-       (begin
-         ,@body)))
 
 ;; rest parameters
 
@@ -99,13 +72,24 @@
 
 ;; eval
 
-(pp (eval_outlet '(baz 1 2 3 4)))
+(pp (eval-outlet '(baz 1 2 3 4)))
 
 ;; ->string
 
 (display (->string '(foo 2 bar 4 "hel\nlo\"fdfsf")))
+
+;; Example tracer using `alert`:
+
+(require (trace "./trace"))
+(trace.set-prompt alert)
+
+(trace-source (let ((i (+ 4 5)))
+                (+ i (* 2 (/ 3 4)))))
+
 </pre>
     </div>
+
+    <script type="text/javascript">fill_code();</script>
   </body>
 </html>
 

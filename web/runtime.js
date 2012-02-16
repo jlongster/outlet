@@ -1,6 +1,15 @@
-var util = require('util');
+var __util = require('util');
 
-function make_symbol(str) {
+var _emptylst = [null];
+
+function string_dash__gt_symbol(str) {
+    str = str.replace(/-/g, '_dash_');
+    str = str.replace(/\?/g, '_p_');
+    str = str.replace(/\!/g, '_excl_');
+    str = str.replace(/>/g, '_gt_');
+    str = str.replace(/</g, '_lt_');
+    str = str.replace(/%/g, '_per_');
+
     return {
         str: str,
         symbol: true
@@ -9,7 +18,7 @@ function make_symbol(str) {
 
 function map(func, lst) {
     if(null_p_(lst)) {
-        return [];
+        return _emptylst;
     }
     else {
         return cons(func(car(lst)),
@@ -17,14 +26,27 @@ function map(func, lst) {
     }
 }
 
-function for_each(func, lst) {
+function for_dash_each(func, lst) {
     if(!null_p_(lst)) {
         func(car(lst));
-        for_each(func, cdr(lst));
+        for_dash_each(func, cdr(lst));
     }
 }
 
-function vector_map(func, vec) {
+function fold(func, acc, lst) {
+    if(null_p_(lst)) {
+        return acc;
+    }
+    else {
+        return fold(func, func(car(lst), acc), cdr(lst));
+    }
+}
+
+function make_dash_vector(i) {
+    return new Array(i);
+}
+
+function vector_dash_map(func, vec) {
     var res = [];
 
     for(var i=0, len=vec.length; i<len; i++) {
@@ -34,22 +56,26 @@ function vector_map(func, vec) {
     return res;
 }
 
-function vector_for_each(func, vec) {
+function vector_dash_for_dash_each(func, vec) {
     for(var i=0, len=vec.length; i<len; i++) {
         func(vec[i]);
     }
 }
 
+function vector_dash_length(vec) {
+    return vec.length;
+}
+
 function display(msg) {
-    console.log(msg);
+    __util.print(msg);
 }
 
 function pp(obj) {
-    display(inspect(obj));
+    display(inspect(obj) + '\n');
 }
 
 function inspect(obj) {
-    return util.inspect(obj, null, 10);
+    return __util.inspect(obj, null, 50);
 }
 
 function not(v) {
@@ -62,10 +88,10 @@ function eq_p_(v1, v2) {
         return v1.str == v2.str;
     }
 
-    return v1 == v2;
+    return v1 === v2;
 }
 
-function equal_p_(v1, v2) {
+function equal_p_(v1, v2) {    
     if(list_p_(v1) && list_p_(v2)) {
         function l(lst1, lst2) {
             var n1 = null_p_(lst1);
@@ -94,7 +120,7 @@ function equal_p_(v1, v2) {
         }
         return true;
     }
-    else if(map_p_(v1) && map_p_(v2)) {
+    else if(dict_p_(v1) && dict_p_(v2)) {
         for(var k in v1) {
             if(!equal_p_(v1[k], v2[k])) {
                 return false;
@@ -105,11 +131,15 @@ function equal_p_(v1, v2) {
     else if(symbol_p_(v1) && symbol_p_(v2)) {
         return v1.str == v2.str;
     }
+
     return v1 == v2;
 }
 
 function null_p_(arr) {
-    return arr.length !== undefined && arr.length == 0;
+    return (arr &&
+            arr.length !== undefined &&
+            arr.length === 1 &&
+            arr[0] === null);
 }
 
 function cons(v1, v2) {
@@ -126,25 +156,69 @@ function cdr(arr) {
     return arr[1];
 }
 
-function make_list(arr) {
+function cadr(lst) {
+    return car(cdr(lst));
+}
+
+function cddr(lst) {
+    return cdr(cdr(lst));
+}
+
+function caddr(lst) {
+    return car(cdr(cdr(lst)));
+}
+
+function cdddr(lst) {
+    return cdr(cdr(cdr(lst)));
+}
+
+function cadddr(lst) {
+    return car(cdr(cdr(cdr(lst))));
+}
+
+function cddddr(lst) {
+    return cdr(cdr(cdr(cdr(lst))));
+}
+
+function length(lst) {
+    var i=0;
+    for_dash_each(function(obj) { i++; },
+                  lst);
+    return i;
+}
+
+function reverse(lst) {
+    if(null_p_(lst)) {
+        return _emptylst;
+    }
+    return list_dash_append(reverse(cdr(lst)), list(car(lst)));
+}
+
+function make_dash_list(arr) {
     arr.list = true;
     return arr;
 }
 
-function vector_to_list(vec) {
+function list() {
+    return vector_dash_to_dash_list(
+        Array.prototype.slice.call(arguments)
+    );
+}
+
+function vector_dash_to_dash_list(vec) {
     function l(v, i) {
         if(i < v.length) {
             return cons(v[i], l(v, i+1));
         }
         else {
-            return [];
+            return _emptylst;
         }
     }
 
     return l(vec, 0);
 }
 
-function list_to_vector(lst) {
+function list_dash_to_dash_vector(lst) {
     var res = [];
 
     function m(lst) {
@@ -158,15 +232,15 @@ function list_to_vector(lst) {
     return res;
 }
 
-function vector_ref(arr, i) {
+function vector_dash_ref(arr, i) {
     return arr[i];
 }
 
-function vector_set_excl_(arr, i, v) {
+function vector_dash_set_excl_(arr, i, v) {
     arr[i] = v;
 }
 
-function vector_concat(arr1, arr2) {
+function vector_dash_concat(arr1, arr2) {
     return arr1.concat(arr2);
 }
 
@@ -174,26 +248,18 @@ function vector() {
     return Array.prototype.slice.call(arguments);
 }
 
-function vector_push(vec, val) {
+function vector_dash_push(vec, val) {
     vec.push(val);
 }
 
-function hash_map() {
+function dict() {
     var keyvals = Array.prototype.slice.call(arguments);
     var res = {};
 
     for(var i=0, len=keyvals.length; i<len; i+=2) {
         var key = keyvals[i];
 
-        // Ignore this, it's only to support the compiler for now...
-        if(key.children &&
-           key.children.length > 0 &&
-           key.children[0].data &&
-           key.children[0].data.str &&
-           key.children[0].data.str == 'quote') {
-            key = key.children[1].data.str;
-        }
-        else if(key.str) {
+        if(key.str) {
             key = key.str;
         }
 
@@ -203,24 +269,63 @@ function hash_map() {
     return res;
 }
 
-function hash_map_map(func, m) {
+var hash_dash_map = dict;
+
+
+function dict_dash_map(func, dict) {
     var res = {};
-    for(var k in m) {
-        res[k] = func(m[k]);
+    for(var k in dict) {
+        res[k] = func(dict[k]);
     }
     return res;
 }
 
-function hash_map_to_vec(obj) {
+var hash_dash_map_dash_map = dict_dash_map;
+
+function hash_dash_map_dash_to_dash_vec(obj) {
     var res = [];
     for(var k in obj) {
-        res.push(vector_to_list([make_symbol('quote'), make_symbol(k)]));
+        res.push(vector_to_list([string_dash__gt_symbol('quote'),
+                                 string_dash__gt_symbol(k)]));
         res.push(obj[k]);
     }
     return res;
 }
 
-function object_ref(obj, key) {
+function dict_dash_to_dash_list(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(string_dash__gt_symbol(k));
+        res.push(dict[k]);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function keys(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(k);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function vals(dict) {
+    var res = [];
+    for(var k in dict) {
+        res.push(dict[k]);
+    }
+    return vector_dash_to_dash_list(res);
+}
+
+function zip(keys, vals) {
+    var obj = {};
+    for(var i=0, len=keys.length; i<len; i++) {
+        obj[keys[i]] = vals[i];
+    }
+    return obj;
+}
+
+function object_dash_ref(obj, key) {
     return obj[key];
 }
 
@@ -229,7 +334,7 @@ function number_p_(obj) {
 }
 
 function symbol_p_(obj) {
-    return obj && obj.str && obj.symbol;
+    return obj && obj.str != undefined && obj.symbol != undefined;
 }
 
 function string_p_(obj) {
@@ -241,18 +346,20 @@ function boolean_p_(obj) {
 }
 
 function list_p_(obj) {
-    return obj && obj.list;
+    return !!obj && obj.list !== undefined;
 }
 
 function vector_p_(obj) {
-    return obj && typeof obj == 'object' && obj.length !== undefined;
+    var v = (obj && typeof obj == 'object' && obj.length !== undefined);
+    return !list_p_(obj) && !null_p_(obj) && v;
 }
 
-function map_p_(obj) {
-    return obj && typeof obj == 'object' && obj.length === undefined;
+function dict_p_(obj) {
+    var d = (obj && typeof obj == 'object' && obj.length === undefined);
+    return !symbol_p_(obj) && d;
 }
 
-function __gt_string(obj) {
+function _dash__gt_string(obj) {
     if(number_p_(obj)) {
         return '' + obj;
     }
@@ -272,26 +379,29 @@ function __gt_string(obj) {
     }
     else if(list_p_(obj)) {
         return '(' + 
-            map(function(obj) { return __gt_string(obj); },
+            map(function(obj) { return _dash__gt_string(obj); },
                 obj).join(' ') +
             ')';
     }
     else if(vector_p_(obj)) {
         return '[' +
-            vector_map(function(obj) { return __gt_string(obj); },
+            vector_dash_map(function(obj) { return _dash__gt_string(obj); },
                        obj).join(' ') +
             ']';
     }
-    else if(map_p_(obj)) {
+    else if(dict_p_(obj)) {
         var res = [];
         for(var k in obj) {
-            res.push(k + ': ' + util.inspect(obj[k], null, 10));
+            res.push(k + ': ' + __util.inspect(obj[k], null, 10));
         }
         return '{' + res.join(', ') + '}';
     }
+    else if(null_p_(obj)) {
+        return '()';
+    }
 }
 
-function list_append(lst1, lst2) {
+function list_dash_append(lst1, lst2) {
     function loop(lst) {
         if(null_p_(lst)) {
             return lst2;
@@ -309,13 +419,17 @@ function list_append(lst1, lst2) {
     }
 }
 
+function string_dash_append() {
+    return Array.prototype.slice.call(arguments).join('');
+}
+
 function unquote_splice(lst) {
     // if(!lst.length || lst.length != 2 || lst[1].length === undefined) {
     //     return lst;
     // }
 
     if(null_p_(lst)) {
-        return [];
+        return _emptylst;
     }
     else {
         var elem = car(lst);
@@ -328,7 +442,7 @@ function unquote_splice(lst) {
             }
 
             // do we need to unquote_splice elem.data?
-            return list_append(elem.data, rest);
+            return list_dash_append(elem.data, rest);
         }
         else {
             return cons(elem, rest);
@@ -364,7 +478,7 @@ function unquote_splice_map(obj) {
     for(var k in obj) {
         var prop = obj[k];
         if(prop && prop.please_splice) {
-            if(!map_p_(prop.data)) {
+            if(!dict_p_(prop.data)) {
                 throw ("Maps can only splice maps, unexpected object: " +
                        prop.data);
             }

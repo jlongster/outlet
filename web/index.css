@@ -23,12 +23,18 @@ textarea {
     font-size: 1.1em;
 }
 
-.run {
+.buttons {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.run, .share {
     text-align: center;
     margin: .5em 0;
 }
 
-.run input {
+.run,
+.share {
     font-size: 1em;
 }
 

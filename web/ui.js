@@ -1,16 +1,18 @@
-var outlet = require('./outlet.js');
 var util = require('util');
-var fs = require('fs');
-
 util.inspect = function(obj) {
     return obj && obj.toSource();
-}
+};
+util.print = outlet_display;
+
+var compiler = require('./compiler.js');
+var js = require('./js.js');
+var fs = require('fs');
+var trace = require('trace');
+
+trace.prompt = prompt;
 
 fs.readFileSync = function(src) {
-    if(src == 'macros.ol') {
-        // Somehow we need to get the source for the macros file
-    }
-    return '10';
+    return '';
 };
 
 function outlet_display(str) {
@@ -48,22 +50,44 @@ function compile() {
     try {
         var src = document.getElementById('src').value;
 
-        if(lang == LUA) {
-            code = outlet.compile(src, 'lua');
-            print_code(code);
-            print_result("can't evaluate non-js languages");
-        }
-        else {
-            code = outlet.compile(src, 'no-runtime');
-            print_code(code);
-            try {
-                print_result(eval(code));
-            } catch (x) {
-                print_result('error: ' + x.message);
-            }
+        code = compiler.compile(src, js());
+        print_code(code);
+        try {
+            print_result(eval(code));
+        } catch (x) {
+            print_result('error: ' + x.message);
         }
     } catch (x) {
         print_code(x.message);
     }
+}
 
+function get_query() {
+    if(window.location.search) {
+        var q = window.location.search.substring(1);
+        var p = q.split('&');
+        var obj = {};
+
+        for(var i=0, len=p.length; i<len; i++) {
+            var kv = p[i].split('=');
+            obj[kv[0]] = kv[1];
+        }
+        
+        return obj;
+    }
+};
+
+function fill_code() {
+    var src = document.getElementById('src');
+    var q = get_query();
+
+    if(q.code) {
+        src.value = unescape(q.code);
+    }
+}
+
+function share() {
+    var src = document.getElementById('src').value;
+    alert('Copy the URL to share this program');
+    window.location.search = '?code=' + escape(src);
 }
