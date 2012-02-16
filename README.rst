@@ -69,7 +69,7 @@ More sophisticated build tools will come soon. If you want to work on the compil
 Status
 ------
 
-The compiler is written 100% in Outlet except for the javascript runtime. It was bootstrapped, but has since forked off the original compiler and gone through a total rewrite. The new version has not achieve full bootstrapping yet. (This means that the new version depends on the old version).
+The compiler is written 100% in Outlet except for the javascript runtime, so it is completely bootstrapped. The main focus now is debugging and figuring out which macro system to use.
 
 Todo
 ----
