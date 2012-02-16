@@ -29,29 +29,48 @@
 (define (opt arg def)
   (if (null? arg) def (car arg)))
 
-(define (pretty lst . i)
+(define (pretty obj . i)
   (define (pad n)
     (vector-for-each (lambda (_) (display " "))
-                     (make-vector (* n 2))))
+                     (make-vector n)))
 
-  (let ((i (if (null? i) 0 (car i))))
-    (pad i)
+  (define (space obj)
     (cond
-     ((null? lst) (display "()"))
-     ((list? lst)
-      (let ((node (car lst))
-            (childr (cdr lst)))
+     ((or (literal? obj)
+          (symbol? obj)) (vector-length (->string obj)))
+     ((list? obj)
+      ;; length of obj plus 1 equals the number of spaces and
+      ;; parantheses for a list
+      (+ (length obj)
+         1
+         (fold (lambda (el acc)
+                 (+ acc (space el)))
+               0
+               obj)))
+     ((dict? obj)
+      (space (dict-to-list obj)))
+     ((vector? obj)
+      (space (vector-to-list obj)))))
+
+  (let ((i (if (null? i) 1 (car i))))
+    (cond
+     ((or (symbol? obj)
+          (literal? obj)) (display (->string obj)))
+     ((list? obj)
+      (let ((node (car obj))
+            (childr (cdr obj))
+            (sp (> (space obj) 30)))
         (display "(")
-        (if (list? node)
-            (pretty node (+ i 1))
-            (display (->string node)))
+        (pretty node (+ i 1))
         (for-each (lambda (item)
-                    (display "\n")
-                    (pad i)
+                    (if sp
+                        (begin (display "\n")
+                               (pad i))
+                        (display " "))
                     (pretty item (+ i 1)))
                   childr)
         (display ")")))
-     (else (display (->string lst))))))
+     )))
 
 (define (symbol->string sym)
   sym.str)
@@ -487,7 +506,7 @@
                                el))
                          lst)))
           (parse-list (cons 'dict qlst)))))
-    
+
     (cond
      ((symbol? form) (generator.write-term form (not expr?)))
      ((literal? form) (parse-literal form))
@@ -504,7 +523,7 @@
   ;; eval needs a code generator
   (if (not macro-generator)
       (set! macro-generator generator))
-  
+
   (let ((f (expand (if (string? src) (read src) src))))
     (parse f generator)
     (generator.get-code)))
@@ -517,7 +536,7 @@
                       :expand-once expand-once
                       :expand-nth expand-nth
                       :pretty pretty
-                      
+
                       :expander? expander?
                       :expander-function expander-function
                       :literal? literal?

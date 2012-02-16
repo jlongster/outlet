@@ -33,6 +33,15 @@ function for_dash_each(func, lst) {
     }
 }
 
+function fold(func, acc, lst) {
+    if(null_p_(lst)) {
+        return acc;
+    }
+    else {
+        return fold(func, func(car(lst), acc), cdr(lst));
+    }
+}
+
 function make_dash_vector(i) {
     return new Array(i);
 }
@@ -51,6 +60,10 @@ function vector_dash_for_dash_each(func, vec) {
     for(var i=0, len=vec.length; i<len; i++) {
         func(vec[i]);
     }
+}
+
+function vector_dash_length(vec) {
+    return vec.length;
 }
 
 function display(msg) {
@@ -383,6 +396,9 @@ function _dash__gt_string(obj) {
         }
         return '{' + res.join(', ') + '}';
     }
+    else if(null_p_(obj)) {
+        return '()';
+    }
 }
 
 function list_dash_append(lst1, lst2) {
@@ -498,38 +514,58 @@ return (function() {if(null_p_(arg)) {return def;
 }})()
 ;
 });
-var pretty = (function(lst){
+var pretty = (function(obj){
 var i = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, 1));
 var pad = (function(n){
 return vector_dash_for_dash_each((function(_){
 return display(" ");
-}),make_dash_vector((n * 2)));
+}),make_dash_vector(n));
 });
-return ((function(i){
-pad(i);
-return (function() {if(null_p_(lst)) {return ((function() {return display("()");
+var space = (function(obj){
+return (function() {if((literal_p_(obj) || symbol_p_(obj))) {return ((function() {return vector_dash_length(_dash__gt_string(obj));
 }))();
-} else {return (function() {if(list_p_(lst)) {return ((function() {return ((function(node,childr){
-display("(");
-(function() {if(list_p_(node)) {return pretty(node,(i + 1));
-} else {return display(_dash__gt_string(node));
+} else {return (function() {if(list_p_(obj)) {return ((function() {return (length(obj) + 1 + fold((function(el,acc){
+return (acc + space(el));
+}),0,obj));
+}))();
+} else {return (function() {if(dict_p_(obj)) {return ((function() {return space(dict_dash_to_dash_list(obj));
+}))();
+} else {return (function() {if(vector_p_(obj)) {return ((function() {return space(vector_dash_to_dash_list(obj));
+}))();
+} else {return false;
 }})()
 ;
+}})()
+;
+}})()
+;
+}})()
+;
+});
+return ((function(i){
+return (function() {if((symbol_p_(obj) || literal_p_(obj))) {return ((function() {return display(_dash__gt_string(obj));
+}))();
+} else {return (function() {if(list_p_(obj)) {return ((function() {return ((function(node,childr,sp){
+display("(");
+pretty(node,(i + 1));
 for_dash_each((function(item){
-display("\n");
-pad(i);
+(function() {if(sp) {return ((function() {display("\n");
+return pad(i);
+}))();
+} else {return display(" ");
+}})()
+;
 return pretty(item,(i + 1));
 }),childr);
 return display(")");
-}))(car(lst),cdr(lst));
+}))(car(obj),cdr(obj),(space(obj) > 30));
 }))();
-} else {return ((function() {return display(_dash__gt_string(lst));
-}))();
+} else {return false;
 }})()
 ;
 }})()
 ;
-}))((function() {if(null_p_(i)) {return 0;
+}))((function() {if(null_p_(i)) {return 1;
 } else {return car(i);
 }})()
 );
