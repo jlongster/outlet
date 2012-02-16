@@ -514,11 +514,17 @@ return (function() {if(null_p_(arg)) {return def;
 }})()
 ;
 });
+var _str = "";
+var disp = (function(str){
+_str = (_str + str);
+});
+var new_dash_string = (function() {_str = "";
+});
 var pretty = (function(obj){
 var i = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, 1));
 var pad = (function(n){
 return vector_dash_for_dash_each((function(_){
-return display(" ");
+return disp(" ");
 }),make_dash_vector(n));
 });
 var space = (function(obj){
@@ -542,22 +548,22 @@ return (acc + space(el));
 }})()
 ;
 });
-return ((function(i){
-return (function() {if((symbol_p_(obj) || literal_p_(obj))) {return ((function() {return display(_dash__gt_string(obj));
+((function(i){
+return (function() {if((symbol_p_(obj) || literal_p_(obj))) {return ((function() {return disp(_dash__gt_string(obj));
 }))();
 } else {return (function() {if(list_p_(obj)) {return ((function() {return ((function(node,childr,sp){
-display("(");
+disp("(");
 pretty(node,(i + 1));
 for_dash_each((function(item){
-(function() {if(sp) {return ((function() {display("\n");
+(function() {if(sp) {return ((function() {disp("\n");
 return pad(i);
 }))();
-} else {return display(" ");
+} else {return disp(" ");
 }})()
 ;
 return pretty(item,(i + 1));
 }),childr);
-return display(")");
+return disp(")");
 }))(car(obj),cdr(obj),(space(obj) > 30));
 }))();
 } else {return false;
@@ -569,6 +575,7 @@ return display(")");
 } else {return car(i);
 }})()
 );
+return _str;
 });
 var symbol_dash__gt_string = (function(sym){
 return sym.str;
@@ -1065,6 +1072,6 @@ return (function() {if(not(macro_dash_generator)) {macro_dash_generator = g;
 } else {return false;
 }})()
 ;
-}));
+}),string_dash__gt_symbol("new_dash_string"),new_dash_string);
 }))();
 

@@ -1,7 +1,8 @@
 (require (fs "fs")
          (compiler "./compiler")
          (util "util")
-         (js "./backends/js"))
+         (js "./backends/js")
+         (trace "./trace"))
 
 (if (< process.argv.length 3)
     (throw "must pass a filename"))
