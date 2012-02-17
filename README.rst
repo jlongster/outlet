@@ -43,6 +43,13 @@ Example
            (begin
              ,@body)))
 
+Status
+------
+
+The compiler is robust and mostly finished. I am working on the standard library now, as seen in this etherpad: https://etherpad.mozilla.org/HKdNgVXcqk. Feel free to add notes.
+
+The compiler is written 100% in Outlet except for the javascript runtime, so it is completely bootstrapped.
+
 Using
 -----
 
@@ -63,11 +70,6 @@ More sophisticated build tools will come soon. If you want to work on the compil
 ::
 
     make test
-
-Status
-------
-
-The compiler is written 100% in Outlet except for the javascript runtime, so it is completely bootstrapped. The main focus now is debugging and figuring out which macro system to use.
 
 Todo
 ----
