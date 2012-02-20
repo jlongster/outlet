@@ -504,8 +504,55 @@ return (number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
 var application_p_ = (function(form){
 return (list_p_(form) && not(expander_p_(car(form))));
 });
-var ref = (function(obj,name){
-return object_dash_ref(obj,symbol_dash__gt_string(name));
+var ref = (function(obj,val){
+return (function() {if(list_p_(obj)) {return ((function() {var walk = (function(lst,i){
+return (function() {if(null_p_(lst)) {return ((function() {return false;
+}))();
+} else {return (function() {if(eq_p_(i,0)) {return ((function() {return car(lst);
+}))();
+} else {return ((function() {return walk(cdr(lst,(i - 1)));
+}))();
+}})()
+;
+}})()
+;
+});
+return walk(obj,val);
+}))();
+} else {return (function() {if(vector_p_(obj)) {return ((function() {return vector_dash_ref(obj,val);
+}))();
+} else {return (function() {if(dict_p_(obj)) {return ((function() {return object_dash_ref(obj,symbol_dash__gt_string(val));
+}))();
+} else {return false;
+}})()
+;
+}})()
+;
+}})()
+;
+});
+var slice = (function(obj,i){
+return (function() {if(list_p_(obj)) {return ((function() {var walk = (function(lst,i){
+return (function() {if(null_p_(lst)) {return ((function() {return false;
+}))();
+} else {return (function() {if(eq_p_(i,0)) {return ((function() {return lst;
+}))();
+} else {return ((function() {return walk(cdr(lst,(i - 1)));
+}))();
+}})()
+;
+}})()
+;
+});
+return walk(obj,i);
+}))();
+} else {return (function() {if(vector_p_(obj)) {return ((function() {return obj.slice(i);
+}))();
+} else {return false;
+}})()
+;
+}})()
+;
 });
 var put_excl_ = vector_dash_set_excl_;
 var opt = (function(arg,def){
@@ -564,9 +611,17 @@ return pad(i);
 return pretty(item,(i + 1));
 }),childr);
 return disp(")");
-}))(car(obj),cdr(obj),(space(obj) > 30));
+}))(car(obj,0),cdr(obj,1),(space(obj) > 30));
+}))();
+} else {return (function() {if(vector_p_(obj)) {return ((function() {return disp(_dash__gt_string(obj));
+}))();
+} else {return (function() {if(dict_p_(obj)) {return ((function() {return disp(_dash__gt_string(obj));
 }))();
 } else {return false;
+}})()
+;
+}})()
+;
 }})()
 ;
 }})()

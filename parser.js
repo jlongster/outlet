@@ -33,6 +33,15 @@ function for_dash_each(func, lst) {
     }
 }
 
+function fold(func, acc, lst) {
+    if(null_p_(lst)) {
+        return acc;
+    }
+    else {
+        return fold(func, func(car(lst), acc), cdr(lst));
+    }
+}
+
 function make_dash_vector(i) {
     return new Array(i);
 }
@@ -51,6 +60,10 @@ function vector_dash_for_dash_each(func, vec) {
     for(var i=0, len=vec.length; i<len; i++) {
         func(vec[i]);
     }
+}
+
+function vector_dash_length(vec) {
+    return vec.length;
 }
 
 function display(msg) {
@@ -333,7 +346,7 @@ function boolean_p_(obj) {
 }
 
 function list_p_(obj) {
-    return obj && obj.list !== undefined;
+    return !!obj && obj.list !== undefined;
 }
 
 function vector_p_(obj) {
@@ -382,6 +395,9 @@ function _dash__gt_string(obj) {
             res.push(k + ': ' + __util.inspect(obj[k], null, 10));
         }
         return '{' + res.join(', ') + '}';
+    }
+    else if(null_p_(obj)) {
+        return '()';
     }
 }
 

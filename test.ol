@@ -38,8 +38,9 @@
 
   ;;(gen.write-runtime "js")
   (compiler.set-macro-generator gen)
-  
+
   (let ((f (expand-nth (read src) 1000)))
-    ;;(compiler.pretty f)
+    ;;(display (compiler.pretty f))
     (compiler.parse f gen)
-    (eval (gen.get-code))))
+    (eval (gen.get-code))
+    ))

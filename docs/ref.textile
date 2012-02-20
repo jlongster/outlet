@@ -1,0 +1,46 @@
+---
+layout: page
+title: Reference
+id: reference
+---
+
+h2. Types
+
+* "@(number? <val>)@":#number_p
+* "@(string? <val>)@":#string_p
+* "@(boolean? <val>)@":#boolean_p
+* "@(null? <val>)@":#null_p
+* "@(list? <val>)@":#list_p
+* "@(vector? <val>)@":vector_p
+* "@(dict? <val>)@":#dict_p
+
+h2. Functions and Variables
+
+* "@(lambda (<arg> ...) <expr> ...)@":#lambda
+* "@(define <var> <expr>)@":#define
+* "@(define (<var> <arg> ...) <expr> ...)@":#define
+* "@(let ((<var> <expr>) ...) <body> ...)@":#let
+
+h2. Conditionals
+
+* "@(if <test> <tru> <fal>)@":#if
+* "@(cond (<test> <body> ...) ...)@":#cond
+* "@(case <expr> ([<val> | (<val> ...)] <body> ...) ...)@":#case
+
+h2. Data Structures
+
+h3. Strings
+
+* "@(str <val> ...)@":#str
+* "@(ref <seq> <i>)@":#ref
+* "@(put! <seq> <val>)@":#put_excl
+* "@(slice <seq> <start> & <end>)@":#slice
+* "@(splice <seq> <seq-from> <start> & <end>)@":#splice
+
+h3. Vectors/Lists/Dicts
+
+* @(vector/list/dict <val> ...)@
+* "@(ref <seq> <i>)@":#ref
+* "@(put! <seq> <val>)@":#put_excl
+* "@(slice <seq> <start> & <end>)@":#slice
+* "@(splice <seq> <seq-from> <start> & <end>)@":#splice

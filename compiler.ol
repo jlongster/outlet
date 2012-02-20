@@ -21,8 +21,28 @@
   (and (list? form)
        (not (expander? (car form)))))
 
-(define (ref obj name)
-  (object-ref obj (symbol->string name)))
+(define (ref obj val)
+  (cond
+   ((list? obj)
+    (define (walk lst i)
+      (cond
+       ((null? lst) #f)
+       ((eq? i 0) (car lst))
+       (else (walk (cdr lst (- i 1))))))
+    (walk obj val))
+   ((vector? obj) (vector-ref obj val))
+   ((dict? obj) (object-ref obj (symbol->string val)))))
+
+(define (slice obj i)
+  (cond
+   ((list? obj)
+    (define (walk lst i)
+      (cond
+       ((null? lst) #f)
+       ((eq? i 0) lst)
+       (else (walk (cdr lst (- i 1))))))
+    (walk obj i))
+   ((vector? obj) (obj.slice i))))
 
 (define put! vector-set!)
 
@@ -63,8 +83,8 @@
      ((or (symbol? obj)
           (literal? obj)) (disp (->string obj)))
      ((list? obj)
-      (let ((node (car obj))
-            (childr (cdr obj))
+      (let ((node (car obj 0))
+            (childr (cdr obj 1))
             (sp (> (space obj) 30)))
         (disp "(")
         (pretty node (+ i 1))
@@ -75,7 +95,9 @@
                         (disp " "))
                     (pretty item (+ i 1)))
                   childr)
-        (disp ")")))))
+        (disp ")")))
+     ((vector? obj) (disp (->string obj)))
+     ((dict? obj) (disp (->string obj)))))
 
   _str)
 
