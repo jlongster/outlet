@@ -7,17 +7,6 @@
 (if (< process.argv.length 3)
     (throw "must pass a filename"))
 
-(define (initial-expander form e)
-  (cond
-   ((symbol? form) form)
-   ((compiler.literal? form) form)
-   ((vector? form) form)
-   ((dict? form) form)
-   ((compiler.expander? (car form))
-    ((compiler.expander-function (car form)) form e))
-   (else
-    (map (lambda (subform) (e subform e)) form))))
-
 (define (expand-nth form n)
   (let ((i 0))
     (let ((e1 (lambda (x e2)
@@ -42,5 +31,5 @@
   (let ((f (expand-nth (read src) 1000)))
     ;;(display (compiler.pretty f))
     (compiler.parse f gen)
-    (eval (gen.get-code))
+    ((%raw "eval") (gen.get-code))
     ))

@@ -130,16 +130,16 @@
 
 (define (expand-nth form n)
   (let ((i 0))
-    (initial-expander
-     form
-     (lambda (form e)
-       (let ((e1 (lambda (x e2)
-                   (if (not (< i n))
-                       x
-                       (begin
-                         (set! i (+ i 1))
-                         (e x e2))))))
-         (e1 form e1))))))
+    (let ((e1 (lambda (x e2)
+                (if (not (< i n))
+                    x
+                    (begin
+                      (if (and (list? x)
+                               (expander? (car x))
+                               (not (eq? (car x) 'lambda)))
+                          (set! i (+ i 1)))
+                      (initial-expander x e2))))))
+      (e1 form e1))))
 
 (define (initial-expander form e)
   (cond
@@ -195,8 +195,8 @@
     ;; compile the macro into native code and use the host's native
     ;; eval to eval it into a function. we don't use outlet's eval
     ;; because that only works outside the compiler (see comments on
-    ;; `eval-outlet`).
-    (eval
+    ;; `eval`).
+    ((%raw "eval")
      (compile
       `(lambda (,x ,e)
          (,e (let ,(destructure pattern `(cdr ,x) '())
@@ -371,7 +371,7 @@
 ;; depends on two builtins which represent the current compiler and
 ;; generator.
 
-(install-expander 'eval-outlet
+(install-expander 'eval
                   (lambda (form e)
                     `(eval
                       (__compiler.compile ,(e (cadr form) e) (__generator)))))
@@ -514,6 +514,9 @@
          ((eq? first 'quote) (parse-quoted form))
          ((or (eq? first 'set!)
               (eq? first 'set)) (parse-set form))
+         ((eq? first '%raw)
+          (assert (string? (cadr form)) "%raw expects a string")
+          (generator.write-raw-code (cadr form)))
          ((native? first)
           ((native-function first) form generator expr? %parse))
          (else (parse-func-call form)))))
@@ -566,13 +569,7 @@
                       :expand-nth expand-nth
                       :pretty pretty
 
-                      :expander? expander?
-                      :expander-function expander-function
-                      :literal? literal?
                       :set-macro-generator
                       (lambda (g)
                         (if (not macro-generator)
-                            (set! macro-generator g)))
-                      
-                      ;; delete me
-                      :new-string new-string})
+                            (set! macro-generator g)))})

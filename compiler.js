@@ -711,12 +711,12 @@ return true;
 }));
 var make_dash_expander = (function(arg_dash_names,body){
 assert(eq_p_(length(arg_dash_names),2),"define-expander functions must take two arguments");
-return eval(compile(list_dash_append(list(string_dash__gt_symbol("lambda"),arg_dash_names),((function(o1){
+return eval(__compiler.compile(compile(list_dash_append(list(string_dash__gt_symbol("lambda"),arg_dash_names),((function(o1){
 return (function() {if(vector_p_(o1)) {return vector_dash_to_dash_list(o1);
 } else {return o1;
 }})()
 ;
-}))(body)),macro_dash_generator.make_dash_fresh()));
+}))(body)),macro_dash_generator.make_dash_fresh()),__generator()));
 });
 install_dash_expander(string_dash__gt_symbol("define_dash_macro"),(function(form,e){
 return ((function(sig){
@@ -939,7 +939,7 @@ return (function() {if(eq_p_(length(res),1)) {return car(res);
 ;
 }))(quote_dash_splice(lst,_emptylst,_emptylst));
 });
-install_dash_expander(string_dash__gt_symbol("eval_dash_outlet"),(function(form,e){
+install_dash_expander(string_dash__gt_symbol("eval"),(function(form,e){
 return list(string_dash__gt_symbol("eval"),list(string_dash__gt_symbol("__compiler.compile"),e(cadr(form),e),list(string_dash__gt_symbol("__generator"))));
 }));
 var _natives_ = dict();
@@ -1047,10 +1047,15 @@ return (function() {if(eq_p_(first,string_dash__gt_symbol("if"))) {return ((func
 }))();
 } else {return (function() {if((eq_p_(first,string_dash__gt_symbol("set_excl_")) || eq_p_(first,string_dash__gt_symbol("set")))) {return ((function() {return parse_dash_set(form);
 }))();
+} else {return (function() {if(eq_p_(first,string_dash__gt_symbol("_per_raw"))) {return ((function() {assert(string_p_(cadr(form)),"%raw expects a string");
+return generator.write_dash_raw_dash_code(cadr(form));
+}))();
 } else {return (function() {if(native_p_(first)) {return ((function() {return native_dash_function(first)(form,generator,expr_p_,_per_parse);
 }))();
 } else {return ((function() {return parse_dash_func_dash_call(form);
 }))();
+}})()
+;
 }})()
 ;
 }})()

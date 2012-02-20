@@ -184,6 +184,9 @@
 
     (terminate-expr expr?))
 
+  (define (write-raw-code code)
+    (write code))
+
   (define (write-op op vals expr? parse)
     (write "(")
     (let ((op-writer (inline-writer
@@ -220,7 +223,8 @@
    :write-if write-if
    :write-lambda write-lambda
    :write-func-call write-func-call
-
+   :write-raw-code write-raw-code
+   
    ;; specials
    :write-require write-require
    :write-and (make-op-writer "&&")

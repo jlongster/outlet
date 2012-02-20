@@ -18,7 +18,7 @@
   `(%test read ,src ,val ,@args))
 
 (define-macro (test-eval src val . args)
-  `(%test eval-outlet ',src ,val ,@args))
+  `(%test eval ',src ,val ,@args))
 
 ;; data structures
 ;;
