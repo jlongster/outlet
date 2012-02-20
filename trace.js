@@ -494,66 +494,51 @@ function unquote_splice_map(obj) {
 
     return res;
 }
-// needed for eval because it needs access to the compiler to compile
-// the expression and evaluate it inline to be in the right context.
-var __compiler = require("./compiler");
-var __generator = require("./backends/js");
-var read = __compiler.read;
-var pretty = __compiler.pretty;
-
-((function() {var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
-} else {return false;
-}})()
-;
-var initial_dash_expander = (function(form,e){
-return (function() {if(symbol_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(compiler.literal_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(vector_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(dict_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(compiler.expander_p_(car(form))) {return ((function() {return compiler.expander_dash_function(car(form))(form,e);
-}))();
-} else {return ((function() {return map((function(subform){
-return e(subform,e);
-}),form);
-}))();
-}})()
-;
-}})()
-;
-}})()
-;
-}})()
-;
+((function() {var compiler = require("./compiler");compiler.install_dash_expander(string_dash__gt_symbol("trace_dash_source"),(function(form,e){
+var trace_dash_expander = (function(src,e){
+return (function(x,e1){
+return (function() {if((list_p_(x) && subexpression_p_(x,src))) {return list(string_dash__gt_symbol("trace.trace_dash_form"),e(list(string_dash__gt_symbol("quote"),x),e),list(string_dash__gt_symbol("lambda"),_emptylst,e(x,e1)));
+} else {return e(x,e1);
 }})()
 ;
 });
-var expand_dash_nth = (function(form,n){
-return ((function(i){
+});
+var subexpression_p_ = (function(form,src){
+return (equal_p_(form,src) || (list_p_(src) && (subexpression_p_(form,car(src)) || subexpression_p_(form,cdr(src)))));
+});
 return ((function(e1){
-return e1(form,e1);
-}))((function(x,e2){
-return (function() {if(not((i < n))) {return x;
-} else {return ((function() {(function() {if((list_p_(x) && compiler.expander_p_(car(x)) && not(eq_p_(car(x),string_dash__gt_symbol("lambda"))))) {i = (i + 1);
-} else {return false;
-}})()
-;
-return initial_dash_expander(x,e2);
-}))();
-}})()
-;
+return e1(cadr(form),e1);
+}))(trace_dash_expander(cadr(form),e));
 }));
-}))(0);
+var level = 0;
+var trace_dash_form = (function(src,k){
+compiler.new_dash_string();
+pr(string_dash_append(pad(level,"-"),compiler.pretty(src),"\n"));
+level = (level + 1);
+return ((function(value){
+level = (level - 1);
+compiler.new_dash_string();
+pr(string_dash_append(pad(level,">"),"RESULT: ",compiler.pretty(value),"\n"));
+return value;
+}))(k());
 });
-return ((function(src,gen){
-compiler.set_dash_macro_dash_generator(gen);
-return ((function(f){
-compiler.parse(f,gen);
-return eval(gen.get_dash_code());
-}))(expand_dash_nth(read(src),1000));
-}))(fs.readFileSync(string_dash_append("tests/",vector_dash_ref(process.argv,2)),"utf-8"),js());
+var pad = (function(n,s){
+return ((function(v){
+return ((function(s){
+return (function() {if((n > 0)) {return string_dash_append(s," ");
+} else {return s;
+}})()
+;
+}))(v.join(""));
+}))(vector_dash_map((function(_){
+return s;
+}),make_dash_vector((n * 2))));
+});
+var pr = false;
+pr = display;
+var set_dash_prompt = (function(func){
+pr = func;
+});
+module.exports = dict(string_dash__gt_symbol("trace_dash_form"),trace_dash_form,string_dash__gt_symbol("set_dash_prompt"),set_dash_prompt);
 }))();
 

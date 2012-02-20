@@ -29,9 +29,15 @@
 (define (opt arg def)
   (if (null? arg) def (car arg)))
 
+(define _str "")
+(define (disp str)
+  (set! _str (+ _str str)))
+(define (new-string)
+  (set! _str ""))
+
 (define (pretty obj . i)
   (define (pad n)
-    (vector-for-each (lambda (_) (display " "))
+    (vector-for-each (lambda (_) (disp " "))
                      (make-vector n)))
 
   (define (space obj)
@@ -55,22 +61,23 @@
   (let ((i (if (null? i) 1 (car i))))
     (cond
      ((or (symbol? obj)
-          (literal? obj)) (display (->string obj)))
+          (literal? obj)) (disp (->string obj)))
      ((list? obj)
       (let ((node (car obj))
             (childr (cdr obj))
             (sp (> (space obj) 30)))
-        (display "(")
+        (disp "(")
         (pretty node (+ i 1))
         (for-each (lambda (item)
                     (if sp
-                        (begin (display "\n")
+                        (begin (disp "\n")
                                (pad i))
-                        (display " "))
+                        (disp " "))
                     (pretty item (+ i 1)))
                   childr)
-        (display ")")))
-     )))
+        (disp ")")))))
+
+  _str)
 
 (define (symbol->string sym)
   sym.str)
@@ -543,4 +550,7 @@
                       :set-macro-generator
                       (lambda (g)
                         (if (not macro-generator)
-                            (set! macro-generator g)))})
+                            (set! macro-generator g)))
+                      
+                      ;; delete me
+                      :new-string new-string})

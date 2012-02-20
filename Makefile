@@ -18,6 +18,9 @@ backends/js.js: backends/js.ol
 test.js: test.ol
 	$(NODE_MAKE) test.ol > test2.js && mv test2.js test.js
 
+trace.js: trace.ol
+	$(NODE_MAKE) trace.ol > trace2.js && mv trace2.js trace.js
+
 compiler: compiler.js parser.js grammar.js backends/js.js test.js
 
 test: compiler
