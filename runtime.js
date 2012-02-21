@@ -280,6 +280,15 @@ function dict_dash_map(func, dict) {
     return res;
 }
 
+function dict_dash_key_dash_map(func, dict) {
+    var res = {};
+    for(var k in dict) {
+        res[k] = func(k, dict[k]);
+    }
+    return res;
+}
+
+
 var hash_dash_map_dash_map = dict_dash_map;
 
 function hash_dash_map_dash_to_dash_vec(obj) {
@@ -304,7 +313,7 @@ function dict_dash_to_dash_list(dict) {
 function keys(dict) {
     var res = [];
     for(var k in dict) {
-        res.push(k);
+        res.push(string_dash__gt_symbol(k));
     }
     return vector_dash_to_dash_list(res);
 }
@@ -319,13 +328,24 @@ function vals(dict) {
 
 function zip(keys, vals) {
     var obj = {};
-    for(var i=0, len=keys.length; i<len; i++) {
-        obj[keys[i]] = vals[i];
+
+    function loop(ks, vs) {
+        if(null_p_(ks)) {
+            return obj;
+        }
+        else {
+            obj[car(ks).str] = car(vs);
+            return loop(cdr(ks), cdr(vs));
+        }
     }
-    return obj;
+
+    return loop(keys, vals);
 }
 
 function object_dash_ref(obj, key) {
+    if(key.str) {
+        key = key.str;
+    }
     return obj[key];
 }
 

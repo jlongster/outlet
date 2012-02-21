@@ -7,29 +7,20 @@
 (if (< process.argv.length 3)
     (throw "must pass a filename"))
 
-(define (expand-nth form n)
-  (let ((i 0))
-    (let ((e1 (lambda (x e2)
-                (if (not (< i n))
-                    x
-                    (begin
-                      (if (and (list? x)
-                               (compiler.expander? (car x))
-                               (not (eq? (car x) 'lambda)))
-                          (set! i (+ i 1)))
-                      (initial-expander x e2))))))
-      (e1 form e1))))
-
 (let ((src (fs.readFileSync (string-append "tests/"
                                            (vector-ref process.argv 2))
                             "utf-8"))
       (gen (js)))
 
+  ;; new runtime
+  (gen.write-raw-code (fs.readFileSync "r.js" "utf-8"))
+  (gen.write-raw-code (fs.readFileSync "runtime-eval.js" "utf-8"))
   ;;(gen.write-runtime "js")
   (compiler.set-macro-generator gen)
 
-  (let ((f (expand-nth (read src) 1000)))
-    ;;(display (compiler.pretty f))
+  (let ((f (compiler.expand (read src))))
+    ;;(pp f)
     (compiler.parse f gen)
-    ((%raw "eval") (gen.get-code))
+    ;;((%raw "eval") (gen.get-code))
+    (display (gen.get-code))
     ))

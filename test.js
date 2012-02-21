@@ -505,55 +505,14 @@ var pretty = __compiler.pretty;
 } else {return false;
 }})()
 ;
-var initial_dash_expander = (function(form,e){
-return (function() {if(symbol_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(compiler.literal_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(vector_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(dict_p_(form)) {return ((function() {return form;
-}))();
-} else {return (function() {if(compiler.expander_p_(car(form))) {return ((function() {return compiler.expander_dash_function(car(form))(form,e);
-}))();
-} else {return ((function() {return map((function(subform){
-return e(subform,e);
-}),form);
-}))();
-}})()
-;
-}})()
-;
-}})()
-;
-}})()
-;
-}})()
-;
-});
-var expand_dash_nth = (function(form,n){
-return ((function(i){
-return ((function(e1){
-return e1(form,e1);
-}))((function(x,e2){
-return (function() {if(not((i < n))) {return x;
-} else {return ((function() {(function() {if((list_p_(x) && compiler.expander_p_(car(x)) && not(eq_p_(car(x),string_dash__gt_symbol("lambda"))))) {i = (i + 1);
-} else {return false;
-}})()
-;
-return initial_dash_expander(x,e2);
-}))();
-}})()
-;
-}));
-}))(0);
-});
 return ((function(src,gen){
+gen.write_dash_raw_dash_code(fs.readFileSync("r.js","utf-8"));
+gen.write_dash_raw_dash_code(fs.readFileSync("runtime-eval.js","utf-8"));
 compiler.set_dash_macro_dash_generator(gen);
 return ((function(f){
 compiler.parse(f,gen);
-return eval(gen.get_dash_code());
-}))(expand_dash_nth(read(src),1000));
+return display(gen.get_dash_code());
+}))(compiler.expand(read(src)));
 }))(fs.readFileSync(string_dash_append("tests/",vector_dash_ref(process.argv,2)),"utf-8"),js());
 }))();
 

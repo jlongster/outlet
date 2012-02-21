@@ -4,12 +4,7 @@
          (grammar "./grammar")
          (js "./backends/js"))
 
-;; runtime
-
-(define _gensym 0)
-(define (gensym)
-  (set! _gensym (+ _gensym 1))
-  (string->symbol (+ "o" _gensym)))
+;; util
 
 (define (literal? x)
   (or (number? x)
@@ -21,88 +16,8 @@
   (and (list? form)
        (not (expander? (car form)))))
 
-(define (ref obj val)
-  (cond
-   ((list? obj)
-    (define (walk lst i)
-      (cond
-       ((null? lst) #f)
-       ((eq? i 0) (car lst))
-       (else (walk (cdr lst (- i 1))))))
-    (walk obj val))
-   ((vector? obj) (vector-ref obj val))
-   ((dict? obj) (object-ref obj (symbol->string val)))))
-
-(define (slice obj i)
-  (cond
-   ((list? obj)
-    (define (walk lst i)
-      (cond
-       ((null? lst) #f)
-       ((eq? i 0) lst)
-       (else (walk (cdr lst (- i 1))))))
-    (walk obj i))
-   ((vector? obj) (obj.slice i))))
-
-(define put! vector-set!)
-
 (define (opt arg def)
   (if (null? arg) def (car arg)))
-
-(define _str "")
-(define (disp str)
-  (set! _str (+ _str str)))
-(define (new-string)
-  (set! _str ""))
-
-(define (pretty obj . i)
-  (define (pad n)
-    (vector-for-each (lambda (_) (disp " "))
-                     (make-vector n)))
-
-  (define (space obj)
-    (cond
-     ((or (literal? obj)
-          (symbol? obj)) (vector-length (->string obj)))
-     ((list? obj)
-      ;; length of obj plus 1 equals the number of spaces and
-      ;; parantheses for a list
-      (+ (length obj)
-         1
-         (fold (lambda (el acc)
-                 (+ acc (space el)))
-               0
-               obj)))
-     ((dict? obj)
-      (space (dict-to-list obj)))
-     ((vector? obj)
-      (space (vector-to-list obj)))))
-
-  (let ((i (if (null? i) 1 (car i))))
-    (cond
-     ((or (symbol? obj)
-          (literal? obj)) (disp (->string obj)))
-     ((list? obj)
-      (let ((node (car obj 0))
-            (childr (cdr obj 1))
-            (sp (> (space obj) 30)))
-        (disp "(")
-        (pretty node (+ i 1))
-        (for-each (lambda (item)
-                    (if sp
-                        (begin (disp "\n")
-                               (pad i))
-                        (disp " "))
-                    (pretty item (+ i 1)))
-                  childr)
-        (disp ")")))
-     ((vector? obj) (disp (->string obj)))
-     ((dict? obj) (disp (->string obj)))))
-
-  _str)
-
-(define (symbol->string sym)
-  sym.str)
 
 (define (assert cnd msg)
   (if (not cnd)
@@ -113,15 +28,14 @@
 (define _expanders_ {})
 
 (define (expander-function name)
-  (ref _expanders_ name))
+  (dict-ref _expanders_ name))
 
 (define (install-expander name func)
-  (put! _expanders_ (symbol->string name) func))
+  (dict-put! _expanders_ (symbol->string name) func))
 
 (define (expander? name)
-  (and (symbol? name)
-       (not (eq? (ref _expanders_ name)
-                 undefined))))
+  (not (eq? (dict-ref _expanders_ name)
+            undefined)))
 
 (define (expand form)
   (initial-expander form initial-expander))
@@ -250,38 +164,39 @@
                         (e `(set ,sig ,(caddr form)) e))
                        (else
                         (throw (string-append "define requires a list"
-                                              " or symbol to operate on: "
-                                              (->string form))))))))
+                                              " or symbol to operate on")))))))
 
-(install-expander
- 'let
- (lambda (form e)
-   (let ((name (if (symbol? (cadr form))
-                   (cadr form)
-                   (gensym)))
-         (forms (if (symbol? (cadr form))
-                    (caddr form)
-                    (cadr form))))
-     (assert (and (list? forms)
-                  (list? (car forms)))
-             "invalid let")
-     (let ((body (if (symbol? (cadr form))
-                     (cdddr form)
-                     (cddr form)))
-           (syms (zip (map (lambda (el) (gensym)) forms)
-                      (map cadr forms))))
-       (e `((lambda ()
-              (define (,name ,@(map car forms))
-                ,@body)
-              ;; todo, bug here. splicing in
-              ;; var-defs and then putting (,name
-              ;; ,@vars) after it didn't work
-              ,@(list-append
-                 (map (lambda (k)
-                        `(define ,k ,(object-ref syms k)))
-                      (keys syms))
-                 `((,name ,@(keys syms))))))
-          e)))))
+(install-expander 'let
+                  (lambda (form e)
+                    (let ((name (if (symbol? (cadr form))
+                                    (cadr form)
+                                    #f))
+                          (forms (if (symbol? (cadr form))
+                                     (caddr form)
+                                     (cadr form))))
+                      (assert (and (list? forms)
+                                   (list? (car forms)))
+                              "invalid let")
+                      (let ((body (if name
+                                      (cdddr form)
+                                      (cddr form)))
+                            (vars (map car forms))
+                            (var-defs (map (lambda (el)
+                                         `(define ,(car el) ,(cadr el)))
+                                       forms)))
+                        (if name
+                            (e `((lambda ()
+                                   (define (,name ,@vars)
+                                     ,@body)
+                                   ;; todo, bug here. splicing in
+                                   ;; var-defs and then putting (,name
+                                   ;; ,@vars) after it didn't work
+                                   ,@(list-append
+                                      var-defs
+                                      `((,name ,@vars)))
+                                   )) e)
+                            (e `((lambda ()
+                                   ,@(list-append var-defs body))) e))))))
 
 ;; quoting
 
@@ -411,19 +326,18 @@
 (define _natives_ {})
 
 (define (native-function name)
-  (ref _natives_ name))
+  (dict-ref _natives_ name))
 
 (define (install-native name func validator)
-  (put! _natives_
-        (symbol->string name)
-        (lambda (form gen expr? parse)
-          (validator form)
-          ((ref gen func) (cdr form) expr? parse))))
+  (dict-put! _natives_
+             (symbol->string name)
+             (lambda (form gen expr? parse)
+               (validator form)
+               ((dict-ref gen func) (cdr form) expr? parse))))
 
 (define (native? name)
-  (and (symbol? name)
-       (not (eq? (ref _natives_ name))
-            undefined)))
+  (not (eq? (dict-ref _natives_ name))
+       undefined))
 
 (define (verify-not-single form)
   (assert (> (length form) 1)
@@ -581,13 +495,8 @@
   (if (not macro-generator)
       (set! macro-generator generator))
 
-  (let ((forms (if (string? src) (read src) src)))
-    (if (eq? (car forms) 'begin)
-        ;; parse top-level forms individually
-        (for-each (lambda (form)
-                    (parse (expand form) generator))
-                  (cdr forms))
-        (parse (expand forms) generator))
+  (let ((f (expand (if (string? src) (read src) src))))
+    (parse f generator)
     (generator.get-code)))
 
 (set! module.exports {:read read
@@ -597,7 +506,6 @@
                       :install-expander install-expander
                       :expand-once expand-once
                       :expand-nth expand-nth
-                      :pretty pretty
 
                       :set-macro-generator
                       (lambda (g)

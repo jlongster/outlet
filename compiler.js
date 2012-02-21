@@ -280,6 +280,15 @@ function dict_dash_map(func, dict) {
     return res;
 }
 
+function dict_dash_key_dash_map(func, dict) {
+    var res = {};
+    for(var k in dict) {
+        res[k] = func(k, dict[k]);
+    }
+    return res;
+}
+
+
 var hash_dash_map_dash_map = dict_dash_map;
 
 function hash_dash_map_dash_to_dash_vec(obj) {
@@ -304,7 +313,7 @@ function dict_dash_to_dash_list(dict) {
 function keys(dict) {
     var res = [];
     for(var k in dict) {
-        res.push(k);
+        res.push(string_dash__gt_symbol(k));
     }
     return vector_dash_to_dash_list(res);
 }
@@ -319,13 +328,24 @@ function vals(dict) {
 
 function zip(keys, vals) {
     var obj = {};
-    for(var i=0, len=keys.length; i<len; i++) {
-        obj[keys[i]] = vals[i];
+
+    function loop(ks, vs) {
+        if(null_p_(ks)) {
+            return obj;
+        }
+        else {
+            obj[car(ks).str] = car(vs);
+            return loop(cdr(ks), cdr(vs));
+        }
     }
-    return obj;
+
+    return loop(keys, vals);
 }
 
 function object_dash_ref(obj, key) {
+    if(key.str) {
+        key = key.str;
+    }
     return obj[key];
 }
 
@@ -649,7 +669,7 @@ var install_dash_expander = (function(name,func){
 return put_excl_(_expanders_,symbol_dash__gt_string(name),func);
 });
 var expander_p_ = (function(name){
-return not(eq_p_(ref(_expanders_,name),undefined));
+return (symbol_p_(name) && not(eq_p_(ref(_expanders_,name),undefined)));
 });
 var expand = (function(form){
 return initial_dash_expander(form,initial_dash_expander);
@@ -661,17 +681,18 @@ return x;
 });
 var expand_dash_nth = (function(form,n){
 return ((function(i){
-return initial_dash_expander(form,(function(form,e){
 return ((function(e1){
 return e1(form,e1);
 }))((function(x,e2){
 return (function() {if(not((i < n))) {return x;
-} else {return ((function() {i = (i + 1);
-return e(x,e2);
+} else {return ((function() {(function() {if((list_p_(x) && expander_p_(car(x)) && not(eq_p_(car(x),string_dash__gt_symbol("lambda"))))) {i = (i + 1);
+} else {return false;
+}})()
+;
+return initial_dash_expander(x,e2);
 }))();
 }})()
 ;
-}));
 }));
 }))(0);
 });
@@ -809,7 +830,7 @@ return (function() {if(vector_p_(o8)) {return vector_dash_to_dash_list(o8);
 }))();
 } else {return (function() {if(symbol_p_(sig)) {return ((function() {return e(list(string_dash__gt_symbol("set"),sig,caddr(form)),e);
 }))();
-} else {return ((function() {throw(string_dash_append("define requires a list"," or symbol to operate on"));
+} else {return ((function() {throw(string_dash_append("define requires a list"," or symbol to operate on: ",_dash__gt_string(form)));
 }))();
 }})()
 ;
@@ -818,19 +839,45 @@ return (function() {if(vector_p_(o8)) {return vector_dash_to_dash_list(o8);
 }))(cadr(form));
 }));
 install_dash_expander(string_dash__gt_symbol("let"),(function(form,e){
-return ((function(forms,body){
-return e(list_dash_append(list(list_dash_append(list(string_dash__gt_symbol("lambda"),map(car,forms)),((function(o9){
+return ((function(name,forms){
+assert((list_p_(forms) && list_p_(car(forms))),"invalid let");
+return ((function(body,syms){
+return e(list(list_dash_append(list(string_dash__gt_symbol("lambda"),_emptylst,list_dash_append(list(string_dash__gt_symbol("define"),list_dash_append(list(name),((function(o9){
 return (function() {if(vector_p_(o9)) {return vector_dash_to_dash_list(o9);
 } else {return o9;
 }})()
 ;
-}))(body))),((function(o10){
+}))(map(car,forms)))),((function(o10){
 return (function() {if(vector_p_(o10)) {return vector_dash_to_dash_list(o10);
 } else {return o10;
 }})()
 ;
-}))(map(cadr,forms))),e);
-}))(cadr(form),cddr(form));
+}))(body))),((function(o11){
+return (function() {if(vector_p_(o11)) {return vector_dash_to_dash_list(o11);
+} else {return o11;
+}})()
+;
+}))(list_dash_append(map((function(k){
+return list(string_dash__gt_symbol("define"),k,object_dash_ref(syms,k));
+}),keys(syms)),list(list_dash_append(list(name),((function(o12){
+return (function() {if(vector_p_(o12)) {return vector_dash_to_dash_list(o12);
+} else {return o12;
+}})()
+;
+}))(keys(syms)))))))),e);
+}))((function() {if(symbol_p_(cadr(form))) {return cdddr(form);
+} else {return cddr(form);
+}})()
+,zip(map((function(el){
+return gensym();
+}),forms),map(cadr,forms)));
+}))((function() {if(symbol_p_(cadr(form))) {return cadr(form);
+} else {return gensym();
+}})()
+,(function() {if(symbol_p_(cadr(form))) {return caddr(form);
+} else {return cadr(form);
+}})()
+);
 }));
 install_dash_expander(string_dash__gt_symbol("quote"),(function(form,e){
 return ((function(src){
@@ -953,7 +1000,7 @@ return ref(gen,func)(cdr(form),expr_p_,parse);
 }));
 });
 var native_p_ = (function(name){
-return not(eq_p_(ref(_natives_,name)),undefined);
+return (symbol_p_(name) && not(eq_p_(ref(_natives_,name)),undefined));
 });
 var verify_dash_not_dash_single = (function(form){
 return assert((length(form) > 1),string_dash_append("form requires at least one operand:",inspect(form)));
@@ -1119,19 +1166,24 @@ var compile = (function(src,generator){
 } else {return false;
 }})()
 ;
-return ((function(f){
-parse(f,generator);
+return ((function(forms){
+(function() {if(eq_p_(car(forms),string_dash__gt_symbol("begin"))) {return for_dash_each((function(form){
+return parse(expand(form),generator);
+}),cdr(forms));
+} else {return parse(expand(forms),generator);
+}})()
+;
 return generator.get_dash_code();
-}))(expand((function() {if(string_p_(src)) {return read(src);
+}))((function() {if(string_p_(src)) {return read(src);
 } else {return src;
 }})()
-));
+);
 });
-module.exports = dict(string_dash__gt_symbol("read"),read,string_dash__gt_symbol("expand"),expand,string_dash__gt_symbol("parse"),parse,string_dash__gt_symbol("compile"),compile,string_dash__gt_symbol("install_dash_expander"),install_dash_expander,string_dash__gt_symbol("expand_dash_once"),expand_dash_once,string_dash__gt_symbol("expand_dash_nth"),expand_dash_nth,string_dash__gt_symbol("pretty"),pretty,string_dash__gt_symbol("expander_p_"),expander_p_,string_dash__gt_symbol("expander_dash_function"),expander_dash_function,string_dash__gt_symbol("literal_p_"),literal_p_,string_dash__gt_symbol("set_dash_macro_dash_generator"),(function(g){
+module.exports = dict(string_dash__gt_symbol("read"),read,string_dash__gt_symbol("expand"),expand,string_dash__gt_symbol("parse"),parse,string_dash__gt_symbol("compile"),compile,string_dash__gt_symbol("install_dash_expander"),install_dash_expander,string_dash__gt_symbol("expand_dash_once"),expand_dash_once,string_dash__gt_symbol("expand_dash_nth"),expand_dash_nth,string_dash__gt_symbol("pretty"),pretty,string_dash__gt_symbol("set_dash_macro_dash_generator"),(function(g){
 return (function() {if(not(macro_dash_generator)) {macro_dash_generator = g;
 } else {return false;
 }})()
 ;
-}),string_dash__gt_symbol("new_dash_string"),new_dash_string);
+}));
 }))();
 

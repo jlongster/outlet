@@ -130,7 +130,7 @@
             (write "var ")
             (write-term capture-name)
             (write " = ")
-            (write-term 'vector-to-list)
+            (write-term 'vector->list)
             (write "(Array.prototype.slice.call(arguments, ")
             ;; only slice args from where the dot started
             (write (- (length args) 2))
@@ -140,7 +140,7 @@
       (write "var ")
       (write-term args)
       (write " = ")
-      (write-term 'vector-to-list)
+      (write-term 'vector->list)
       (write "(Array.prototype.slice.call(arguments));" #t))
      ((null? args)
       (write "(function() {")))

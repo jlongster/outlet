@@ -1,5 +1,9 @@
 
-NODE_MAKE = node make.js
+ifeq ($(BOOT),1)
+	NODE_MAKE = node make.js _boot
+else
+	NODE_MAKE = node make.js
+endif
 
 all: compiler
 
@@ -10,16 +14,16 @@ grammar.js: grammar.ol
 	$(NODE_MAKE) grammar.ol > grammar2.js && mv grammar2.js grammar.js
 
 compiler.js: compiler.ol
-	$(NODE_MAKE) compiler.ol > compiler2.js && mv compiler2.js compiler.js
+	$(NODE_MAKE) _current_runtime compiler.ol > compiler2.js && mv compiler2.js compiler.js
 
 backends/js.js: backends/js.ol
 	$(NODE_MAKE) backends/js.ol > backends/js2.js && mv backends/js2.js backends/js.js
 
 test.js: test.ol
-	$(NODE_MAKE) test.ol > test2.js && mv test2.js test.js
+	$(NODE_MAKE) _with_eval test.ol > test2.js && mv test2.js test.js
 
-trace.js: trace.ol
-	$(NODE_MAKE) trace.ol > trace2.js && mv trace2.js trace.js
+r.js: r.ol
+	$(NODE_MAKE) _no_runtime r.ol > r2.js && mv r2.js r.js
 
 compiler: compiler.js parser.js grammar.js backends/js.js test.js
 
