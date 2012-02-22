@@ -9,6 +9,7 @@ function string_dash__gt_symbol(str) {
     str = str.replace(/>/g, '_gt_');
     str = str.replace(/</g, '_lt_');
     str = str.replace(/%/g, '_per_');
+    str = str.replace(/=/g, '_eq_');
 
     return {
         str: str,

@@ -68,15 +68,26 @@
 
 (define (string->symbol str)
   (let ((s str))
-    (set! s (s.replace (RegExp "\\\\" "g") "\\\\"))
-    (set! s (s.replace (RegExp "\n" "g") "\\n"))
-    (set! s (s.replace (RegExp "\r" "g") "\\r"))
-    (set! s (s.replace (RegExp "\t" "g") "\\t"))
-    (set! s (s.replace (RegExp "\"" "g") "\\\""))
+    (set! s (s.replace (RegExp "-" "g") "_dash_"))
+    (set! s (s.replace (RegExp "\\?" "g") "_p_"))
+    (set! s (s.replace (RegExp "\\!" "g") "_excl_"))
+    (set! s (s.replace (RegExp ">" "g") "_gt_"))
+    (set! s (s.replace (RegExp "<" "g") "_lt_"))
+    (set! s (s.replace (RegExp "%" "g") "_per_"))
+    (set! s (s.replace (RegExp "=" "g") "_eq_"))
     ;; raw code so that the compiler doesn't see this as a symbol
     (%raw "{str:s, symbol:true}")))
 
-(define (symbol->string sym) sym.str)
+(define (symbol->string sym)
+  (let ((s sym.str))
+    (set! s (s.replace (RegExp "_dash_" "g") "-"))
+    (set! s (s.replace (RegExp "_p_" "g") "?"))
+    (set! s (s.replace (RegExp "_excl_" "g") "!"))
+    (set! s (s.replace (RegExp "_gt_" "g") ">"))
+    (set! s (s.replace (RegExp "_lt_" "g") "<"))
+    (set! s (s.replace (RegExp "_per_" "g") "%"))
+    (set! s (s.replace (RegExp "_eq_" "g") "="))
+    s))
 
 ;; lists
 
@@ -134,6 +145,25 @@
         (if (eq? (car lst) val)
             lst
             (loop (cdr lst))))))
+
+(define (map func lst)
+  (if (null? lst)
+      '()
+      (cons (func (car lst))
+            (map func (cdr lst)))))
+
+(define (for-each func lst)
+  (if (not (null? lst))
+      (begin
+        (func (car lst))
+        (for-each func (cdr lst)))))
+
+(define (fold func acc lst)
+  (if (null? lst)
+      acc
+      (fold func
+            (func (car lst) acc)
+            (cdr lst))))
 
 (define (reverse lst)
   (if (null? lst)
@@ -289,17 +319,17 @@
 ;; not
 
 (define (not obj)
-  (and (%raw "typeof v !== 'number'")
+  (and (%raw "typeof obj !== 'number'")
        (%raw "!obj")))
 
 ;; equality
 
-(define (eq? obj1 obj2)
+(define (== obj1 obj2)
   (if (and (symbol? obj1) (symbol? obj2))
       (%raw "obj1.str === obj2.str")
       (%raw "obj1 === obj2")))
 
-(define (equal? obj1 obj2)
+(define (= obj1 obj2)
   (cond
    ((and (list? obj1)
          (list? obj2))
@@ -345,6 +375,9 @@
                      #f))))))
    (else
     (eq? obj1 obj2))))
+
+(define eq? ==)
+(define equal? =)
 
 ;; output
 
@@ -442,27 +475,6 @@
                 (loop (cddr lst) #f)))))
       (disp "}")
       (get-buffer)))))
-
-;; sequences
-
-(define (map func lst)
-  (if (null? lst)
-      '()
-      (cons (func (car lst))
-            (map func (cdr lst)))))
-
-(define (for-each func lst)
-  (if (not (null? lst))
-      (begin
-        (func (car lst))
-        (for-each func (cdr lst)))))
-
-(define (fold func acc lst)
-  (if (null? lst)
-      acc
-      (fold func
-            (func (car lst) acc)
-            (cdr lst))))
 
 ;; gensym (need to randomize)
 

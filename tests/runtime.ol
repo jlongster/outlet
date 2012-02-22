@@ -1,7 +1,7 @@
 ;; Tests for the runtime
 
 (define-macro (%test hook src val . args)
-  `(let ((comp ,(if (null? args) 'equal? (car args)))
+  `(let ((comp ,(if (null? args) '= (car args)))
          (res (,hook ,src)))
      (if (not (comp res ,val))
          (throw (str "FAILURE with " (inspect ',hook) ": "
@@ -30,7 +30,9 @@
 (test-eval (str [1 2 3] "one" ) "[1 2 3]one")
 
 (test-eval (string->symbol "foo") 'foo)
+(test-eval (string->symbol "foo-?!><%=") 'foo-?!><%=)
 (test-eval (symbol->string 'bar) "bar")
+(test-eval (symbol->string 'bar-?!><%=) "bar-?!><%=")
 
 ;; lists
 
@@ -60,6 +62,17 @@
 (test-eval (vector->list [1 2 3]) '(1 2 3))
 (test-eval (vector->list [1 2 [1 2]]) '(1 2 [1 2]))
 
+(test-eval (map (lambda (el) (+ el 1))'(1 2 3)) '(2 3 4))
+(test-eval (fold (lambda (el acc) (+ el acc)) 0
+                 '(5 6 7))
+           18)
+
+(define last #f)
+(for-each (lambda (el)
+            (set! last el))
+          '(one two three))
+(test-eval last 'three)
+
 ;; vectors
 
 (test-eval (make-vector 5 1) [1 1 1 1 1])
@@ -81,19 +94,16 @@
 (test-eval (vector-find '[x y z] 'z) 2)
 (test-eval (vector-length [1 2 3]) 3)
 (test-eval (list->vector '(1 2 3)) [1 2 3])
-(test-eval (vector-map (lambda (el) (+ el 1))
-                       [1 2 3 4])
-           [2 3 4 5])
+(test-eval (vector-map (lambda (el) (+ el 1)) [1 2 3 4]) [2 3 4 5])
+(test-eval (vector-fold (lambda (el acc) (+ el acc)) 0
+                        [1 2 3])
+           6)
 
 (define last #f)
 (vector-for-each (lambda (el)
                    (set! last el))
                  [4 5 6])
 (test-eval last 6)
-
-(test-eval (vector-fold (lambda (el acc)
-                          (+ el acc)) 0 [1 2 3])
-           6)
 
 ;; dicts
 
@@ -136,8 +146,36 @@
 ;; not
 
 (test-eval (not #f) #t)
-;;(test-eval (not 0) #f)
+(test-eval (not 0) #f)
 (test-eval (not "foo") #f)
+
+;; equality
+
+(test-assert (== 3 3))
+(test-assert (= 3 3))
+(test-assert (== "foo" "foo"))
+(test-assert (= "foo" "foo"))
+(test-assert (== #t #t))
+(test-assert (= #t #t))
+(test-assert (== 'foo 'foo))
+(test-assert (= 'foo 'foo))
+(test-assert (== '() '()))
+(test-assert (= '() '()))
+
+(define foo '(1 2 3))
+(test-assert (== foo foo))
+(test-eval (== '(1 2 3) '(1 2 3)) #f)
+(test-assert (= '(1 2 3) '(1 2 3)))
+
+(define foo [1 2 3])
+(test-assert (== foo foo))
+(test-eval (== [1 2 3] [1 2 3]) #f)
+(test-assert (= [1 2 3] [1 2 3]))
+
+(define foo {:one 1})
+(test-assert (== foo foo))
+(test-eval (== {:one 1} {:one 1}) #f)
+(test-assert (= {:one 1} {:one 1}))
 
 ;; types
 
