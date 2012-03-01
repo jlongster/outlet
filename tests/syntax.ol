@@ -7,17 +7,17 @@
 
 (define (test-read src expected)
   (if (not (= (read src) expected))
-      (throw (string-append "FAILURE: got "
-                            (inspect (read src))
-                            " but expected "
-                            (inspect expected)))))
+      (throw (str "FAILURE: got "
+                  (inspect (read src))
+                  " but expected "
+                  (inspect expected)))))
 
 (define (test-eval val expected)
   (if (not (= val expected))
-      (throw (string-append "FAILURE: got "
-                            (inspect val)
-                            " but expected "
-                            (inspect expected)))))
+      (throw (str "FAILURE: got "
+                  (inspect val)
+                  " but expected "
+                  (inspect expected)))))
 
 
 ;; integers

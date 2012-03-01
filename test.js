@@ -656,22 +656,31 @@ return string_dash__gt_symbol(("o" + _gensym));
 
 var __compiler = require('./compiler');
 var __generator = require('./backends/js');
-var read = __compiler.read;var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
+var read = __compiler.read;var fs = require("fs");var compiler = require("./compiler");var boot = require("./boot/compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
 } else {return false;
 }})()
 ;
-((function() {var o1 = (function(src,gen){
-compiler.set_dash_macro_dash_generator(gen);
-return ((function() {var o4 = (function(f){
-compiler.parse(f,gen);
+((function() {var o1 = (function(filename){
+return ((function() {var o3 = (function(src,gen,comp){
+comp.set_dash_macro_dash_generator(gen);
+return ((function() {var o7 = (function(f){
+comp.parse(f,gen);
 return eval(gen.get_dash_code());
 });
-var o5 = compiler.expand(read(src));
-return o4(o5);
+var o8 = comp.expand(read(src));
+return o7(o8);
 }))();
 });
-var o2 = fs.readFileSync(str("tests/",vector_dash_ref(process.argv,2)),"utf-8");
-var o3 = js();
-return o1(o2,o3);
+var o4 = fs.readFileSync(str("tests/",filename),"utf-8");
+var o5 = js();
+var o6 = (function() {if(_eq_(filename,"syntax.ol")) {return boot;
+} else {return compiler;
+}})()
+;
+return o3(o4,o5,o6);
+}))();
+});
+var o2 = vector_dash_ref(process.argv,2);
+return o1(o2);
 }))();
 

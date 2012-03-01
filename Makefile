@@ -28,6 +28,5 @@ runtime.js: runtime.ol
 compiler: runtime.js compiler.js parser.js grammar.js backends/js.js test.js
 
 test: compiler
-	node test basic.ol
-	node test compile.ol
-	node test runtime.ol
+	node test syntax.ol
+	node test core.ol
