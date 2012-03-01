@@ -190,7 +190,7 @@
   (define (write-op op vals expr? parse)
     (write "(")
     (let ((op-writer (inline-writer
-                      (string-append " " op " "))))
+                      (str " " op " "))))
       (for-each (lambda (arg)
                   (op-writer)
                   (parse arg #t))
