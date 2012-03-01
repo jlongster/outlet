@@ -137,7 +137,7 @@
                                  state)))))
                    (after (char ")")
                            (lambda (state _)
-                              (vector-to-list state)))
+                              (vector->list state)))
                    (char "]"))))))
   (after
    (repeated
@@ -147,7 +147,7 @@
                 (lambda (root child)
                   (root.concat (vector child))))))
    (lambda (_ root)
-     (let ((lst (vector-to-list root)))
+     (let ((lst (vector->list root)))
        (if (eq? (length lst) 1)
            (car lst)
            (cons 'begin lst))))))

@@ -219,7 +219,6 @@ var o11 = 0;
 return loop(o11);
 }))();
 });
-var vector_dash_to_dash_list = vector_dash__gt_list;
 var make_dash_vector = (function(count,val){
 return ((function() {var o12 = (function(v){
 return ((function() {var loop = (function(i){
