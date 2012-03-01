@@ -113,8 +113,8 @@
                      (after (elements lst)
                             (lambda (parent child)
                               (vector-concat parent [child]))))))
-              (any (before (char "}")
-                           (lambda (state)
+              (any (after (char "}")
+                           (lambda (state _)
                              (let ((i 0))
                                (dict.apply
                                 null
@@ -135,8 +135,8 @@
                                            el)
                                        el))
                                  state)))))
-                   (before (char ")")
-                           (lambda (state)
+                   (after (char ")")
+                           (lambda (state _)
                               (vector-to-list state)))
                    (char "]"))))))
   (after

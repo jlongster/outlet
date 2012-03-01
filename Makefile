@@ -11,7 +11,7 @@ parser.js: parser.ol
 	$(NODE_MAKE) _current_runtime parser.ol > parser2.js && mv parser2.js parser.js
 
 grammar.js: grammar.ol
-	$(NODE_MAKE) grammar.ol > grammar2.js && mv grammar2.js grammar.js
+	$(NODE_MAKE) _current_runtime grammar.ol > grammar2.js && mv grammar2.js grammar.js
 
 compiler.js: compiler.ol
 	$(NODE_MAKE) _current_runtime compiler.ol > compiler2.js && mv compiler2.js compiler.js
@@ -30,3 +30,4 @@ compiler: compiler.js parser.js grammar.js backends/js.js test.js
 test: compiler
 	node test basic.ol
 	node test compile.ol
+	node test runtime.ol
