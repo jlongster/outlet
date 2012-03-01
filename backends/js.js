@@ -655,14 +655,14 @@ return string_dash__gt_symbol(("o" + _gensym));
 });
 
 
-((function() {var fs = require("fs");var should_dash_return_p_ = (function(form){
+var fs = require("fs");var should_dash_return_p_ = (function(form){
 return not((list_p_(form) && (eq_p_(car(form),string_dash__gt_symbol("throw")) || eq_p_(car(form),string_dash__gt_symbol("set_excl_")) || eq_p_(car(form),string_dash__gt_symbol("set")))));
 });
 var generator = (function() {var code = vector();
 var make_dash_fresh = (function() {return generator();
 });
 var write = (function(src){
-var eol = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, 1));
+var eol = vector_dash__gt_list(Array.prototype.slice.call(arguments, 1));
 return code.push((src + (function() {if(null_p_(eol)) {return "";
 } else {return "\n";
 }})()
@@ -680,13 +680,16 @@ return (function() {if(not(equal_p_(target,"js-noeval"))) {return write(fs.readF
 ;
 });
 var inline_dash_writer = (function(str){
-return ((function(first){
+return ((function() {var o1 = (function(first){
 return (function() {return (function() {if(first) {first = false;
 } else {return write(str);
 }})()
 ;
 });
-}))(true);
+});
+var o2 = true;
+return o1(o2);
+}))();
 });
 var terminate_dash_expr = (function(expr_p_){
 return (function() {if(not(expr_p_)) {return write(";",true);
@@ -710,7 +713,7 @@ write("_emptylst");
 return terminate_dash_expr(not(top_p_));
 });
 var write_dash_string = (function(obj,top_p_){
-return ((function(str){
+return ((function() {var o3 = (function(str){
 str = str.replace(RegExp("\\\\","g"),"\\\\");
 str = str.replace(RegExp("\n","g"),"\\n");
 str = str.replace(RegExp("\r","g"),"\\r");
@@ -718,7 +721,10 @@ str = str.replace(RegExp("\t","g"),"\\t");
 str = str.replace(RegExp("\"","g"),"\\\"");
 write(("\"" + str + "\""));
 return terminate_dash_expr(not(top_p_));
-}))(obj);
+});
+var o4 = obj;
+return o3(o4);
+}))();
 });
 var write_dash_symbol = (function(obj,top_p_){
 write(("string_dash__gt_symbol(\"" + obj.str + "\")"));
@@ -739,7 +745,7 @@ parse(rval,true);
 return write(";",true);
 });
 var write_dash_if = (function(pred,tru,expr_p_,parse){
-var fal = vector_dash_to_dash_list(Array.prototype.slice.call(arguments, 4));
+var fal = vector_dash__gt_list(Array.prototype.slice.call(arguments, 4));
 write("(function() {");
 write("if(");
 parse(pred,true);
@@ -811,7 +817,7 @@ return write("(Array.prototype.slice.call(arguments));",true);
 ;
 }})()
 ;
-((function(i,len){
+((function() {var o5 = (function(i,len){
 return for_dash_each((function(form){
 (function() {if((eq_p_(i,(len - 1)) && should_dash_return_p_(form))) {return write("return ");
 } else {return false;
@@ -820,7 +826,11 @@ return for_dash_each((function(form){
 parse(form);
 i = (i + 1);
 }),body);
-}))(0,length(body));
+});
+var o6 = 0;
+var o7 = length(body);
+return o5(o6,o7);
+}))();
 write("})");
 return terminate_dash_expr(expr_p_);
 });
@@ -836,12 +846,15 @@ return write(")");
 }})()
 ;
 write("(");
-((function(comma){
+((function() {var o8 = (function(comma){
 return for_dash_each((function(arg){
 comma();
 return parse(arg,true);
 }),args);
-}))(inline_dash_writer(","));
+});
+var o9 = inline_dash_writer(",");
+return o8(o9);
+}))();
 write(")");
 return terminate_dash_expr(expr_p_);
 });
@@ -850,12 +863,15 @@ return write(code);
 });
 var write_dash_op = (function(op,vals,expr_p_,parse){
 write("(");
-((function(op_dash_writer){
+((function() {var o10 = (function(op_dash_writer){
 return for_dash_each((function(arg){
 op_dash_writer();
 return parse(arg,true);
 }),vals);
-}))(inline_dash_writer(str(" ",op," ")));
+});
+var o11 = inline_dash_writer(str(" ",op," "));
+return o10(o11);
+}))();
 write(")");
 return terminate_dash_expr(expr_p_);
 });
@@ -873,9 +889,8 @@ write_dash_string(cadr(el));
 return write(");");
 }),args);
 });
-return dict(string_dash__gt_symbol("write_dash_runtime"),write_dash_runtime,string_dash__gt_symbol("write_dash_number"),write_dash_number,string_dash__gt_symbol("write_dash_string"),write_dash_string,string_dash__gt_symbol("write_dash_boolean"),write_dash_boolean,string_dash__gt_symbol("write_dash_term"),write_dash_term,string_dash__gt_symbol("write_dash_symbol"),write_dash_symbol,string_dash__gt_symbol("write_dash_empty_dash_list"),write_dash_empty_dash_list,string_dash__gt_symbol("write_dash_set"),write_dash_set,string_dash__gt_symbol("write_dash_set_excl_"),write_dash_set_excl_,string_dash__gt_symbol("write_dash_if"),write_dash_if,string_dash__gt_symbol("write_dash_lambda"),write_dash_lambda,string_dash__gt_symbol("write_dash_func_dash_call"),write_dash_func_dash_call,string_dash__gt_symbol("write_dash_raw_dash_code"),write_dash_raw_dash_code,string_dash__gt_symbol("write_dash_require"),write_dash_require,string_dash__gt_symbol("write_dash_and"),make_dash_op_dash_writer("&&"),string_dash__gt_symbol("write_dash_or"),make_dash_op_dash_writer("||"),string_dash__gt_symbol("write_dash_add"),make_dash_op_dash_writer("+"),string_dash__gt_symbol("write_dash_subtract"),make_dash_op_dash_writer("-"),string_dash__gt_symbol("write_dash_multiply"),make_dash_op_dash_writer("*"),string_dash__gt_symbol("write_dash_divide"),make_dash_op_dash_writer("/"),string_dash__gt_symbol("write_dash_gt"),make_dash_op_dash_writer(">"),string_dash__gt_symbol("write_dash_lt"),make_dash_op_dash_writer("<"),string_dash__gt_symbol("write_dash_mod"),make_dash_op_dash_writer("%"),string_dash__gt_symbol("make_dash_fresh"),make_dash_fresh,string_dash__gt_symbol("get_dash_code"),(function() {return code.join("");
-}));
+return dict(string_dash__gt_symbol("get_dash_code"),(function() {return code.join("");
+}),string_dash__gt_symbol("make_dash_fresh"),make_dash_fresh,string_dash__gt_symbol("write_dash_mod"),make_dash_op_dash_writer("%"),string_dash__gt_symbol("write_dash_lt"),make_dash_op_dash_writer("<"),string_dash__gt_symbol("write_dash_gt"),make_dash_op_dash_writer(">"),string_dash__gt_symbol("write_dash_divide"),make_dash_op_dash_writer("/"),string_dash__gt_symbol("write_dash_multiply"),make_dash_op_dash_writer("*"),string_dash__gt_symbol("write_dash_subtract"),make_dash_op_dash_writer("-"),string_dash__gt_symbol("write_dash_add"),make_dash_op_dash_writer("+"),string_dash__gt_symbol("write_dash_or"),make_dash_op_dash_writer("||"),string_dash__gt_symbol("write_dash_and"),make_dash_op_dash_writer("&&"),string_dash__gt_symbol("write_dash_require"),write_dash_require,string_dash__gt_symbol("write_dash_raw_dash_code"),write_dash_raw_dash_code,string_dash__gt_symbol("write_dash_func_dash_call"),write_dash_func_dash_call,string_dash__gt_symbol("write_dash_lambda"),write_dash_lambda,string_dash__gt_symbol("write_dash_if"),write_dash_if,string_dash__gt_symbol("write_dash_set_excl_"),write_dash_set_excl_,string_dash__gt_symbol("write_dash_set"),write_dash_set,string_dash__gt_symbol("write_dash_empty_dash_list"),write_dash_empty_dash_list,string_dash__gt_symbol("write_dash_symbol"),write_dash_symbol,string_dash__gt_symbol("write_dash_term"),write_dash_term,string_dash__gt_symbol("write_dash_boolean"),write_dash_boolean,string_dash__gt_symbol("write_dash_string"),write_dash_string,string_dash__gt_symbol("write_dash_number"),write_dash_number,string_dash__gt_symbol("write_dash_runtime"),write_dash_runtime);
 });
 module.exports = generator;
-}))();
 

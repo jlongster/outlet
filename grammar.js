@@ -655,7 +655,7 @@ return string_dash__gt_symbol(("o" + _gensym));
 });
 
 
-((function() {var grammar = (function(all,any,capture,char,not_dash_char,optional,Y,eof,terminator,before,after){
+var grammar = (function(all,any,capture,char,not_dash_char,optional,Y,eof,terminator,before,after){
 var repeated = (function(rule){
 return Y((function(seq){
 return any(all(rule,seq),rule);
@@ -673,18 +673,21 @@ return (function() {if(equal_p_(text,"#f")) {return false;
 }})()
 ;
 }));
-var string = ((function(capt,capt_node,capt_special,init){
+var string = ((function() {var o1 = (function(capt,capt_node,capt_special,init){
 var content = any(capt_special(all(char("\\"),not_dash_char(""))),capt(not_dash_char("\"")));
 return init(all(char("\""),capt_node(optional(repeated(content))),char("\"")));
-}))((function(rule){
+});
+var o2 = (function(rule){
 return capture(rule,(function(buf,state){
 return (state + buf);
 }));
-}),(function(rule){
+});
+var o3 = (function(rule){
 return capture(rule,(function(str,state){
 return state;
 }));
-}),(function(rule){
+});
+var o4 = (function(rule){
 return capture(rule,(function(str,state){
 return (state + (function() {if(equal_p_(str,"\\n")) {return ((function() {return "\n";
 }))();
@@ -701,11 +704,14 @@ return (state + (function() {if(equal_p_(str,"\\n")) {return ((function() {retur
 }})()
 );
 }));
-}),(function(rule){
+});
+var o5 = (function(rule){
 return before(rule,(function(state){
 return "";
 }));
-}));
+});
+return o1(o2,o3,o4,o5);
+}))();
 var raw_term = capture(repeated(any(not_dash_char(("{}()[]'" + space_dash_char)))),(function(buf,s){
 return string_dash__gt_symbol(buf);
 }));
@@ -716,9 +722,10 @@ var term = any(raw_keyword,raw_term);
 var elements = (function(lst){
 var quoting = (function(rule){
 var capt = (function(buf,node){
-return ((function(special){
+return ((function() {var o6 = (function(special){
 return list(string_dash__gt_symbol(special),node);
-}))((function() {if(equal_p_(buf.substring(0,2),",@")) {return ((function() {return "unquote-splicing";
+});
+var o7 = (function() {if(equal_p_(buf.substring(0,2),",@")) {return ((function() {return "unquote-splicing";
 }))();
 } else {return (function() {if(equal_p_(buf.charAt(0),",")) {return ((function() {return "unquote";
 }))();
@@ -734,15 +741,20 @@ return list(string_dash__gt_symbol(special),node);
 }})()
 ;
 }})()
-);
+;
+return o6(o7);
+}))();
 });
 return Y((function(q){
 return capture(all(any(char("'"),char("`"),all(char(","),char("@")),char(",")),any(q,rule)),capt);
 }));
 });
-return ((function(rule){
+return ((function() {var o8 = (function(rule){
 return any(quoting(rule),rule);
-}))(any(lst,number,string,boolean,term));
+});
+var o9 = any(lst,number,string,boolean,term);
+return o8(o9);
+}))();
 });
 var lst = Y((function(lst){
 return all(any(before(char("{"),(function(state){
@@ -754,7 +766,7 @@ return vector();
 }))),optional(repeated(any(space,comment,after(elements(lst),(function(parent,child){
 return vector_dash_concat(parent,vector(child));
 }))))),any(after(char("}"),(function(state,_){
-return ((function(i){
+return ((function() {var o10 = (function(i){
 return dict.apply(null,vector_dash_map((function(el){
 i = (i + 1);
 return (function() {if(eq_p_(((i - 1) % 2),0)) {return (function() {if((list_p_(el) && eq_p_(car(el),string_dash__gt_symbol("quote")))) {return cadr(el);
@@ -765,7 +777,10 @@ return (function() {if(eq_p_(((i - 1) % 2),0)) {return (function() {if((list_p_(
 }})()
 ;
 }),state));
-}))(0);
+});
+var o11 = 0;
+return o10(o11);
+}))();
 })),after(char(")"),(function(state,_){
 return vector_dash_to_dash_list(state);
 })),char("]")));
@@ -773,14 +788,16 @@ return vector_dash_to_dash_list(state);
 return after(repeated(any(space,comment,after(elements(any(lst)),(function(root,child){
 return root.concat(vector(child));
 })))),(function(_,root){
-return ((function(lst){
+return ((function() {var o12 = (function(lst){
 return (function() {if(eq_p_(length(lst),1)) {return car(lst);
 } else {return cons(string_dash__gt_symbol("begin"),lst);
 }})()
 ;
-}))(vector_dash_to_dash_list(root));
+});
+var o13 = vector_dash_to_dash_list(root);
+return o12(o13);
+}))();
 }));
 });
 module.exports = grammar;
-}))();
 

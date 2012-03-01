@@ -662,16 +662,22 @@ var __generator = require("./backends/js");
 var read = __compiler.read;
 var pretty = __compiler.pretty;
 
-((function() {var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
+var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
 } else {return false;
 }})()
 ;
-return ((function(src,gen){
+((function() {var o1 = (function(src,gen){
 compiler.set_dash_macro_dash_generator(gen);
-return ((function(f){
+return ((function() {var o4 = (function(f){
 compiler.parse(f,gen);
 return eval(gen.get_dash_code());
-}))(compiler.expand(read(src)));
-}))(fs.readFileSync(str("tests/",vector_dash_ref(process.argv,2)),"utf-8"),js());
+});
+var o5 = compiler.expand(read(src));
+return o4(o5);
+}))();
+});
+var o2 = fs.readFileSync(str("tests/",vector_dash_ref(process.argv,2)),"utf-8");
+var o3 = js();
+return o1(o2,o3);
 }))();
 
