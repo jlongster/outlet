@@ -219,7 +219,7 @@
                        ((symbol? src) (list 'quote src))
                        ((literal? src) src)
                        ((vector? src) `(list->vector
-                                        ,(unquote-splice-expand (vector-to-list src) e)))
+                                        ,(unquote-splice-expand (vector->list src) e)))
                        ((dict? src)
                         ;; dicts only support the `unquote` form in
                         ;; the value position. `unquote-splicing`
@@ -268,7 +268,7 @@
               (let ((src (cond
                           ((literal? (cadr el)) (list 'list (cadr el)))
                           ((vector? (cadr el))
-                           (list 'vector-to-list (cadr el)))
+                           (list 'vector->list (cadr el)))
                           ((dict? (cadr el))
                            (pp el)
                            (throw "cannot splice dict"))
@@ -279,7 +279,7 @@
                            (let ((v (gensym)))
                              `(let ((,v ,(cadr el)))
                                 (if (vector? ,v)
-                                    (vector-to-list ,v)
+                                    (vector->list ,v)
                                     ,v)))))))
                 (quote-splice (cdr lst)
                               (cons (e src e)
@@ -455,7 +455,7 @@
          (else (parse-func-call form)))))
 
     (define (parse-vector vec)
-      (parse-list (cons 'vector (vector-to-list vec))))
+      (parse-list (cons 'vector (vector->list vec))))
 
     (define (parse-dict dict)
       (let ((lst (dict->list dict))

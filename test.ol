@@ -13,7 +13,7 @@
       (gen (js)))
 
   ;; new runtime
-  ;;(gen.write-runtime "js")
+  ;; (gen.write-runtime "js")
   (compiler.set-macro-generator gen)
 
   (let ((f (compiler.expand (read src))))

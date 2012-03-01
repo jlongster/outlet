@@ -20,48 +20,7 @@
 (define-macro (test-eval src val)
   `(%test eval ',src ,val))
 
-;; data structures
-;;
-;; the main purpose of this section is to make sure literals are
-;; passed through macros correctly
 
-(test-eval '(1 2 3) (list 1 2 3))
-(test-eval [1 2 3] (vector 1 2 3))
-(test-eval {:foo 1 :bar 2} (dict :foo 1 :bar 2))
-
-;; functions
-(define (foo x y z) (+ x y z))
-(test-eval (foo 1 2 3) 6)
-
-
-(define (bar t) (* (foo 1 2 3) t))
-(test-eval (bar 5) 30)
-
-(test-eval ((lambda (x)
-               (bar (+ x 2))) 5)
-           42)
-
-;; lambda
-(define foo (lambda (x y z) (+ x y z)))
-(test-eval (foo 1 2 3) 6)
-
-(define foo (lambda args args))
-(test-eval (foo 1 2 3) '(1 2 3))
-
-;; set!
-(test-eval ((lambda (x)
-               (set! x 10)
-               (* x x)) 5)
-           100)
-
-;; if
-(test-eval (if #t 1 2) 1)
-(test-eval (if #f 1 2) 2)
-(test-eval (if true
-                (begin
-                  (define a 5)
-                  (* a 2)))
-           10)
 
 ;; cond
 (define x 3)

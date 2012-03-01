@@ -21,7 +21,10 @@
         (begin
           (write (fs.readFileSync "runtime.js" "utf-8") #t)
           (if (not (equal? target "js-noeval"))
-              (write (fs.readFileSync "runtime-eval.js" "utf-8") #t)))))
+              (begin
+                (write "var __compiler = require('./compiler');" #t)
+                (write "var __generator = require('./backends/js');" #t)
+                (write "var read = __compiler.read;") #t)))))
 
   (define (inline-writer str)
     (let ((first #t))

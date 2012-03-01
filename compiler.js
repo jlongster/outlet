@@ -219,7 +219,6 @@ var o11 = 0;
 return loop(o11);
 }))();
 });
-var vector_dash_to_dash_list = vector_dash__gt_list;
 var make_dash_vector = (function(count,val){
 return ((function() {var o12 = (function(v){
 return ((function() {var loop = (function(i){
@@ -1019,7 +1018,7 @@ return (function() {if(symbol_p_(src)) {return ((function() {return list(string_
 }))();
 } else {return (function() {if(literal_p_(src)) {return ((function() {return src;
 }))();
-} else {return (function() {if(vector_p_(src)) {return ((function() {return list(string_dash__gt_symbol("list_dash__gt_vector"),unquote_dash_splice_dash_expand(vector_dash_to_dash_list(src),e));
+} else {return (function() {if(vector_p_(src)) {return ((function() {return list(string_dash__gt_symbol("list_dash__gt_vector"),unquote_dash_splice_dash_expand(vector_dash__gt_list(src),e));
 }))();
 } else {return (function() {if(dict_p_(src)) {return ((function() {return dict_dash_map((function(el){
 return (function() {if((list_p_(el) && eq_p_(car(src),string_dash__gt_symbol("unquote")))) {return e(cadr(el),e);
@@ -1065,13 +1064,13 @@ return quote_dash_splice(cdr(lst),cons(e(src,e),list_dash_push(lst_dash_acc,acc)
 });
 var o81 = (function() {if(literal_p_(cadr(el))) {return ((function() {return list(string_dash__gt_symbol("list"),cadr(el));
 }))();
-} else {return (function() {if(vector_p_(cadr(el))) {return ((function() {return list(string_dash__gt_symbol("vector_dash_to_dash_list"),cadr(el));
+} else {return (function() {if(vector_p_(cadr(el))) {return ((function() {return list(string_dash__gt_symbol("vector_dash__gt_list"),cadr(el));
 }))();
 } else {return (function() {if(dict_p_(cadr(el))) {return ((function() {pp(el);
 throw("cannot splice dict");
 }))();
 } else {return ((function() {return ((function() {var o82 = (function(v){
-return list(string_dash__gt_symbol("let"),list(list(v,cadr(el))),list(string_dash__gt_symbol("if"),list(string_dash__gt_symbol("vector_p_"),v),list(string_dash__gt_symbol("vector_dash_to_dash_list"),v),v));
+return list(string_dash__gt_symbol("let"),list(list(v,cadr(el))),list(string_dash__gt_symbol("if"),list(string_dash__gt_symbol("vector_p_"),v),list(string_dash__gt_symbol("vector_dash__gt_list"),v),v));
 });
 var o83 = gensym();
 return o82(o83);
@@ -1247,7 +1246,7 @@ return o95(o96);
 }))();
 });
 var parse_dash_vector = (function(vec){
-return parse_dash_list(cons(string_dash__gt_symbol("vector"),vector_dash_to_dash_list(vec)));
+return parse_dash_list(cons(string_dash__gt_symbol("vector"),vector_dash__gt_list(vec)));
 });
 var parse_dash_dict = (function(dict){
 return ((function() {var o97 = (function(lst,i){

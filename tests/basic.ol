@@ -93,8 +93,3 @@ buz")
 (test-eval '{:foo foo :bar bar} (dict :foo 'foo :bar 'bar))
 (test-eval `{:three 3 :four ,4} {:three 3 :four 4})
 (test-eval `{:three 3 :four ,foo} {:three 3 :four 4})
-
-;; functions
-(define (foo x y z)
-  (list x y z))
-(test-eval (foo 1 2 3) '(1 2 3))

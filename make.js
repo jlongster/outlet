@@ -1,7 +1,6 @@
 var util = require('util');
 var fs = require('fs');
 
-
 var opts = {};
 var root;
 var args = process.argv.slice(2);
@@ -39,17 +38,12 @@ if(opts.current_runtime) {
     rt_root = './';
 }
 
-var runtime = fs.readFileSync(rt_root + 'runtime.js', 'utf-8');
-var runtime_eval = fs.readFileSync(rt_root + 'runtime-eval.js', 'utf-8');
 var src = fs.readFileSync(srcfile, 'utf-8');
+var js = js_generator();
 
-if(!opts.no_runtime) {
-    util.puts(runtime);
-
-    if(opts.with_eval) {
-        util.puts(runtime_eval);
-    }
-}
-
-
-util.puts(compiler.compile(src, js_generator()));
+js.write_dash_runtime(opts.no_runtime ? 
+                      'no-runtime' :
+                      (opts.with_eval ?
+                       'js' :
+                       'js-noeval'));
+util.puts(compiler.compile(src, js));

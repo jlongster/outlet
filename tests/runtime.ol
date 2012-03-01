@@ -1,4 +1,4 @@
-;; Tests for the runtime
+;; tests core functions and semantics
 
 (define-macro (%test hook src val . args)
   `(let ((comp ,(if (null? args) '= (car args)))
@@ -22,6 +22,21 @@
   `(%test eval ',src #t (lambda (res val)
                           (not (eq? res #f)))))
 
+;; functions
+
+(define (foo x y z) (+ x y z))
+(test-eval (foo 1 2 3) 6)
+
+(define (bar t) (* (foo 1 2 3) t))
+(test-eval (bar 5) 30)
+
+(test-eval ((lambda (x)
+               (bar (+ x 2))) 5)
+           42)
+
+(define foo (lambda (x y z) (+ x y z)))
+(test-eval (foo 1 2 3) 6)
+
 ;; strings
 
 (test-eval (str "one" "two") "onetwo")
@@ -33,6 +48,25 @@
 (test-eval (string->symbol "foo-?!><%=") 'foo-?!><%=)
 (test-eval (symbol->string 'bar) "bar")
 (test-eval (symbol->string 'bar-?!><%=) "bar-?!><%=")
+
+;; set!
+
+(test-eval ((lambda (x)
+               (set! x 10)
+               (* x x)) 5)
+           100)
+
+;; math
+
+(test-eval (+ 1 2) 3)
+(test-eval (- 1 2) -1)
+(test-eval (* 3 4) 12)
+(test-eval (/ 10 4) 2.5)
+(test-eval (% 12 10) 2)
+(test-eval (< 1 2) #t)
+(test-eval (< 5 4) #f)
+(test-eval (> 2 1) #t)
+(test-eval (> 4 5) #f)
 
 ;; lists
 
@@ -62,7 +96,7 @@
 (test-eval (vector->list [1 2 3]) '(1 2 3))
 (test-eval (vector->list [1 2 [1 2]]) '(1 2 [1 2]))
 
-(test-eval (map (lambda (el) (+ el 1))'(1 2 3)) '(2 3 4))
+(test-eval (map (lambda (el) (+ el 1)) '(1 2 3)) '(2 3 4))
 (test-eval (fold (lambda (el acc) (+ el acc)) 0
                  '(5 6 7))
            18)
@@ -72,6 +106,9 @@
             (set! last el))
           '(one two three))
 (test-eval last 'three)
+
+(define foo (lambda args args))
+(test-eval (foo 1 2 3) '(1 2 3))
 
 ;; vectors
 
@@ -199,3 +236,54 @@
 (ensure-type '(1 2 3) list?)
 (ensure-type [1 2 3] vector?)
 (ensure-type {:one 1} dict?)
+
+;; if
+
+(test-eval (if #t 1 2) 1)
+(test-eval (if #f 1 2) 2)
+(test-eval (if true
+                (begin
+                  (define a 5)
+                  (* a 2)))
+           10)
+
+;; cond
+
+(define x 3)
+(test-eval (cond
+             ((eq? x 0) 'zero)
+             ((eq? x 1) 'one)
+             ((eq? x 2) 'two)
+             ((eq? x 3) 'three))
+           'three)
+
+(test-eval (cond
+            ((eq? x 0) 'zero)
+            ((eq? x 1) 'one)
+            ((eq? x 2) 'two)
+            (else 'none))
+           'none)
+
+;; misc
+
+;; test code following an `if`
+(define (func)
+  (if #t "yes" "no")
+  (+ 1 2))
+(test-eval (func) 3)
+
+;; test set! as last expression
+(define (faz)
+  (let ((x 1))
+    (+ 2 3)
+    (set! x 3)))
+(test-eval (faz) undefined)
+
+;; test define as last expression (this won't be valid in the future)
+(define (buz)
+  (+ 2 3)
+  (define a 4))
+(test-eval (buz) undefined)
+
+;; test a few edge cases
+(test-eval (not (list? 0)) #t)

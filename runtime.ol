@@ -180,9 +180,6 @@
               (loop (+ i 1)))
         (%raw "_emptylst"))))
 
-;; todo: remove me later
-(define vector-to-list vector->list)
-
 ;; vectors
 
 (define (make-vector count val)

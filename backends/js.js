@@ -219,7 +219,6 @@ var o11 = 0;
 return loop(o11);
 }))();
 });
-var vector_dash_to_dash_list = vector_dash__gt_list;
 var make_dash_vector = (function(count,val){
 return ((function() {var o12 = (function(v){
 return ((function() {var loop = (function(i){
@@ -670,7 +669,11 @@ return code.push((src + (function() {if(null_p_(eol)) {return "";
 });
 var write_dash_runtime = (function(target){
 return (function() {if(not(equal_p_(target,"no-runtime"))) {return ((function() {write(fs.readFileSync("runtime.js","utf-8"),true);
-return (function() {if(not(equal_p_(target,"js-noeval"))) {return write(fs.readFileSync("runtime-eval.js","utf-8"),true);
+return (function() {if(not(equal_p_(target,"js-noeval"))) {return ((function() {write("var __compiler = require('./compiler');",true);
+write("var __generator = require('./backends/js');",true);
+write("var read = __compiler.read;");
+return true;
+}))();
 } else {return false;
 }})()
 ;

@@ -219,7 +219,6 @@ var o11 = 0;
 return loop(o11);
 }))();
 });
-var vector_dash_to_dash_list = vector_dash__gt_list;
 var make_dash_vector = (function(count,val){
 return ((function() {var o12 = (function(v){
 return ((function() {var loop = (function(i){
@@ -655,14 +654,9 @@ return string_dash__gt_symbol(("o" + _gensym));
 });
 
 
-// needed for eval because it needs access to the compiler to compile
-// the expression and evaluate it inline to be in the right context.
-var __compiler = require("./compiler");
-var __generator = require("./backends/js");
-var read = __compiler.read;
-var pretty = __compiler.pretty;
-
-var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
+var __compiler = require('./compiler');
+var __generator = require('./backends/js');
+var read = __compiler.read;var fs = require("fs");var compiler = require("./compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
 } else {return false;
 }})()
 ;
