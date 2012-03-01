@@ -313,7 +313,7 @@
     (if (not (null? ks))
         (begin
           (dict-put! res (car ks) (car vs))
-          (loop (cdr ks) (cdr ks)))))
+          (loop (cdr ks) (cdr vs)))))
   res)
 
 ;; not
@@ -476,8 +476,14 @@
       (disp "}")
       (get-buffer)))))
 
-;; gensym (need to randomize)
+;; misc
 
+(define (apply func args)
+  ((%raw "func.apply")
+   (%raw "null")
+   (list->vector args)))
+
+;; TODO: need to randomize
 (define _gensym 0)
 (define (gensym)
   (set! _gensym (+ _gensym 1))
