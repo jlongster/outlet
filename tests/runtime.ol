@@ -139,9 +139,9 @@
   (test-assert (list-find v 1))
   (test-assert (list-find v 2)))
 
-(let ((dct (zip '(foo bar) '(1 2))))
-  (test-assert (dict-ref dct 'foo) 1)
-  (test-assert (dict-ref dct 'bar) 2))
+(let ((dct (zip '(foo bar baz) '(1 2 3))))
+  (test-eval (dict-ref dct 'foo) 1)
+  (test-eval (dict-ref dct 'bar) 2))
 
 ;; not
 

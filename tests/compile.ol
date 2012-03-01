@@ -6,19 +6,19 @@
   `(let ((comp (if (null? ',args) equal? (car ',args)))
          (res (,hook ,src)))
      (if (not (comp res ,val))
-         (throw (string-append "FAILURE with " (->string ',hook) ": "
-                               (->string ,src)
+         (throw (string-append "FAILURE with " (inspect ',hook) ": "
+                               (inspect ,src)
                                " got "
-                               (->string res)
+                               (inspect res)
                                " but expected "
-                               (->string ,val))))))
+                               (inspect ,val))))))
 
 
 (define-macro (test-read src val . args)
   `(%test read ,src ,val ,@args))
 
-(define-macro (test-eval src val . args)
-  `(%test eval ',src ,val ,@args))
+(define-macro (test-eval src val)
+  `(%test eval ',src ,val))
 
 ;; data structures
 ;;
@@ -27,7 +27,7 @@
 
 (test-eval '(1 2 3) (list 1 2 3))
 (test-eval [1 2 3] (vector 1 2 3))
-(test-eval {:foo 1 :bar 2} (hash-map :foo 1 :bar 2))
+(test-eval {:foo 1 :bar 2} (dict :foo 1 :bar 2))
 
 ;; functions
 (define (foo x y z) (+ x y z))

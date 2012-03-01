@@ -1,23 +1,23 @@
 ;; These tests hit only the basic forms in Outlet and don't use any
 ;; macros, which is useful is something fundamental is broken and hard
 ;; to debug in the context of macros.
-;;
+
 ;; Any basic forms like `let`, `cond`, and `begin` are avoided since
 ;; they are implemented as macros.
 
 (define (test-read src expected)
-  (if (not (equal? (read src) expected))
+  (if (not (= (read src) expected))
       (throw (string-append "FAILURE: got "
-                            (->string (read src))
+                            (inspect (read src))
                             " but expected "
-                            (->string expected)))))
+                            (inspect expected)))))
 
 (define (test-eval val expected)
-  (if (not (equal? val expected))
+  (if (not (= val expected))
       (throw (string-append "FAILURE: got "
-                            (->string val)
+                            (inspect val)
                             " but expected "
-                            (->string expected)))))
+                            (inspect expected)))))
 
 
 ;; integers
@@ -64,7 +64,7 @@ buz")
 (define foo 4)
 (define bar {:one 1 :two 2})
 (test-read "{:biz foo :bazzle bar}" (dict :biz 'foo :bazzle 'bar))
-(test-eval {:five 5 :six 6} (hash-map :five 5 :six 6))
+(test-eval {:five 5 :six 6} (dict :five 5 :six 6))
 (test-eval {:foo foo} {:foo 4})
 
 ;; quoting/splicing for lists, vectors, and dicts
@@ -93,3 +93,8 @@ buz")
 (test-eval '{:foo foo :bar bar} (dict :foo 'foo :bar 'bar))
 (test-eval `{:three 3 :four ,4} {:three 3 :four 4})
 (test-eval `{:three 3 :four ,foo} {:three 3 :four 4})
+
+;; functions
+(define (foo x y z)
+  (list x y z))
+(test-eval (foo 1 2 3) '(1 2 3))
