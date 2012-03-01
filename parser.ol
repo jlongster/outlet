@@ -8,7 +8,7 @@
        (gen
         (lambda args
           (let ((ff (f f)))
-            (ff.apply null (list-to-vector args))))))))
+            (ff.apply null (list->vector args))))))))
 
   (define (optional func)
     (lambda (text state)

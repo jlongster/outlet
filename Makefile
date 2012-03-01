@@ -8,7 +8,7 @@ endif
 all: compiler
 
 parser.js: parser.ol
-	$(NODE_MAKE) parser.ol > parser2.js && mv parser2.js parser.js
+	$(NODE_MAKE) _current_runtime parser.ol > parser2.js && mv parser2.js parser.js
 
 grammar.js: grammar.ol
 	$(NODE_MAKE) grammar.ol > grammar2.js && mv grammar2.js grammar.js
