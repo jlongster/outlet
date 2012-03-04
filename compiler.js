@@ -45,7 +45,7 @@ var null_p_ = (function(obj){
 return (!!obj && not(eq_p_(obj.length,undefined)) && eq_p_(obj.length,1) && eq_p_(vector_dash_ref(obj,0),null));
 });
 var list_p_ = (function(obj){
-return (!!obj && not(eq_p_(obj.list,undefined)));
+return (!!obj && not(eq_p_(obj.length,undefined)) && not(eq_p_(obj.list,undefined)));
 });
 var vector_p_ = (function(obj){
 return (not(list_p_(obj)) && not(null_p_(obj)) && !!obj && eq_p_(typeof obj,"object") && not(eq_p_(obj.length,undefined)));

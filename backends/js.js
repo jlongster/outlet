@@ -668,11 +668,10 @@ return code.push((src + (function() {if(null_p_(eol)) {return "";
 ));
 });
 var write_dash_runtime = (function(target){
-return (function() {if(not(equal_p_(target,"no-runtime"))) {return ((function() {write(fs.readFileSync("runtime.js","utf-8"),true);
-return (function() {if(not(equal_p_(target,"js-noeval"))) {return ((function() {write("var __compiler = require('./compiler');",true);
-write("var __generator = require('./backends/js');",true);
-write("var read = __compiler.read;");
-return true;
+return (function() {if(not(equal_p_(target,"no-runtime"))) {return ((function() {write(fs.readFileSync(str(__dirname,"/../runtime.js"),"utf-8"),true);
+return (function() {if(not(equal_p_(target,"js-noeval"))) {return ((function() {write(str("var __compiler = require('",__dirname,"/../compiler');"),true);
+write(str("var __generator = require('",__dirname,"/js');"),true);
+return write("var read = __compiler.read;",true);
 }))();
 } else {return false;
 }})()

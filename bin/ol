@@ -1,0 +1,45 @@
+#!/usr/bin/env node 
+
+var util = require('util');
+var fs = require('fs');
+var compiler = require('../compiler');
+var js_backend = require('../backends/js');
+var src;
+
+if(process.argv.length < 3) {
+    console.log('Usage:\n');
+    console.log(process.argv[0] + ' <file>');
+    console.log('   -c      : compile');
+    console.log('   -e <src>: evalute src');
+    process.exit(1);
+}
+
+args = process.argv.slice(2);
+var compile = false;
+
+if(args[0] == '-c') {
+    compile = true;
+    args = args.slice(1);
+}
+
+if(args[0] == '-e') {
+    src = args[1];
+    args = args.slice(2);
+}
+else {
+    src = fs.readFileSync(args[0], 'utf-8');
+    args = args.slice(1);
+}
+
+var js = js_backend();
+js.write_dash_runtime('js');
+var output = compiler.compile(src, js);
+
+if(compile) {
+    output = 'var __args = process.argv.slice(2);' + output;
+    console.log(output);
+}
+else {
+    output = 'var __args = args;' + output;
+    eval(output);
+}

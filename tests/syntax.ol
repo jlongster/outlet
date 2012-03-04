@@ -19,6 +19,11 @@
                   " but expected "
                   (inspect expected)))))
 
+(define (test-assert val)
+  (if (not val)
+      (throw (str "FAILURE: "
+                  (inspect val)
+                  " is false"))))
 
 ;; integers
 (test-read "4.0" 4)
@@ -93,3 +98,10 @@ buz")
 (test-eval '{:foo foo :bar bar} (dict :foo 'foo :bar 'bar))
 (test-eval `{:three 3 :four ,4} {:three 3 :four 4})
 (test-eval `{:three 3 :four ,foo} {:three 3 :four 4})
+
+;; a few edge cases
+
+;; make sure you can use any symbol as a dict key
+(test-assert {:list 1})
+(test-assert {:eval 1})
+

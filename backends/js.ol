@@ -19,12 +19,14 @@
   (define (write-runtime target)
     (if (not (equal? target "no-runtime"))
         (begin
-          (write (fs.readFileSync "runtime.js" "utf-8") #t)
+          (write (fs.readFileSync (str __dirname "/../runtime.js") "utf-8") #t)
           (if (not (equal? target "js-noeval"))
               (begin
-                (write "var __compiler = require('./compiler');" #t)
-                (write "var __generator = require('./backends/js');" #t)
-                (write "var read = __compiler.read;") #t)))))
+                (write (str "var __compiler = require('"
+                            __dirname "/../compiler');") #t)
+                (write (str "var __generator = require('"
+                            __dirname "/js');") #t)
+                (write "var read = __compiler.read;" #t))))))
 
   (define (inline-writer str)
     (let ((first #t))

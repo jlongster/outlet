@@ -36,6 +36,7 @@
 
 (define (list? obj)
   (and (%raw "!!obj")
+       (not (eq? obj.length (%raw "undefined")))
        (not (eq? obj.list (%raw "undefined")))))
 
 (define (vector? obj)
@@ -134,9 +135,9 @@
 (define (list-append lst1 lst2)
   (let loop ((lst lst1))
     (if (null? lst)
-         lst2
-         (cons (car lst)
-               (loop (cdr lst))))))
+        lst2
+        (cons (car lst)
+              (loop (cdr lst))))))
 
 (define (list-find lst val)
   (let loop ((lst lst))
