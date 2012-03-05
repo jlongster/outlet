@@ -45,7 +45,7 @@ var null_p_ = (function(obj){
 return (!!obj && not(eq_p_(obj.length,undefined)) && eq_p_(obj.length,1) && eq_p_(vector_dash_ref(obj,0),null));
 });
 var list_p_ = (function(obj){
-return (!!obj && not(eq_p_(obj.list,undefined)));
+return (!!obj && not(eq_p_(obj.length,undefined)) && not(eq_p_(obj.list,undefined)));
 });
 var vector_p_ = (function(obj){
 return (not(list_p_(obj)) && not(null_p_(obj)) && !!obj && eq_p_(typeof obj,"object") && not(eq_p_(obj.length,undefined)));
@@ -668,9 +668,11 @@ return code.push((src + (function() {if(null_p_(eol)) {return "";
 ));
 });
 var write_dash_runtime = (function(target){
-return (function() {if(not(equal_p_(target,"no-runtime"))) {return ((function() {write(fs.readFileSync(str(__dirname,"/../runtime.js"),"utf-8"),true);
-return (function() {if(not(equal_p_(target,"js-noeval"))) {return ((function() {write(str("var __compiler = require('",__dirname,"/../compiler');"),true);
-write(str("var __generator = require('",__dirname,"/js');"),true);
+var root = vector_dash__gt_list(Array.prototype.slice.call(arguments, 1));
+return ((function() {var o1 = (function(root){
+return (function() {if(not(equal_p_(target,"no-runtime"))) {return ((function() {write(fs.readFileSync(str(root,"/runtime.js"),"utf-8"),true);
+return (function() {if(not(equal_p_(target,"js-noeval"))) {return ((function() {write(str("var __compiler = require('",root,"/compiler');"),true);
+write(str("var __generator = require('",root,"/backends/js');"),true);
 return write("var read = __compiler.read;",true);
 }))();
 } else {return false;
@@ -681,16 +683,23 @@ return write("var read = __compiler.read;",true);
 }})()
 ;
 });
+var o2 = (function() {if(null_p_(root)) {return __dirname;
+} else {return car(root);
+}})()
+;
+return o1(o2);
+}))();
+});
 var inline_dash_writer = (function(str){
-return ((function() {var o1 = (function(first){
+return ((function() {var o3 = (function(first){
 return (function() {return (function() {if(first) {first = false;
 } else {return write(str);
 }})()
 ;
 });
 });
-var o2 = true;
-return o1(o2);
+var o4 = true;
+return o3(o4);
 }))();
 });
 var terminate_dash_expr = (function(expr_p_){
@@ -715,7 +724,7 @@ write("_emptylst");
 return terminate_dash_expr(not(top_p_));
 });
 var write_dash_string = (function(obj,top_p_){
-return ((function() {var o3 = (function(str){
+return ((function() {var o5 = (function(str){
 str = str.replace(RegExp("\\\\","g"),"\\\\");
 str = str.replace(RegExp("\n","g"),"\\n");
 str = str.replace(RegExp("\r","g"),"\\r");
@@ -724,8 +733,8 @@ str = str.replace(RegExp("\"","g"),"\\\"");
 write(("\"" + str + "\""));
 return terminate_dash_expr(not(top_p_));
 });
-var o4 = obj;
-return o3(o4);
+var o6 = obj;
+return o5(o6);
 }))();
 });
 var write_dash_symbol = (function(obj,top_p_){
@@ -819,7 +828,7 @@ return write("(Array.prototype.slice.call(arguments));",true);
 ;
 }})()
 ;
-((function() {var o5 = (function(i,len){
+((function() {var o7 = (function(i,len){
 return for_dash_each((function(form){
 (function() {if((eq_p_(i,(len - 1)) && should_dash_return_p_(form))) {return write("return ");
 } else {return false;
@@ -829,9 +838,9 @@ parse(form);
 i = (i + 1);
 }),body);
 });
-var o6 = 0;
-var o7 = length(body);
-return o5(o6,o7);
+var o8 = 0;
+var o9 = length(body);
+return o7(o8,o9);
 }))();
 write("})");
 return terminate_dash_expr(expr_p_);
@@ -848,14 +857,14 @@ return write(")");
 }})()
 ;
 write("(");
-((function() {var o8 = (function(comma){
+((function() {var o10 = (function(comma){
 return for_dash_each((function(arg){
 comma();
 return parse(arg,true);
 }),args);
 });
-var o9 = inline_dash_writer(",");
-return o8(o9);
+var o11 = inline_dash_writer(",");
+return o10(o11);
 }))();
 write(")");
 return terminate_dash_expr(expr_p_);
@@ -865,14 +874,14 @@ return write(code);
 });
 var write_dash_op = (function(op,vals,expr_p_,parse){
 write("(");
-((function() {var o10 = (function(op_dash_writer){
+((function() {var o12 = (function(op_dash_writer){
 return for_dash_each((function(arg){
 op_dash_writer();
 return parse(arg,true);
 }),vals);
 });
-var o11 = inline_dash_writer(str(" ",op," "));
-return o10(o11);
+var o13 = inline_dash_writer(str(" ",op," "));
+return o12(o13);
 }))();
 write(")");
 return terminate_dash_expr(expr_p_);

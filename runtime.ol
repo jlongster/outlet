@@ -52,6 +52,9 @@
        (eq? (%raw "typeof obj") "object")
        (eq? obj.length (%raw "undefined"))))
 
+(define (function? obj)
+  (eq? (%raw "typeof obj") "function"))
+
 (define (literal? x)
   (or (number? x)
       (string? x)
@@ -139,13 +142,14 @@
         (cons (car lst)
               (loop (cdr lst))))))
 
-(define (list-find lst val)
-  (let loop ((lst lst))
-    (if (null? lst)
-        #f
-        (if (eq? (car lst) val)
-            lst
-            (loop (cdr lst))))))
+(define (list-find lst val . rst)
+  (let ((pred? (if (null? rst) == (car rst))))
+    (let loop ((lst lst))
+      (if (null? lst)
+          #f
+          (if (pred? (car lst) val)
+              lst
+              (loop (cdr lst)))))))
 
 (define (map func lst)
   (if (null? lst)
@@ -421,6 +425,7 @@
      ((symbol? obj) (symbol->string obj))
      ((boolean? obj) (if obj "#t" "#f"))
      ((null? obj) "()")
+     ((function? obj) "<function>")
      ((list? obj)
       (let ((node (car obj))
             (childr (cdr obj))

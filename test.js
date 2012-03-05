@@ -45,13 +45,16 @@ var null_p_ = (function(obj){
 return (!!obj && not(eq_p_(obj.length,undefined)) && eq_p_(obj.length,1) && eq_p_(vector_dash_ref(obj,0),null));
 });
 var list_p_ = (function(obj){
-return (!!obj && not(eq_p_(obj.list,undefined)));
+return (!!obj && not(eq_p_(obj.length,undefined)) && not(eq_p_(obj.list,undefined)));
 });
 var vector_p_ = (function(obj){
 return (not(list_p_(obj)) && not(null_p_(obj)) && !!obj && eq_p_(typeof obj,"object") && not(eq_p_(obj.length,undefined)));
 });
 var dict_p_ = (function(obj){
 return (not(symbol_p_(obj)) && !!obj && eq_p_(typeof obj,"object") && eq_p_(obj.length,undefined));
+});
+var function_p_ = (function(obj){
+return eq_p_(typeof obj,"function");
 });
 var literal_p_ = (function(x){
 return (number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
@@ -170,17 +173,26 @@ return loop(o9);
 }))();
 });
 var list_dash_find = (function(lst,val){
+var rst = vector_dash__gt_list(Array.prototype.slice.call(arguments, 2));
+return ((function() {var o10 = (function(pred_p_){
 return ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return false;
-} else {return (function() {if(eq_p_(car(lst),val)) {return lst;
+} else {return (function() {if(pred_p_(car(lst),val)) {return lst;
 } else {return loop(cdr(lst));
 }})()
 ;
 }})()
 ;
 });
-var o10 = lst;
-return loop(o10);
+var o12 = lst;
+return loop(o12);
+}))();
+});
+var o11 = (function() {if(null_p_(rst)) {return _eq__eq_;
+} else {return car(rst);
+}})()
+;
+return o10(o11);
 }))();
 });
 var map = (function(func,lst){
@@ -215,12 +227,12 @@ return (function() {if((i < vec.length)) {return cons(vector_dash_ref(vec,i),loo
 } else {return _emptylst}})()
 ;
 });
-var o11 = 0;
-return loop(o11);
+var o13 = 0;
+return loop(o13);
 }))();
 });
 var make_dash_vector = (function(count,val){
-return ((function() {var o12 = (function(v){
+return ((function() {var o14 = (function(v){
 return ((function() {var loop = (function(i){
 return (function() {if((i < count)) {return ((function() {vector_dash_put_excl_(v,i,val);
 return loop((i + 1));
@@ -229,12 +241,12 @@ return loop((i + 1));
 }})()
 ;
 });
-var o14 = 0;
-return loop(o14);
+var o16 = 0;
+return loop(o16);
 }))();
 });
-var o13 = new Array(count);
-return o12(o13);
+var o15 = new Array(count);
+return o14(o15);
 }))();
 });
 var vector = (function() {return Array.prototype.slice.call(arguments)});
@@ -258,8 +270,8 @@ return (function() {if((i < vec.length)) {return (function() {if(eq_p_(vector_da
 }})()
 ;
 });
-var o15 = 0;
-return loop(o15);
+var o17 = 0;
+return loop(o17);
 }))();
 });
 var vector_dash_length = (function(vec){
@@ -282,8 +294,8 @@ return loop((i + 1));
 }})()
 ;
 });
-var o16 = 0;
-return loop(o16);
+var o18 = 0;
+return loop(o18);
 }))();
 return res;
 });
@@ -296,8 +308,8 @@ return loop((i + 1));
 }})()
 ;
 });
-var o17 = 0;
-return loop(o17);
+var o19 = 0;
+return loop(o19);
 }))();
 });
 var vector_dash_fold = (function(func,acc,vec){
@@ -307,29 +319,29 @@ return (function() {if((i < vector_dash_length(vec))) {return loop((i + 1),func(
 }})()
 ;
 });
-var o18 = 0;
-var o19 = acc;
-return loop(o18,o19);
+var o20 = 0;
+var o21 = acc;
+return loop(o20,o21);
 }))();
 });
 var dict = (function() {
 var args = vector_dash__gt_list(Array.prototype.slice.call(arguments));
 var res = {};
 ((function() {var loop = (function(lst){
-return (function() {if(not(null_p_(lst))) {return ((function() {var o21 = (function(key,val){
+return (function() {if(not(null_p_(lst))) {return ((function() {var o23 = (function(key,val){
 dict_dash_put_excl_(res,key,val);
 return loop(cddr(lst));
 });
-var o22 = car(lst);
-var o23 = cadr(lst);
-return o21(o22,o23);
+var o24 = car(lst);
+var o25 = cadr(lst);
+return o23(o24,o25);
 }))();
 } else {return false;
 }})()
 ;
 });
-var o20 = args;
-return loop(o20);
+var o22 = args;
+return loop(o22);
 }))();
 return res;
 });
@@ -340,19 +352,19 @@ return dct[k.str]});
 var dict_dash_map = (function(func,dct){
 var res = dict();
 ((function() {var loop = (function(lst){
-return (function() {if(not(null_p_(lst))) {return ((function() {var o25 = (function(k){
+return (function() {if(not(null_p_(lst))) {return ((function() {var o27 = (function(k){
 dict_dash_put_excl_(res,k,func(dict_dash_ref(dct,k)));
 return loop(cdr(lst));
 });
-var o26 = car(lst);
-return o25(o26);
+var o28 = car(lst);
+return o27(o28);
 }))();
 } else {return false;
 }})()
 ;
 });
-var o24 = keys(dct);
-return loop(o24);
+var o26 = keys(dct);
+return loop(o26);
 }))();
 return res;
 });
@@ -367,8 +379,8 @@ return loop(cdr(lst));
 }})()
 ;
 });
-var o27 = keys(dct);
-return loop(o27);
+var o29 = keys(dct);
+return loop(o29);
 }))();
 return res;
 });
@@ -376,13 +388,13 @@ var dict_dash__gt_list = (function(dct){
 return vector_dash__gt_list(dict_dash__gt_vector(dct));
 });
 var keys = (function(dct){
-return ((function() {var o28 = (function(res){
+return ((function() {var o30 = (function(res){
 for(var k in dct) {
        res = cons(string_dash__gt_symbol(k), res);
     }return res;
 });
-var o29 = _emptylst;
-return o28(o29);
+var o31 = _emptylst;
+return o30(o31);
 }))();
 });
 var vals = (function(dct){
@@ -400,9 +412,9 @@ return loop(cdr(ks),cdr(vs));
 }})()
 ;
 });
-var o30 = keys;
-var o31 = vals;
-return loop(o30,o31);
+var o32 = keys;
+var o33 = vals;
+return loop(o32,o33);
 }))();
 return res;
 });
@@ -431,9 +443,9 @@ return (function() {if((n1 && n2)) {return ((function() {return true;
 }})()
 ;
 });
-var o32 = obj1;
-var o33 = obj2;
-return loop(o32,o33);
+var o34 = obj1;
+var o35 = obj2;
+return loop(o34,o35);
 }))();
 }))();
 } else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return ((function() {var loop = (function(i){
@@ -451,11 +463,11 @@ return (function() {if(((i < obj1.length) && (i < obj2.length))) {return ((funct
 }})()
 ;
 });
-var o34 = 0;
-return loop(o34);
+var o36 = 0;
+return loop(o36);
 }))();
 }))();
-} else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {return ((function() {var o35 = (function(keys1,keys2){
+} else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {return ((function() {var o37 = (function(keys1,keys2){
 return (eq_p_(length(keys1),length(keys2)) && ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return true;
 } else {return (function() {if(equal_p_(dict_dash_ref(obj1,car(lst)),dict_dash_ref(obj2,car(lst)))) {return loop(cdr(lst));
@@ -465,13 +477,13 @@ return (function() {if(null_p_(lst)) {return true;
 }})()
 ;
 });
-var o38 = keys1;
-return loop(o38);
+var o40 = keys1;
+return loop(o40);
 }))());
 });
-var o36 = keys(obj1);
-var o37 = keys(obj2);
-return o35(o36,o37);
+var o38 = keys(obj1);
+var o39 = keys(obj2);
+return o37(o38,o39);
 }))();
 }))();
 } else {return ((function() {return eq_p_(obj1,obj2);
@@ -514,7 +526,7 @@ return (acc + space(el));
 }})()
 ;
 });
-return ((function() {var o39 = (function(i){
+return ((function() {var o41 = (function(i){
 var buffer = "";
 var get_dash_buffer = (function() {return buffer;
 });
@@ -539,7 +551,9 @@ return (function() {if(number_p_(obj)) {return ((function() {return ("" + obj);
 }))();
 } else {return (function() {if(null_p_(obj)) {return ((function() {return "()";
 }))();
-} else {return (function() {if(list_p_(obj)) {return ((function() {return ((function() {var o41 = (function(node,childr,sp){
+} else {return (function() {if(function_p_(obj)) {return ((function() {return "<function>";
+}))();
+} else {return (function() {if(list_p_(obj)) {return ((function() {return ((function() {var o43 = (function(node,childr,sp){
 disp("(");
 disp(inspect(node,(i + 1)));
 for_dash_each((function(item){
@@ -554,13 +568,13 @@ return disp(inspect(item,(i + 1)));
 disp(")");
 return get_dash_buffer();
 });
-var o42 = car(obj);
-var o43 = cdr(obj);
-var o44 = (space(obj) > 30);
-return o41(o42,o43,o44);
+var o44 = car(obj);
+var o45 = cdr(obj);
+var o46 = (space(obj) > 30);
+return o43(o44,o45,o46);
 }))();
 }))();
-} else {return (function() {if(vector_p_(obj)) {return ((function() {return ((function() {var o45 = (function(first,rest,sp){
+} else {return (function() {if(vector_p_(obj)) {return ((function() {return ((function() {var o47 = (function(first,rest,sp){
 disp("[");
 disp(inspect(first,(i + 1)));
 vector_dash_for_dash_each((function(item){
@@ -575,16 +589,16 @@ return disp(inspect(item,(i + 1)));
 disp("]");
 return get_dash_buffer();
 });
-var o46 = vector_dash_ref(obj,0);
-var o47 = vector_dash_slice(obj,1);
-var o48 = (space(obj) > 30);
-return o45(o46,o47,o48);
+var o48 = vector_dash_ref(obj,0);
+var o49 = vector_dash_slice(obj,1);
+var o50 = (space(obj) > 30);
+return o47(o48,o49,o50);
 }))();
 }))();
 } else {return (function() {if(dict_p_(obj)) {return ((function() {disp("{");
-((function() {var o49 = (function(lst,sp){
+((function() {var o51 = (function(lst,sp){
 return ((function() {var loop = (function(lst,first){
-return (function() {if(not(null_p_(lst))) {return ((function() {var o54 = (function(key,val){
+return (function() {if(not(null_p_(lst))) {return ((function() {var o56 = (function(key,val){
 (function() {if(not(first)) {return (function() {if(sp) {return ((function() {disp("\n");
 return pad(i);
 }))();
@@ -600,22 +614,22 @@ disp(" ");
 disp(inspect(val,(i + 1 + vector_dash_length(symbol_dash__gt_string(key)))));
 return loop(cddr(lst),false);
 });
-var o55 = car(lst);
-var o56 = cadr(lst);
-return o54(o55,o56);
+var o57 = car(lst);
+var o58 = cadr(lst);
+return o56(o57,o58);
 }))();
 } else {return false;
 }})()
 ;
 });
-var o52 = lst;
-var o53 = true;
-return loop(o52,o53);
+var o54 = lst;
+var o55 = true;
+return loop(o54,o55);
 }))();
 });
-var o50 = dict_dash__gt_list(obj);
-var o51 = (space(obj) > 30);
-return o49(o50,o51);
+var o52 = dict_dash__gt_list(obj);
+var o53 = (space(obj) > 30);
+return o51(o52,o53);
 }))();
 disp("}");
 return get_dash_buffer();
@@ -637,12 +651,14 @@ return get_dash_buffer();
 ;
 }})()
 ;
+}})()
+;
 });
-var o40 = (function() {if(null_p_(rest)) {return 1;
+var o42 = (function() {if(null_p_(rest)) {return 1;
 } else {return car(rest);
 }})()
 ;
-return o39(o40);
+return o41(o42);
 }))();
 });
 var apply = (function(func,args){
@@ -654,9 +670,10 @@ return string_dash__gt_symbol(("o" + _gensym));
 });
 
 
-var __compiler = require('./compiler');
-var __generator = require('./backends/js');
-var read = __compiler.read;var fs = require("fs");var compiler = require("./compiler");var boot = require("./boot/compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
+var __compiler = require('/Users/james/projects/outlet/compiler');
+var __generator = require('/Users/james/projects/outlet/backends/js');
+var read = __compiler.read;
+var fs = require("fs");var compiler = require("./compiler");var boot = require("./boot/compiler");var util = require("util");var js = require("./backends/js");var trace = require("./trace");(function() {if((process.argv.length < 3)) {throw("must pass a filename");
 } else {return false;
 }})()
 ;

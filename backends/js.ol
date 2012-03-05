@@ -16,17 +16,18 @@
   (define (write src . eol)
     (code.push (+ src (if (null? eol) "" "\n"))))
 
-  (define (write-runtime target)
-    (if (not (equal? target "no-runtime"))
-        (begin
-          (write (fs.readFileSync (str __dirname "/../runtime.js") "utf-8") #t)
-          (if (not (equal? target "js-noeval"))
-              (begin
-                (write (str "var __compiler = require('"
-                            __dirname "/../compiler');") #t)
-                (write (str "var __generator = require('"
-                            __dirname "/js');") #t)
-                (write "var read = __compiler.read;" #t))))))
+  (define (write-runtime target . root)
+    (let ((root (if (null? root) __dirname (car root))))
+      (if (not (equal? target "no-runtime"))
+          (begin
+            (write (fs.readFileSync (str root "/runtime.js") "utf-8") #t)
+            (if (not (equal? target "js-noeval"))
+                (begin
+                  (write (str "var __compiler = require('"
+                              root "/compiler');") #t)
+                  (write (str "var __generator = require('"
+                              root "/backends/js');") #t)
+                  (write "var read = __compiler.read;" #t)))))))
 
   (define (inline-writer str)
     (let ((first #t))

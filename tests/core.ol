@@ -92,6 +92,8 @@
 (test-eval (list-append '(1 2) '(3 4)) '(1 2 3 4))
 (test-eval (list-find '(x y z) 'z) '(z))
 (test-eval (list-find '(x y z) 'w) #f)
+(test-eval (list-find '((1 2) (3 4)) '(3 4)) #f)
+(test-eval (list-find '((1 2) (3 4)) '(3 4) =) '((3 4)))
 (test-eval (reverse '(x y z)) '(z y x))
 (test-eval (vector->list [1 2 3]) '(1 2 3))
 (test-eval (vector->list [1 2 [1 2]]) '(1 2 [1 2]))

@@ -104,4 +104,3 @@ buz")
 ;; make sure you can use any symbol as a dict key
 (test-assert {:list 1})
 (test-assert {:eval 1})
-
