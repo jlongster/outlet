@@ -12,6 +12,9 @@ Example
     (define (bar x)
       (+ x 1))
 
+    (define (me)
+        (+ x 1))
+
     (define (buz x y)
       (let ((z 5))
         (+ x y z)))
@@ -46,7 +49,7 @@ Example
 Status
 ------
 
-The compiler is robust and mostly finished. I am working on the standard library now, as seen in this etherpad: https://etherpad.mozilla.org/HKdNgVXcqk. Feel free to add notes.
+The compiler is stable and a full runtime is available (see runtime.ol). I am currently working on a register-based virtual machine for Outlet which will solely act as a debugger. It will allow Outlet code to be paused, resumed, and inspected, making an in-browser stepping debugger possible.
 
 The compiler is written 100% in Outlet except for the javascript runtime, so it is completely bootstrapped.
 
