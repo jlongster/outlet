@@ -17,7 +17,9 @@
     (code.push (+ src (if (null? eol) "" "\n"))))
 
   (define (write-runtime target . root)
-    (let ((root (if (null? root) __dirname (car root))))
+    (let ((root (if (null? root)
+                    (str __dirname "/..")
+                    (car root))))
       (if (not (equal? target "no-runtime"))
           (begin
             (write (fs.readFileSync (str root "/runtime.js") "utf-8") #t)

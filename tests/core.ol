@@ -93,7 +93,7 @@
 (test-eval (list-find '(x y z) 'z) '(z))
 (test-eval (list-find '(x y z) 'w) #f)
 (test-eval (list-find '((1 2) (3 4)) '(3 4)) #f)
-(test-eval (list-find '((1 2) (3 4)) '(3 4) =) '((3 4)))
+(test-eval (list-find '((1 2) (3 4)) 4 cadr) '((3 4)))
 (test-eval (reverse '(x y z)) '(z y x))
 (test-eval (vector->list [1 2 3]) '(1 2 3))
 (test-eval (vector->list [1 2 [1 2]]) '(1 2 [1 2]))
@@ -155,6 +155,9 @@
 (test-eval (dict-map (lambda (el) (+ el 1))
                      {:foo 1 :bar 2})
            {:foo 2 :bar 3})
+
+(test-eval (dict-merge {:one 1 :two 2} {:three 3 :four 4})
+           {:one 1 :two 2 :three 3 :four 4})
 
 (test-assert (let ((vec (dict->vector {:one 1 :two 2})))
                ;; can't guarantee order

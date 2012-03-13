@@ -683,7 +683,7 @@ return write("var read = __compiler.read;",true);
 }})()
 ;
 });
-var o2 = (function() {if(null_p_(root)) {return __dirname;
+var o2 = (function() {if(null_p_(root)) {return str(__dirname,"/..");
 } else {return car(root);
 }})()
 ;

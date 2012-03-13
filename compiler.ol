@@ -55,8 +55,10 @@
   (cond
    ((symbol? form) form)
    ((literal? form) form)
-   ((vector? form) form)
-   ((dict? form) form)
+   ((vector? form) (vector-map (lambda (el) (e el e))
+                               form))
+   ((dict? form) (dict-map (lambda (el) (e el e))
+                           form))
    ((expander? (car form))
     ((expander-function (car form)) form e))
    (else
@@ -505,6 +507,7 @@
                       :install-expander install-expander
                       :expand-once expand-once
                       :expand-nth expand-nth
+                      :pp pp
 
                       :set-macro-generator
                       (lambda (g)

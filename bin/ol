@@ -4,6 +4,7 @@ var util = require('util');
 var fs = require('fs');
 var compiler = require('../compiler');
 var js_backend = require('../backends/js');
+var runtime = require('../runtime');
 var src;
 
 if(process.argv.length < 3) {
@@ -14,11 +15,17 @@ if(process.argv.length < 3) {
     process.exit(1);
 }
 
-args = process.argv.slice(2);
+var args = process.argv.slice(2);
 var compile = false;
+var expand = false;
 
 if(args[0] == '-c') {
     compile = true;
+    args = args.slice(1);
+}
+
+if(args[0] == '-p') {
+    expand = true;
     args = args.slice(1);
 }
 
@@ -31,15 +38,20 @@ else {
     args = args.slice(1);
 }
 
-var js = js_backend();
-js.write_dash_runtime('js');
-var output = compiler.compile(src, js);
-
-if(compile) {
-    output = 'var __args = process.argv.slice(2);' + output;
-    console.log(output);
+if(expand) {
+    compiler.pp(compiler.expand(compiler.read(src)));
 }
 else {
-    output = 'var __args = args;' + output;
-    eval(output);
+    var js = js_backend();
+    js.write_dash_runtime('js');
+    var output = compiler.compile(src, js);
+
+    if(compile) {
+        output = 'var __args = process.argv.slice(2);' + output;
+        console.log(output);
+    }
+    else {
+        output = 'var __args = args;' + output;
+        eval(output);
+    }
 }

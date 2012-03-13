@@ -715,9 +715,13 @@ return (function() {if(symbol_p_(form)) {return ((function() {return form;
 }))();
 } else {return (function() {if(literal_p_(form)) {return ((function() {return form;
 }))();
-} else {return (function() {if(vector_p_(form)) {return ((function() {return form;
+} else {return (function() {if(vector_p_(form)) {return ((function() {return vector_dash_map((function(el){
+return e(el,e);
+}),form);
 }))();
-} else {return (function() {if(dict_p_(form)) {return ((function() {return form;
+} else {return (function() {if(dict_p_(form)) {return ((function() {return dict_dash_map((function(el){
+return e(el,e);
+}),form);
 }))();
 } else {return (function() {if(expander_p_(car(form))) {return ((function() {return expander_dash_function(car(form))(form,e);
 }))();
@@ -1328,5 +1332,5 @@ return (function() {if(not(macro_dash_generator)) {macro_dash_generator = g;
 } else {return false;
 }})()
 ;
-}),string_dash__gt_symbol("expand_dash_nth"),expand_dash_nth,string_dash__gt_symbol("expand_dash_once"),expand_dash_once,string_dash__gt_symbol("install_dash_expander"),install_dash_expander,string_dash__gt_symbol("compile"),compile,string_dash__gt_symbol("parse"),parse,string_dash__gt_symbol("expand"),expand,string_dash__gt_symbol("read"),read);
+}),string_dash__gt_symbol("pp"),pp,string_dash__gt_symbol("expand_dash_nth"),expand_dash_nth,string_dash__gt_symbol("expand_dash_once"),expand_dash_once,string_dash__gt_symbol("install_dash_expander"),install_dash_expander,string_dash__gt_symbol("compile"),compile,string_dash__gt_symbol("parse"),parse,string_dash__gt_symbol("expand"),expand,string_dash__gt_symbol("read"),read);
 

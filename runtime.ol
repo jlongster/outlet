@@ -143,11 +143,11 @@
               (loop (cdr lst))))))
 
 (define (list-find lst val . rst)
-  (let ((pred? (if (null? rst) == (car rst))))
+  (let ((access (if (null? rst) (lambda (x) x) (car rst))))
     (let loop ((lst lst))
       (if (null? lst)
           #f
-          (if (pred? (car lst) val)
+          (if (== (access (car lst)) val)
               lst
               (loop (cdr lst)))))))
 
@@ -283,6 +283,14 @@
                      (func (dict-ref dct k)))
           (loop (cdr lst)))))
   res)
+
+(define (dict-merge dct1 dct2)
+  (let ((res {}))
+    (map (lambda (k) (dict-put! res k (dict-ref dct1 k)))
+         (keys dct1))
+    (map (lambda (k) (dict-put! res k (dict-ref dct2 k)))
+         (keys dct2))
+    res))
 
 (define (dict->vector dct)
   (define res [])
