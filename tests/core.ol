@@ -292,3 +292,26 @@
 
 ;; test a few edge cases
 (test-eval (not (list? 0)) #t)
+
+;; let
+
+;; vars should be able to reference each other within a let
+(let ((x 0)
+      (y (+ x 1)))
+  (test-eval y 1))
+
+;; functions can reference vars too and order matters
+(define foo 5)
+(let ((baz foo)
+      (bar (lambda () (* baz 5))))
+  (test-eval (bar) 25))
+
+;; vars can also reference themselves
+(define foo 5)
+(let ((foo foo)
+      (bar (+ foo 1)))
+  (test-eval foo 5)
+  (test-eval bar 6)
+  (set! foo 6)
+  (test-eval foo 6))
+(test-eval foo 5)

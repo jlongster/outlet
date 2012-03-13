@@ -166,6 +166,40 @@
 (install-expander
  'let
  (lambda (form e)
+   (define (replace expr old sym)
+     (cond
+      ((symbol? expr) (if (== expr old)
+                          sym
+                          expr))
+      ((literal? expr) expr)
+      ((dict? expr) (dict-map (lambda (e) (replace e old sym))
+                              expr))
+      ((vector? expr) (vector-map (lambda (e) (replace e old sym))
+                                  expr))
+      ((list? expr) (map (lambda (e) (replace e old sym))
+                         expr))))
+   
+   (define (generate-defs syms exprs)
+     (reverse
+      (let loop ((lst syms)
+                 (forms exprs)
+                 (vars {})
+                 (acc '()))
+        (if (null? lst)
+            acc
+            (let ((sym (car lst))
+                  (name (car (car forms)))
+                  (code (cadar forms)))
+              (loop (cdr lst)
+                    (cdr forms)
+                    (dict-merge vars (dict name sym))
+                    (cons `(define ,(car lst)
+                             ,(fold (lambda (el acc)
+                                      (replace acc el (dict-ref vars el)))
+                                    code
+                                    (keys vars)))
+                          acc)))))))
+   
    (let ((name (if (symbol? (cadr form))
                    (cadr form)
                    (gensym)))
@@ -175,23 +209,20 @@
      (assert (and (list? forms)
                   (list? (car forms)))
              "invalid let")
-     (let ((syms (map (lambda (el) (gensym)) forms)))
-       (let ((body (if (symbol? (cadr form))
+     (let ((syms (map (lambda (el) (gensym)) forms))
+           (body (if (symbol? (cadr form))
                        (cdddr form)
-                       (cddr form)))
-             (symvals (zip syms (map cadr forms))))
-         (e `((lambda ()
-                (define (,name ,@(map car forms))
-                  ,@body)
-                ;; todo, bug here. splicing in
-                ;; var-defs and then putting (,name
-                ;; ,@vars) after it didn't work
-                ,@(list-append
-                   (map (lambda (k)
-                          `(define ,k ,(dict-ref symvals k)))
-                        syms)
-                   `((,name ,@syms)))))
-            e))))))
+                       (cddr form))))
+       (e `((lambda ()
+              (define (,name ,@(map car forms))
+                ,@body)
+              ;; todo, bug here. splicing in
+              ;; var-defs and then putting (,name
+              ;; ,@vars) after it didn't work
+              ,@(list-append
+                 (generate-defs syms forms)
+                 `((,name ,@syms)))))
+          e)))))
 
 ;; quoting
 
