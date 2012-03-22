@@ -2,6 +2,19 @@ Outlet is a programming language. It is Lisp-like in nature and compiles to both
 
 See http://jlongster.com/2012/01/04/outlet-my-lisp-to-javascript-experiment.html.
 
+Features
+--------
+
+* Object literals: `{:one 1 :two}`, `[1 2 3 4 5]`
+* A pretty printer: `pp`
+* Tail-recursive named lets:
+    (let loop ()
+      (if (eq? (read-input) 'quit)
+        (loop)))
+* Expansion Passing Style and define-macro style macros
+* Javascript code generator
+* Several other things, it's hackable!
+
 Example
 -------
 
@@ -49,9 +62,11 @@ Example
 Status
 ------
 
-The compiler is stable and a full runtime is available (see runtime.ol). I am currently working on a register-based virtual machine for Outlet which will solely act as a debugger. It will allow Outlet code to be paused, resumed, and inspected, making an in-browser stepping debugger possible.
+I am no longer actively working on Outlet, and it is a research project I use to learn or play around with new ideas.
 
-The compiler is written 100% in Outlet except for the javascript runtime, so it is completely bootstrapped.
+The compiler is stable and a full runtime is available (see runtime.ol). It is written 100% in Outlet.
+
+I was working on a virtual machine to run Outlet code that is compiled to special assembly instructions. It works great, but it is slow. The project is outlet-machine: https://github.com/jlongster/outlet-machine.
 
 Using
 -----
@@ -73,16 +88,3 @@ More sophisticated build tools will come soon. If you want to work on the compil
 ::
 
     make test
-
-Todo
-----
-
-* Named lets: this lets you do looping with (let loop ((var val)) ... (loop))
-* `letrec`: allows you to references other variables within the same `let`
-* `eval` is not implemented in the new rewrite
-* `define-macro` is implemented, but it evalutes the macros in the wrong context. Currently it simply transforms into a `install-expander` expression which makes it available for code which is evaluated. The macro needs to be available for the current source code, not for evaluated code one level above.
-* raw code: provide a way to output raw javascript, possibly something like (%js "return obj.props[val]"). this is just temporary until Outlet evolves more.
-* Build system: make it easier to compile multi-file programs
-* Tools: make it easy to use Outlet on the web or on the CLI
-
-That's all for now. I will work on other things too but this is what's on my mind.
