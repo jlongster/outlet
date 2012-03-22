@@ -66,7 +66,8 @@
 (define str
   (lambda args
     (fold (lambda (el acc)
-            (+ acc (inspect el)))
+            (+ acc
+               (if (string? el) el (inspect el))))
           ""
           args)))
 
@@ -158,10 +159,11 @@
             (map func (cdr lst)))))
 
 (define (for-each func lst)
-  (if (not (null? lst))
-      (begin
-        (func (car lst))
-        (for-each func (cdr lst)))))
+  (let loop ((lst lst))
+    (if (not (null? lst))
+        (begin
+          (func (car lst))
+          (loop (cdr lst))))))
 
 (define (fold func acc lst)
   (if (null? lst)
@@ -391,101 +393,134 @@
 
 ;; output
 
-(define (display msg)
-  (console.log msg))
+(define (print msg)
+  (util.print msg))
+
+(define (println msg)
+  (util.puts msg))
 
 (define (pp obj)
-  (display (str (inspect obj) "\n")))
+  (println (inspect obj)))
+
+(define (%inspect-non-sequence obj)
+  (cond
+   ((number? obj) (+ "" obj))
+   ((string? obj)
+    (set! obj (obj.replace (RegExp "\\\\" "g") "\\\\"))
+    (set! obj (obj.replace (RegExp "\n" "g") "\\n"))
+    (set! obj (obj.replace (RegExp "\r" "g") "\\r"))
+    (set! obj (obj.replace (RegExp "\t" "g") "\\t"))
+    (set! obj (obj.replace (RegExp "\"" "g") "\\\""))
+    (+ "\"" obj "\""))
+   ((symbol? obj) (symbol->string obj))
+   ((boolean? obj) (if obj "#t" "#f"))
+   ((null? obj) "()")
+   ((function? obj) "<function>")
+   (else (throw "%inspect-non-sequence: unexpected type"))))
+
+(define (%recur-protect obj arg func halt . rest)
+  (let ((parents (if (null? rest) '() (car rest))))
+    (if (list-find parents obj)
+        halt
+        (func obj arg (lambda (el arg)
+                        (%recur-protect el arg func halt
+                                        (cons obj parents)))))))
+
+(define (%space obj)
+  (%recur-protect
+   obj
+   #f
+   (lambda (obj arg recur)
+     (cond
+      ((list? obj)
+       ;; length of obj plus 1 equals the number of spaces and
+       ;; parantheses for a list
+       (+ (length obj)
+          1
+          (fold (lambda (el acc)
+                  (+ acc (recur el #f)))
+                0
+                obj)))
+      ((dict? obj)
+       (recur (dict->list obj) #f))
+      ((vector? obj)
+       (recur (vector->list obj) #f))
+      (else
+       (vector-length (%inspect-non-sequence obj)))))
+   (vector-length "<circular>")))
 
 (define (inspect obj . rest)
-  (define (space obj)
-    (cond
-     ((or (literal? obj)
-          (symbol? obj)) (vector-length (inspect obj)))
-     ((list? obj)
-      ;; length of obj plus 1 equals the number of spaces and
-      ;; parantheses for a list
-      (+ (length obj)
-         1
-         (fold (lambda (el acc)
-                 (+ acc (space el)))
-               0
-               obj)))
-     ((dict? obj)
-      (space (dict->list obj)))
-     ((vector? obj)
-      (space (vector->list obj)))))
+  (let ((no-newlines (if (null? rest) #f (car rest))))
+    (%recur-protect
+     obj
+     1
+     (lambda (obj i recur)
+       (define buffer "")
+       (define (get-buffer) buffer)
 
-  (let ((i (if (null? rest) 1 (car rest))))
-    (define buffer "")
-    (define (get-buffer) buffer)
-    
-    (define (disp str)
-      (set! buffer (+ buffer str)))
+       (define (disp s)
+         (set! buffer (+ buffer s)))
 
-    (define (pad n)
-      (vector-for-each (lambda (_) (disp " "))
-                       (make-vector n)))
-    
-    (cond
-     ((number? obj) (+ "" obj))
-     ((string? obj) obj)
-     ((symbol? obj) (symbol->string obj))
-     ((boolean? obj) (if obj "#t" "#f"))
-     ((null? obj) "()")
-     ((function? obj) "<function>")
-     ((list? obj)
-      (let ((node (car obj))
-            (childr (cdr obj))
-            (sp (> (space obj) 30)))
-        (disp "(")
-        (disp (inspect node (+ i 1)))
-        (for-each (lambda (item)
-                    (if sp
-                        (begin (disp "\n")
-                               (pad i))
-                        (disp " "))
-                    (disp (inspect item (+ i 1))))
-                  childr)
-        (disp ")")
-        (get-buffer)))
-     ((vector? obj)
-      (let ((first (vector-ref obj 0))
-            (rest (vector-slice obj 1))
-            (sp (> (space obj) 30)))
-        (disp "[")
-        (disp (inspect first (+ i 1)))
-        (vector-for-each (lambda (item)
-                           (if sp
+       (define (pad n)
+         (vector-for-each (lambda (_) (disp " "))
+                          (make-vector n)))
+
+       (cond
+        ((list? obj)
+         (let ((sp (> (%space obj) 30))
+               (first #t))
+           (disp "(")
+           (for-each
+            (lambda (el)
+              (if (not first)
+                  (if (and sp (not no-newlines))
+                      (begin (disp "\n")
+                             (pad i))
+                      (disp " ")))
+              (disp (recur el (+ i 1)))
+              (set! first #f))
+            obj)
+           (disp ")")
+           (get-buffer)))
+        ((vector? obj)
+         (let ((sp (> (%space obj) 30))
+               (first #t))
+           (disp "[")
+           (vector-for-each (lambda (el)
+                              (if (not first)
+                                  (if (and sp (not no-newlines))
+                                      (begin (disp "\n")
+                                             (pad i))
+                                      (disp " ")))                            
+                              (disp (recur el (+ i 1)))
+                              (set! first #f))
+                            obj)
+           (disp "]")
+           (get-buffer)))
+        ((dict? obj)
+         (let ((sp (> (%space obj) 30))
+               (first #t))
+           (disp "{")
+           (for-each (lambda (k)
+                       (if (not first)
+                           (if (and sp (not no-newlines))
                                (begin (disp "\n")
                                       (pad i))
-                               (disp " "))
-                           (disp (inspect item (+ i 1))))
-                         rest)
-        (disp "]")
-        (get-buffer)))
-     ((dict? obj)
-      (disp "{")
-      (let ((lst (dict->list obj))
-            (sp (> (space obj) 30)))
-        (let loop ((lst lst)
-                   (first #t))
-          (if (not (null? lst))
-              (let ((key (car lst))
-                    (val (cadr lst)))
-                (if (not first)
-                    (if sp
-                        (begin (disp "\n")
-                               (pad i))
-                        (disp " ")))
-                (disp ":")
-                (disp (inspect key i))
-                (disp " ")
-                (disp (inspect val (+ i 1 (vector-length
-                                           (symbol->string key)))))
-                (loop (cddr lst) #f)))))
-      (disp "}")
-      (get-buffer)))))
+                               (disp " ")))
+                       (disp ":")
+                       (disp (recur k i))
+                       (disp " ")
+                       (disp (recur (dict-ref obj k)
+                                    (+ i 3 (vector-length
+                                            (symbol->string k)))))
+                       (set! first #f))
+                     (keys obj))
+           (disp "}")
+           (get-buffer)))
+        (else
+         (%inspect-non-sequence obj))))
+     "<circular>")))
+
 
 ;; misc
 
@@ -493,6 +528,14 @@
   ((%raw "func.apply")
    (%raw "null")
    (list->vector args)))
+
+(define (trampoline-result? value)
+  (and (vector? value)
+       (= (vector-ref value 0) "__tco_call")))
+
+(define (trampoline value)
+  (%raw "while(trampoline_dash_result_p_(value)) { value = value[1](); }")
+  value)
 
 ;; TODO: need to randomize
 (define _gensym 0)

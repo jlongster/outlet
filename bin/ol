@@ -18,6 +18,9 @@ if(process.argv.length < 3) {
 var args = process.argv.slice(2);
 var compile = false;
 var expand = false;
+var amt = false;
+var rt = 'js';
+var compiler_path = false;
 
 if(args[0] == '-c') {
     compile = true;
@@ -27,6 +30,24 @@ if(args[0] == '-c') {
 if(args[0] == '-p') {
     expand = true;
     args = args.slice(1);
+    if(args[0].indexOf('.ol') == -1) {
+        amt = args[0];
+        args = args.slice(1);
+    }
+}
+
+if(args[0] == '-r') {
+    if(args[1].indexOf('.ol') == -1) {
+        rt = args[1];
+        args = args.slice(2);
+    }
+}
+
+if(args[0] == '-l') {
+    if(args[1].indexOf('.ol') == -1) {
+        compiler_path = args[1];
+        args = args.slice(2);
+    }
 }
 
 if(args[0] == '-e') {
@@ -39,11 +60,25 @@ else {
 }
 
 if(expand) {
-    compiler.pp(compiler.expand(compiler.read(src)));
+    compiler.set_dash_macro_dash_generator(js_backend());
+
+    if(amt) {
+        compiler.pp(compiler.expand_dash_nth(compiler.read(src), amt));
+    }
+    else {
+        compiler.pp(compiler.expand(compiler.read(src)));
+    }
 }
 else {
     var js = js_backend();
-    js.write_dash_runtime('js');
+
+    if(compiler_path) {
+        js.write_dash_runtime(rt, compiler_path);
+    }
+    else {
+        js.write_dash_runtime(rt);
+    }
+
     var output = compiler.compile(src, js);
 
     if(compile) {

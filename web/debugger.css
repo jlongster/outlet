@@ -1,0 +1,59 @@
+body {
+    font-size: 1.2em;
+    background-color: #eeeeef;
+    margin: 0;
+    padding: 0;
+    color: #333333;
+}
+
+.content {
+    width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    overflow: hidden;
+    padding: 0 1em;
+    box-shadow: 0 0 1px grey;
+}
+
+h2, .input {
+    text-align: center;
+}
+
+.buttons {
+    margin: 0 auto;
+    text-align: center;
+}
+
+#messages, #environment, #result {
+    font-family: Courier New;
+}
+
+.messages h1 {
+    margin-bottom: .5em;
+}
+
+button {
+    font-size: 1em;
+    margin: 0;
+    margin-bottom: 1em;
+}
+
+.messages {
+    float: left;
+    width: 59%
+}
+
+.right-panel {
+    float: right;
+    width: 39%;
+}
+
+.environment {
+    overflow: auto;
+}
+
+.canvas-area {
+    clear: both;
+    text-align: center;
+    margin: 2em 0;
+}

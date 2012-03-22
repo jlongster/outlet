@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Outlet Debugger</title>
+    <link type="text/css" href="debugger.css" rel="stylesheet" />
+    <script type="text/javascript">
+      var process = {};
+      process.argv = ['web', 'web'];
+      process.stdin = {};
+      process.stdin.on = function() {};
+      process.stdin.resume = function() {};
+      process.stdin.proceed = function() {};
+      process.stdin.pause = function() {};
+    </script>
+    <script type="text/javascript" src="runtime.js"></script>
+    <script type="text/javascript" src="vm.js"></script>
+  </head>
+  <body>
+    <div class="content">
+      <p>
+        This is a prototype of an in-browser stepping debugger for
+        Outlet code.
+      </p>
+
+      <div class="messages">
+        <h1>Messages</h1>
+        <button onclick="step()">Step Into</button>
+        <div id="messages">
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="environment">
+          <h1>Environment</h1>
+          <div id="environment"></div>
+        </div>
+
+        <div class="result">
+          <h1>Result</h1>
+          <div id="result"></div>
+        </div>
+      </div>
+
+      <div class="canvas-area">
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+  </body>
+</html>
+

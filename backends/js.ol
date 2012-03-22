@@ -22,7 +22,8 @@
                     (car root))))
       (if (not (equal? target "no-runtime"))
           (begin
-            (write (fs.readFileSync (str root "/runtime.js") "utf-8") #t)
+            (if (not (equal? target "js-onlyeval"))
+                (write (fs.readFileSync (str root "/runtime.js") "utf-8") #t))
             (if (not (equal? target "js-noeval"))
                 (begin
                   (write (str "var __compiler = require('"
@@ -76,8 +77,11 @@
     (terminate-expr (not top?)))
 
   (define (write-term obj top?)
-    (write obj.str)
-    (terminate-expr (not top?)))
+    (let ((obj (if (= obj 'var)
+                   '_var_
+                   obj)))
+      (write obj.str)
+      (terminate-expr (not top?))))
   
   (define (write-set lval rval parse)
     (write "var ")

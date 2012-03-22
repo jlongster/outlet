@@ -3,10 +3,18 @@
   <head>
     <title>Outlet REPL</title>
     <link type="text/css" href="index.css" rel="stylesheet" />
+    <script type="text/javascript">
+      var process = {};
+      process.argv = ['web', 'web'];
+      process.stdin = {};
+      process.stdin.on = function() {};
+      process.stdin.resume = function() {};
+      process.stdin.proceed = function() {};
+    </script>
+    <script type="text/javascript" src="web.js"></script>
+    <script type="text/javascript" src="runtime.js"></script>
     <script type="text/javascript" src="web.js"></script>
     <script type="text/javascript" src="ui.js"></script>
-    <script type="text/javascript" src="runtime.js"></script>
-    <script type="text/javascript" src="runtime-eval.js"></script>
   </head>
   <body>
     <div class="content">

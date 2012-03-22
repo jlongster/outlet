@@ -11,7 +11,6 @@
                      " but expected "
                      (inspect ,val))))))
 
-
 (define-macro (test-read src val . args)
   `(%test read ,src ,val ,@args))
 
@@ -21,6 +20,7 @@
 (define-macro (test-assert src)
   `(%test eval ',src #t (lambda (res val)
                           (not (eq? res #f)))))
+
 
 ;; functions
 
@@ -247,9 +247,9 @@
 (test-eval (if #t 1 2) 1)
 (test-eval (if #f 1 2) 2)
 (test-eval (if true
-                (begin
-                  (define a 5)
-                  (* a 2)))
+               (begin
+                 (define a 5)
+                 (* a 2)))
            10)
 
 ;; cond

@@ -178,7 +178,7 @@
                                   expr))
       ((list? expr) (map (lambda (e) (replace e old sym))
                          expr))))
-   
+
    (define (generate-defs syms exprs)
      (reverse
       (let loop ((lst syms)
@@ -200,29 +200,102 @@
                                     (keys vars)))
                           acc)))))))
    
+   (define (tco exprs exit)
+     (define (if? expr)
+       (and (list? expr)
+            (== (car expr) 'if)))
+
+     (define (let? expr)
+       (and (list? expr)
+            (== (car expr) 'let)))
+     
+     (define (begin? expr)
+       (and (list? expr)
+            (== (car expr) 'begin)))
+     
+     (define (tco? expr)
+       (and (list? expr)
+            (== (car expr) exit)))
+
+     (define (process-if expr transform)
+       (if (null? (cdddr expr))
+           `(if ,(cadr expr)
+                ,(transform (caddr expr)))
+           `(if ,(cadr expr)
+                ,(transform (caddr expr))
+                ,(transform (car (cdddr expr))))))
+     
+     (let ((rexprs (reverse exprs)))
+       (let ((bottom (car rexprs)))
+         (cond
+          ((if? bottom)
+           (reverse
+            (cons (process-if bottom
+                              (lambda (expr)
+                                (cond
+                                 ((begin? expr) (tco expr exit))
+                                 ((let? expr) (tco expr exit))
+                                 (else 
+                                  (car (tco (list expr) exit))))))
+                  (cdr rexprs))))
+          ((let? bottom)
+           (reverse
+            (cons (tco bottom exit)
+                  (cdr rexprs))))
+          (else
+           (if (tco? bottom)
+               (reverse
+                (cons `(vector "__tco_call" (lambda () ,bottom))
+                      (cdr rexprs)))
+               exprs))))))
+
+   (define (tco-call? name expr)
+     (define (_tco? expr)
+       (and (list? expr)
+            (= (car expr) 'vector)
+            (= (cadr expr) "__tco_call")
+            (let ((lamb (caddr expr)))
+              (let ((body (caddr lamb)))
+                ;; test the name of the loop call and make sure its the
+                ;; same one
+                (= (car body) name)))))
+     
+     (if (list? expr)
+         (or (_tco? expr)
+             (fold (lambda (el acc)
+                     (or acc
+                         (tco-call? name el)))
+                   #f
+                   expr))
+         #f))
+   
    (let ((name (if (symbol? (cadr form))
                    (cadr form)
                    (gensym)))
          (forms (if (symbol? (cadr form))
                     (caddr form)
                     (cadr form))))
-     (assert (and (list? forms)
-                  (list? (car forms)))
-             "invalid let")
+     (assert (or (null? forms)
+                 (and (list? forms)
+                      (list? (car forms))))
+             (str "invalid let: " form))
      (let ((syms (map (lambda (el) (gensym)) forms))
            (body (if (symbol? (cadr form))
                        (cdddr form)
                        (cddr form))))
-       (e `((lambda ()
-              (define (,name ,@(map car forms))
-                ,@body)
-              ;; todo, bug here. splicing in
-              ;; var-defs and then putting (,name
-              ;; ,@vars) after it didn't work
-              ,@(list-append
-                 (generate-defs syms forms)
-                 `((,name ,@syms)))))
-          e)))))
+       (let ((tco-ed (tco body name)))
+         (e `((lambda ()
+                (define (,name ,@(map car forms))
+                  ,@tco-ed)
+                ;; todo, bug here. splicing in
+                ;; var-defs and then putting (,name
+                ;; ,@vars) after it didn't work
+                ,@(list-append
+                   (generate-defs syms forms)
+                   (if (tco-call? name tco-ed)
+                       `((trampoline (,name ,@syms)))
+                       `((,name ,@syms))))))
+            e))))))
 
 ;; quoting
 

@@ -3,17 +3,19 @@ util.inspect = function(obj) {
     return obj && obj.toSource();
 };
 util.print = outlet_display;
+util.puts = outlet_display;
 
 var compiler = require('./compiler.js');
 var js = require('./js.js');
 var fs = require('fs');
-var trace = require('trace');
-
-trace.prompt = prompt;
 
 fs.readFileSync = function(src) {
-    return '';
+    return '1';
 };
+
+start_dash_stdin = function() {};
+stop_dash_stdin = function() {};
+prompt_dash_read = function() {};
 
 function outlet_display(str) {
     var output = document.getElementById('output');
@@ -75,6 +77,7 @@ function get_query() {
         
         return obj;
     }
+    return {};
 };
 
 function fill_code() {
