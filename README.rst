@@ -5,12 +5,16 @@ See http://jlongster.com/2012/01/04/outlet-my-lisp-to-javascript-experiment.html
 Features
 --------
 
-* Object literals: `{:one 1 :two}`, `[1 2 3 4 5]`
-* A pretty printer: `pp`
+* Object literals: ``{:one 1 :two 2}``, ``[1 2 3 4 5]``
+* A pretty printer: ``pp``
 * Tail-recursive named lets:
-    (let loop ()
-      (if (eq? (read-input) 'quit)
-        (loop)))
+
+::
+
+     (let loop ()
+       (if (eq? (read-input) 'quit)
+         (loop)))
+
 * Expansion Passing Style and define-macro style macros
 * Javascript code generator
 * Several other things, it's hackable!
