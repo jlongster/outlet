@@ -882,7 +882,7 @@ var global_dash_environment = setup_dash_environment();
 module.exports = dict(string_dash__gt_symbol("compile"),(function(src){
 return statements(compile(src,string_dash__gt_symbol("val"),string_dash__gt_symbol("next")));
 }),string_dash__gt_symbol("ops"),runtime_dash_ops,string_dash__gt_symbol("first_dash_frame"),first_dash_frame,string_dash__gt_symbol("install_dash_primitives"),install_dash_primitives,string_dash__gt_symbol("stepping_dash_mode"),(function() {always_dash_should_dash_break = true;
-}),string_dash__gt_symbol("global_dash_environment"),global_dash_environment);
+}),string_dash__gt_symbol("primitive_dash_procedure_p_"),primitive_dash_procedure_p_,string_dash__gt_symbol("compiled_dash_procedure_p_"),compiled_dash_procedure_p_,string_dash__gt_symbol("global_dash_environment"),global_dash_environment);
 
 
 });
@@ -1452,7 +1452,16 @@ var continue_dash_machine = (function() {process.stdin.pause();
 return current_dash_machine.proceed();
 });
 var inspect_dash_var = (function(v){
-return inspect(v);
+return (function() {if((v && compiler.compiled_dash_procedure_p_(v))) {return ((function() {return "<compiled-function>";
+}))();
+} else {return (function() {if((v && compiler.primitive_dash_procedure_p_(v))) {return ((function() {return "<native-function>";
+}))();
+} else {return ((function() {return inspect(v);
+}))();
+}})()
+;
+}})()
+;
 });
 var inspect_dash_environment = (function() {return ((function() {var o84 = (function(frame){
 return fold((function(k,acc){

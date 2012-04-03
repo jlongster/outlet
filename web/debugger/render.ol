@@ -1,4 +1,3 @@
-
 (require (vm "./vm"))
 
 (define width 400)
@@ -33,10 +32,11 @@
            (* (rand) 150))
          
          (define (render-rand x y width height)
+           ;;(break)
            (render-box "green" x y width height))
 
          (define (render-n n i)
-           (break)
+           ;;(break)
            (if (< i n)
                (begin
                  (render-rand (rand-int)
