@@ -810,9 +810,10 @@ write(("\"\\uFDD1" + obj["substring"](1) + "\""));
 return terminate_dash_expr(not(top_p_));
 });
 var write_dash_term = (function(obj,top_p_){
-return ((function() {var o7 = (function(obj,obj){
-var parts = obj["split"](".");
-((function() {var o10 = (function(name){
+return ((function() {var o7 = (function(obj){
+var name = obj["substring"](1);
+var parts = name["split"](".");
+((function() {var o9 = (function(name){
 name = name["replace"](RegExp("-","g"),"_dash_");
 name = name["replace"](RegExp("\\?","g"),"_p_");
 name = name["replace"](RegExp("\\!","g"),"_excl_");
@@ -822,8 +823,8 @@ name = name["replace"](RegExp("%","g"),"_per_");
 name = name["replace"](RegExp("=","g"),"_eq_");
 return write(name);
 });
-var o11 = vector_dash_ref(parts,0);
-return o10(o11);
+var o10 = vector_dash_ref(parts,0);
+return o9(o10);
 }))();
 vector_dash_for_dash_each((function(part){
 return write(str("[\"",part,"\"]"));
@@ -834,8 +835,7 @@ var o8 = (function() {if(_eq__eq_(obj,"\uFDD1var")) {return "\uFDD1_var_";
 } else {return obj;
 }})()
 ;
-var o9 = obj["substring"](1);
-return o7(o8,o9);
+return o7(o8);
 }))();
 });
 var write_dash_set = (function(lval,rval,parse){
@@ -921,7 +921,7 @@ return write("(Array.prototype.slice.call(arguments));",true);
 ;
 }})()
 ;
-((function() {var o12 = (function(i,len){
+((function() {var o11 = (function(i,len){
 return for_dash_each((function(form){
 (function() {if((eq_p_(i,(len - 1)) && should_dash_return_p_(form))) {return write("return ");
 } else {return false;
@@ -931,9 +931,9 @@ parse(form);
 i = (i + 1);
 }),body);
 });
-var o13 = 0;
-var o14 = length(body);
-return o12(o13,o14);
+var o12 = 0;
+var o13 = length(body);
+return o11(o12,o13);
 }))();
 write("})");
 return terminate_dash_expr(expr_p_);
@@ -950,14 +950,14 @@ return write(")");
 }})()
 ;
 write("(");
-((function() {var o15 = (function(comma){
+((function() {var o14 = (function(comma){
 return for_dash_each((function(arg){
 comma();
 return parse(arg,true);
 }),args);
 });
-var o16 = inline_dash_writer(",");
-return o15(o16);
+var o15 = inline_dash_writer(",");
+return o14(o15);
 }))();
 write(")");
 return terminate_dash_expr(expr_p_);
@@ -967,14 +967,14 @@ return write(code);
 });
 var write_dash_op = (function(op,vals,expr_p_,parse){
 write("(");
-((function() {var o17 = (function(op_dash_writer){
+((function() {var o16 = (function(op_dash_writer){
 return for_dash_each((function(arg){
 op_dash_writer();
 return parse(arg,true);
 }),vals);
 });
-var o18 = inline_dash_writer(str(" ",op," "));
-return o17(o18);
+var o17 = inline_dash_writer(str(" ",op," "));
+return o16(o17);
 }))();
 write(")");
 return terminate_dash_expr(expr_p_);

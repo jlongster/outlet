@@ -79,10 +79,10 @@
   (define (write-term obj top?)
     (let ((obj (if (== obj 'var)
                    '_var_
-                   obj))
-          (obj (obj.substring 1)))
+                   obj)))
 
-      (define parts (obj.split "."))
+      (define name (obj.substring 1))
+      (define parts (name.split "."))
 
       (let ((name (vector-ref parts 0)))
         (set! name (name.replace (RegExp "-" "g") "_dash_"))
