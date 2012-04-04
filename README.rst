@@ -66,8 +66,6 @@ Example
 Status
 ------
 
-I am no longer actively working on Outlet, and it is a research project I use to learn or play around with new ideas.
-
 The compiler is stable and a full runtime is available (see runtime.ol). It is written 100% in Outlet.
 
 I was working on a virtual machine to run Outlet code that is compiled to special assembly instructions. It works great, but it is slow. The project is outlet-machine: https://github.com/jlongster/outlet-machine.
