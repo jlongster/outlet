@@ -12,7 +12,7 @@
 
   (define (make-fresh)
     (generator))
-  
+
   (define (write src . eol)
     (code.push (+ src (if (null? eol) "" "\n"))))
 
@@ -45,7 +45,7 @@
     ;; separate lines into one call
     (if (not expr?)
         (write ";" #t)))
-  
+
   (define (write-number obj top?)
     (write obj)
     (terminate-expr (not top?)))
@@ -61,7 +61,7 @@
     ;; list data structure implementation
     (write "_emptylst")
     (terminate-expr (not top?)))
-  
+
   (define (write-string obj top?)
     (let ((str obj))
       (set! str (str.replace (RegExp "\\\\" "g") "\\\\"))
@@ -82,6 +82,8 @@
                    obj))
           (obj (obj.substring 1)))
 
+      (define parts (obj.split "."))
+
       ;; (set! obj (obj.replace (RegExp "-" "g") "_dash_"))
       ;; (set! obj (obj.replace (RegExp "\\?" "g") "_p_"))
       ;; (set! obj (obj.replace (RegExp "\\!" "g") "_excl_"))
@@ -89,14 +91,21 @@
       ;; (set! obj (obj.replace (RegExp "<" "g") "_lt_"))
       ;; (set! obj (obj.replace (RegExp "%" "g") "_per_"))
       ;; (set! obj (obj.replace (RegExp "=" "g") "_eq_"))
-      
-      (write obj)
+
+      ;; Convert dots to brackets:
+      ;; foo.bar -> foo["bar"]
+      ;; foo.bar.baz -> foo["bar"]["baz"]
+      (write (vector-ref parts 0))
+      (vector-for-each
+       (lambda (part)
+         (write (str "[\"" part "\"]")))
+       (vector-slice parts 1))
       (terminate-expr (not top?))))
-  
+
   (define (write-set lval rval parse)
     (write "var ")
     (write-set! lval rval parse))
-  
+
   (define (write-set! lval rval parse)
     (write-term lval)
     (write " = ")
@@ -105,7 +114,7 @@
     ;; need to manually terminate it
     (write ";" #t))
 
-  (define (write-if pred tru expr? parse . fal)    
+  (define (write-if pred tru expr? parse . fal)
     (write "(function() {")
 
     (write "if(")
@@ -123,7 +132,7 @@
               (write "return "))
           (parse (car fal))
           (write "}")))
-    
+
     (write "})()" #t)
     (terminate-expr expr?))
 
@@ -132,7 +141,7 @@
      ((list? args)
       (define comma (inline-writer ","))
       (define capture-name #f)
-      
+
       (define (write-args args)
         (if (not (null? args))
             (begin
@@ -180,7 +189,7 @@
                 body))
     (write "})")
     (terminate-expr expr?))
-  
+
   (define (write-func-call func args expr? parse)
     ;; write the calling function, which can be a symbol, a lambda, or a
     ;; call to another function
@@ -232,7 +241,7 @@
                 (write-string (cadr el))
                 (write ");"))
               args))
-  
+
   {:write-runtime write-runtime
    :write-number write-number
    :write-string write-string
@@ -246,7 +255,7 @@
    :write-lambda write-lambda
    :write-func-call write-func-call
    :write-raw-code write-raw-code
-   
+
    ;; specials
    :write-require write-require
    :write-and (make-op-writer "&&")
