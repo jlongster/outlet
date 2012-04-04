@@ -70,13 +70,6 @@ return (acc + (function() {if(string_p_(el)) {return el;
 });
 var string_dash__gt_symbol = (function(str){
 return ((function() {var o1 = (function(s){
-s = s["replace"](RegExp("-","g"),"_dash_");
-s = s["replace"](RegExp("\\?","g"),"_p_");
-s = s["replace"](RegExp("\\!","g"),"_excl_");
-s = s["replace"](RegExp(">","g"),"_gt_");
-s = s["replace"](RegExp("<","g"),"_lt_");
-s = s["replace"](RegExp("%","g"),"_per_");
-s = s["replace"](RegExp("=","g"),"_eq_");
 return ("\uFDD1" + s);
 });
 var o2 = str;
@@ -85,13 +78,6 @@ return o1(o2);
 });
 var symbol_dash__gt_string = (function(sym){
 return ((function() {var o3 = (function(s){
-s = s["replace"](RegExp("_dash_","g"),"-");
-s = s["replace"](RegExp("_p_","g"),"?");
-s = s["replace"](RegExp("_excl_","g"),"!");
-s = s["replace"](RegExp("_gt_","g"),">");
-s = s["replace"](RegExp("_lt_","g"),"<");
-s = s["replace"](RegExp("_per_","g"),"%");
-s = s["replace"](RegExp("_eq_","g"),"=");
 return s;
 });
 var o4 = sym["substring"](1);
@@ -734,7 +720,7 @@ return string_dash__gt_symbol(("o" + _gensym));
 
 
 var fs = require("fs");var should_dash_return_p_ = (function(form){
-return not((list_p_(form) && (eq_p_(car(form),"\uFDD1throw") || eq_p_(car(form),"\uFDD1set_excl_") || eq_p_(car(form),"\uFDD1set"))));
+return not((list_p_(form) && (eq_p_(car(form),"\uFDD1throw") || eq_p_(car(form),"\uFDD1set!") || eq_p_(car(form),"\uFDD1set"))));
 });
 var generator = (function() {var code = vector();
 var make_dash_fresh = (function() {return generator();
@@ -826,7 +812,19 @@ return terminate_dash_expr(not(top_p_));
 var write_dash_term = (function(obj,top_p_){
 return ((function() {var o7 = (function(obj,obj){
 var parts = obj["split"](".");
-write(vector_dash_ref(parts,0));
+((function() {var o10 = (function(name){
+name = name["replace"](RegExp("-","g"),"_dash_");
+name = name["replace"](RegExp("\\?","g"),"_p_");
+name = name["replace"](RegExp("\\!","g"),"_excl_");
+name = name["replace"](RegExp(">","g"),"_gt_");
+name = name["replace"](RegExp("<","g"),"_lt_");
+name = name["replace"](RegExp("%","g"),"_per_");
+name = name["replace"](RegExp("=","g"),"_eq_");
+return write(name);
+});
+var o11 = vector_dash_ref(parts,0);
+return o10(o11);
+}))();
 vector_dash_for_dash_each((function(part){
 return write(str("[\"",part,"\"]"));
 }),vector_dash_slice(parts,1));
@@ -898,7 +896,7 @@ write("){",true);
 return (function() {if(capture_dash_name) {return ((function() {write("var ");
 write_dash_term(capture_dash_name);
 write(" = ");
-write_dash_term("\uFDD1vector_dash__gt_list");
+write_dash_term("\uFDD1vector->list");
 write("(Array.prototype.slice.call(arguments, ");
 write((length(args) - 2));
 return write("));",true);
@@ -911,7 +909,7 @@ return write("));",true);
 write("var ");
 write_dash_term(args);
 write(" = ");
-write_dash_term("\uFDD1vector_dash__gt_list");
+write_dash_term("\uFDD1vector->list");
 return write("(Array.prototype.slice.call(arguments));",true);
 }))();
 } else {return (function() {if(null_p_(args)) {return ((function() {return write("(function() {");
@@ -923,7 +921,7 @@ return write("(Array.prototype.slice.call(arguments));",true);
 ;
 }})()
 ;
-((function() {var o10 = (function(i,len){
+((function() {var o12 = (function(i,len){
 return for_dash_each((function(form){
 (function() {if((eq_p_(i,(len - 1)) && should_dash_return_p_(form))) {return write("return ");
 } else {return false;
@@ -933,9 +931,9 @@ parse(form);
 i = (i + 1);
 }),body);
 });
-var o11 = 0;
-var o12 = length(body);
-return o10(o11,o12);
+var o13 = 0;
+var o14 = length(body);
+return o12(o13,o14);
 }))();
 write("})");
 return terminate_dash_expr(expr_p_);
@@ -952,14 +950,14 @@ return write(")");
 }})()
 ;
 write("(");
-((function() {var o13 = (function(comma){
+((function() {var o15 = (function(comma){
 return for_dash_each((function(arg){
 comma();
 return parse(arg,true);
 }),args);
 });
-var o14 = inline_dash_writer(",");
-return o13(o14);
+var o16 = inline_dash_writer(",");
+return o15(o16);
 }))();
 write(")");
 return terminate_dash_expr(expr_p_);
@@ -969,14 +967,14 @@ return write(code);
 });
 var write_dash_op = (function(op,vals,expr_p_,parse){
 write("(");
-((function() {var o15 = (function(op_dash_writer){
+((function() {var o17 = (function(op_dash_writer){
 return for_dash_each((function(arg){
 op_dash_writer();
 return parse(arg,true);
 }),vals);
 });
-var o16 = inline_dash_writer(str(" ",op," "));
-return o15(o16);
+var o18 = inline_dash_writer(str(" ",op," "));
+return o17(o18);
 }))();
 write(")");
 return terminate_dash_expr(expr_p_);
@@ -995,7 +993,7 @@ write_dash_string(cadr(el));
 return write(");");
 }),args);
 });
-return dict("\uFDD1write_dash_runtime",write_dash_runtime,"\uFDD1write_dash_number",write_dash_number,"\uFDD1write_dash_string",write_dash_string,"\uFDD1write_dash_boolean",write_dash_boolean,"\uFDD1write_dash_term",write_dash_term,"\uFDD1write_dash_symbol",write_dash_symbol,"\uFDD1write_dash_empty_dash_list",write_dash_empty_dash_list,"\uFDD1write_dash_set",write_dash_set,"\uFDD1write_dash_set_excl_",write_dash_set_excl_,"\uFDD1write_dash_if",write_dash_if,"\uFDD1write_dash_lambda",write_dash_lambda,"\uFDD1write_dash_func_dash_call",write_dash_func_dash_call,"\uFDD1write_dash_raw_dash_code",write_dash_raw_dash_code,"\uFDD1write_dash_require",write_dash_require,"\uFDD1write_dash_and",make_dash_op_dash_writer("&&"),"\uFDD1write_dash_or",make_dash_op_dash_writer("||"),"\uFDD1write_dash_add",make_dash_op_dash_writer("+"),"\uFDD1write_dash_subtract",make_dash_op_dash_writer("-"),"\uFDD1write_dash_multiply",make_dash_op_dash_writer("*"),"\uFDD1write_dash_divide",make_dash_op_dash_writer("/"),"\uFDD1write_dash_gt",make_dash_op_dash_writer(">"),"\uFDD1write_dash_lt",make_dash_op_dash_writer("<"),"\uFDD1write_dash_mod",make_dash_op_dash_writer("%"),"\uFDD1make_dash_fresh",make_dash_fresh,"\uFDD1get_dash_code",(function() {return code["join"]("");
+return dict("\uFDD1write-runtime",write_dash_runtime,"\uFDD1write-number",write_dash_number,"\uFDD1write-string",write_dash_string,"\uFDD1write-boolean",write_dash_boolean,"\uFDD1write-term",write_dash_term,"\uFDD1write-symbol",write_dash_symbol,"\uFDD1write-empty-list",write_dash_empty_dash_list,"\uFDD1write-set",write_dash_set,"\uFDD1write-set!",write_dash_set_excl_,"\uFDD1write-if",write_dash_if,"\uFDD1write-lambda",write_dash_lambda,"\uFDD1write-func-call",write_dash_func_dash_call,"\uFDD1write-raw-code",write_dash_raw_dash_code,"\uFDD1write-require",write_dash_require,"\uFDD1write-and",make_dash_op_dash_writer("&&"),"\uFDD1write-or",make_dash_op_dash_writer("||"),"\uFDD1write-add",make_dash_op_dash_writer("+"),"\uFDD1write-subtract",make_dash_op_dash_writer("-"),"\uFDD1write-multiply",make_dash_op_dash_writer("*"),"\uFDD1write-divide",make_dash_op_dash_writer("/"),"\uFDD1write-gt",make_dash_op_dash_writer(">"),"\uFDD1write-lt",make_dash_op_dash_writer("<"),"\uFDD1write-mod",make_dash_op_dash_writer("%"),"\uFDD1make-fresh",make_dash_fresh,"\uFDD1get-code",(function() {return code["join"]("");
 }));
 });
 module["exports"] = generator;

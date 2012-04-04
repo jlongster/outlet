@@ -70,13 +70,6 @@ return (acc + (function() {if(string_p_(el)) {return el;
 });
 var string_dash__gt_symbol = (function(str){
 return ((function() {var o1 = (function(s){
-s = s["replace"](RegExp("-","g"),"_dash_");
-s = s["replace"](RegExp("\\?","g"),"_p_");
-s = s["replace"](RegExp("\\!","g"),"_excl_");
-s = s["replace"](RegExp(">","g"),"_gt_");
-s = s["replace"](RegExp("<","g"),"_lt_");
-s = s["replace"](RegExp("%","g"),"_per_");
-s = s["replace"](RegExp("=","g"),"_eq_");
 return ("\uFDD1" + s);
 });
 var o2 = str;
@@ -85,13 +78,6 @@ return o1(o2);
 });
 var symbol_dash__gt_string = (function(sym){
 return ((function() {var o3 = (function(s){
-s = s["replace"](RegExp("_dash_","g"),"-");
-s = s["replace"](RegExp("_p_","g"),"?");
-s = s["replace"](RegExp("_excl_","g"),"!");
-s = s["replace"](RegExp("_gt_","g"),">");
-s = s["replace"](RegExp("_lt_","g"),"<");
-s = s["replace"](RegExp("_per_","g"),"%");
-s = s["replace"](RegExp("_eq_","g"),"=");
 return s;
 });
 var o4 = sym["substring"](1);

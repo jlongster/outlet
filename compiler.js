@@ -70,13 +70,6 @@ return (acc + (function() {if(string_p_(el)) {return el;
 });
 var string_dash__gt_symbol = (function(str){
 return ((function() {var o1 = (function(s){
-s = s["replace"](RegExp("-","g"),"_dash_");
-s = s["replace"](RegExp("\\?","g"),"_p_");
-s = s["replace"](RegExp("\\!","g"),"_excl_");
-s = s["replace"](RegExp(">","g"),"_gt_");
-s = s["replace"](RegExp("<","g"),"_lt_");
-s = s["replace"](RegExp("%","g"),"_per_");
-s = s["replace"](RegExp("=","g"),"_eq_");
 return ("\uFDD1" + s);
 });
 var o2 = str;
@@ -85,13 +78,6 @@ return o1(o2);
 });
 var symbol_dash__gt_string = (function(sym){
 return ((function() {var o3 = (function(s){
-s = s["replace"](RegExp("_dash_","g"),"-");
-s = s["replace"](RegExp("_p_","g"),"?");
-s = s["replace"](RegExp("_excl_","g"),"!");
-s = s["replace"](RegExp("_gt_","g"),">");
-s = s["replace"](RegExp("_lt_","g"),"<");
-s = s["replace"](RegExp("_per_","g"),"%");
-s = s["replace"](RegExp("_eq_","g"),"=");
 return s;
 });
 var o4 = sym["substring"](1);
@@ -819,7 +805,7 @@ return e(subform,e);
 }})()
 ;
 });
-install_dash_expander("\uFDD1define_dash_expander",(function(form,e){
+install_dash_expander("\uFDD1define-expander",(function(form,e){
 return ((function() {var o5 = (function(sig){
 return ((function() {var o7 = (function(name,arg_dash_names,body){
 install_dash_expander(name,make_dash_expander(arg_dash_names,body));
@@ -845,9 +831,9 @@ return (function() {if(vector_p_(o11)) {return vector_dash__gt_list(o11);
 });
 var o13 = body;
 return o12(o13);
-}))()),macro_dash_generator["make_dash_fresh"]()),__generator()));
+}))()),macro_dash_generator["make-fresh"]()),__generator()));
 });
-install_dash_expander("\uFDD1define_dash_macro",(function(form,e){
+install_dash_expander("\uFDD1define-macro",(function(form,e){
 return ((function() {var o14 = (function(sig){
 return ((function() {var o16 = (function(name,pattern,body){
 install_dash_macro(name,pattern,body);
@@ -870,7 +856,7 @@ return install_dash_expander(name,make_dash_macro(pattern,body));
 var make_dash_macro = (function(pattern,body){
 return ((function() {var o20 = (function(x,e){
 return ((function() {var o23 = (function(src){
-return eval(compile(src,macro_dash_generator["make_dash_fresh"]()));
+return eval(compile(src,macro_dash_generator["make-fresh"]()));
 });
 var o24 = list("\uFDD1lambda",list(x,e),list(e,list_dash_append(list("\uFDD1let",destructure(pattern,list("\uFDD1cdr",x),_emptylst)),((function() {var o26 = (function(o25){
 return (function() {if(vector_p_(o25)) {return vector_dash__gt_list(o25);
@@ -1241,7 +1227,7 @@ return (function() {if(symbol_p_(src)) {return ((function() {return list("\uFDD1
 }))();
 } else {return (function() {if(literal_p_(src)) {return ((function() {return src;
 }))();
-} else {return (function() {if(vector_p_(src)) {return ((function() {return list("\uFDD1list_dash__gt_vector",unquote_dash_splice_dash_expand(vector_dash__gt_list(src),e));
+} else {return (function() {if(vector_p_(src)) {return ((function() {return list("\uFDD1list->vector",unquote_dash_splice_dash_expand(vector_dash__gt_list(src),e));
 }))();
 } else {return (function() {if(dict_p_(src)) {return ((function() {return dict_dash_map((function(el){
 return (function() {if((list_p_(el) && eq_p_(car(src),"\uFDD1unquote"))) {return e(cadr(el),e);
@@ -1282,18 +1268,18 @@ return (function() {if(null_p_(item)) {return lst;
 var quote_dash_splice = (function(lst,lst_dash_acc,acc){
 return (function() {if(null_p_(lst)) {return list_dash_push(lst_dash_acc,acc);
 } else {return ((function() {var o97 = (function(el){
-return (function() {if((list_p_(el) && eq_p_(car(el),"\uFDD1unquote_dash_splicing"))) {return ((function() {var o99 = (function(src){
+return (function() {if((list_p_(el) && eq_p_(car(el),"\uFDD1unquote-splicing"))) {return ((function() {var o99 = (function(src){
 return quote_dash_splice(cdr(lst),cons(e(src,e),list_dash_push(lst_dash_acc,acc)),_emptylst);
 });
 var o100 = (function() {if(literal_p_(cadr(el))) {return ((function() {return list("\uFDD1list",cadr(el));
 }))();
-} else {return (function() {if(vector_p_(cadr(el))) {return ((function() {return list("\uFDD1vector_dash__gt_list",cadr(el));
+} else {return (function() {if(vector_p_(cadr(el))) {return ((function() {return list("\uFDD1vector->list",cadr(el));
 }))();
 } else {return (function() {if(dict_p_(cadr(el))) {return ((function() {pp(el);
 throw("cannot splice dict");
 }))();
 } else {return ((function() {return ((function() {var o101 = (function(v){
-return list("\uFDD1let",list(list(v,cadr(el))),list("\uFDD1if",list("\uFDD1vector_p_",v),list("\uFDD1vector_dash__gt_list",v),v));
+return list("\uFDD1let",list(list(v,cadr(el))),list("\uFDD1if",list("\uFDD1vector?",v),list("\uFDD1vector->list",v),v));
 });
 var o102 = gensym();
 return o101(o102);
@@ -1319,7 +1305,7 @@ return o97(o98);
 });
 return ((function() {var o103 = (function(res){
 return (function() {if(eq_p_(length(res),1)) {return car(res);
-} else {return cons("\uFDD1list_dash_append",reverse(res));
+} else {return cons("\uFDD1list-append",reverse(res));
 }})()
 ;
 });
@@ -1346,16 +1332,16 @@ return (symbol_p_(name) && not(eq_p_(dict_dash_ref(_natives_,name)),undefined));
 var verify_dash_not_dash_single = (function(form){
 return assert((length(form) > 1),str("form requires at least one operand:",inspect(form)));
 });
-install_dash_native("\uFDD1and","\uFDD1write_dash_and",verify_dash_not_dash_single);
-install_dash_native("\uFDD1or","\uFDD1write_dash_or",verify_dash_not_dash_single);
-install_dash_native("\uFDD1+","\uFDD1write_dash_add",verify_dash_not_dash_single);
-install_dash_native("\uFDD1_dash_","\uFDD1write_dash_subtract",verify_dash_not_dash_single);
-install_dash_native("\uFDD1*","\uFDD1write_dash_multiply",verify_dash_not_dash_single);
-install_dash_native("\uFDD1/","\uFDD1write_dash_divide",verify_dash_not_dash_single);
-install_dash_native("\uFDD1_gt_","\uFDD1write_dash_gt",verify_dash_not_dash_single);
-install_dash_native("\uFDD1_lt_","\uFDD1write_dash_lt",verify_dash_not_dash_single);
-install_dash_native("\uFDD1_per_","\uFDD1write_dash_mod",verify_dash_not_dash_single);
-install_dash_native("\uFDD1require","\uFDD1write_dash_require",(function(form){
+install_dash_native("\uFDD1and","\uFDD1write-and",verify_dash_not_dash_single);
+install_dash_native("\uFDD1or","\uFDD1write-or",verify_dash_not_dash_single);
+install_dash_native("\uFDD1+","\uFDD1write-add",verify_dash_not_dash_single);
+install_dash_native("\uFDD1-","\uFDD1write-subtract",verify_dash_not_dash_single);
+install_dash_native("\uFDD1*","\uFDD1write-multiply",verify_dash_not_dash_single);
+install_dash_native("\uFDD1/","\uFDD1write-divide",verify_dash_not_dash_single);
+install_dash_native("\uFDD1>","\uFDD1write-gt",verify_dash_not_dash_single);
+install_dash_native("\uFDD1<","\uFDD1write-lt",verify_dash_not_dash_single);
+install_dash_native("\uFDD1%","\uFDD1write-mod",verify_dash_not_dash_single);
+install_dash_native("\uFDD1require","\uFDD1write-require",(function(form){
 verify_dash_not_dash_single(form);
 return for_dash_each((function(el){
 return assert((list_p_(el) && eq_p_(length(el),2)),str("require needs a list of ","2 element lists: ",inspect(el)));
@@ -1365,13 +1351,13 @@ var parse = (function(form,generator){
 var expr_p_ = vector_dash__gt_list(Array.prototype.slice.call(arguments, 2));
 return ((function() {var o105 = (function(expr_p_,_per_parse){
 var parse_dash_literal = (function(form){
-return (function() {if(number_p_(form)) {return ((function() {return generator["write_dash_number"](form,not(expr_p_));
+return (function() {if(number_p_(form)) {return ((function() {return generator["write-number"](form,not(expr_p_));
 }))();
-} else {return (function() {if(string_p_(form)) {return ((function() {return generator["write_dash_string"](form,not(expr_p_));
+} else {return (function() {if(string_p_(form)) {return ((function() {return generator["write-string"](form,not(expr_p_));
 }))();
-} else {return (function() {if(boolean_p_(form)) {return ((function() {return generator["write_dash_boolean"](form,not(expr_p_));
+} else {return (function() {if(boolean_p_(form)) {return ((function() {return generator["write-boolean"](form,not(expr_p_));
 }))();
-} else {return (function() {if(null_p_(form)) {return ((function() {return generator["write_dash_empty_dash_list"](form,not(expr_p_));
+} else {return (function() {if(null_p_(form)) {return ((function() {return generator["write-empty-list"](form,not(expr_p_));
 }))();
 } else {return ((function() {throw(str("Invalid literal: ",inspect(form)));
 }))();
@@ -1387,14 +1373,14 @@ return (function() {if(number_p_(form)) {return ((function() {return generator["
 var parse_dash_set = (function(form){
 assert(not(expr_p_),str("set{!} cannot be an expression: ",inspect(form)));
 assert(symbol_p_(cadr(form)),"set{!} expects a symbol to operate on");
-return (function() {if(eq_p_(car(form),"\uFDD1set")) {return generator["write_dash_set"];
-} else {return generator["write_dash_set_excl_"];
+return (function() {if(eq_p_(car(form),"\uFDD1set")) {return generator["write-set"];
+} else {return generator["write-set!"];
 }})()
 (cadr(form),caddr(form),_per_parse);
 });
 var parse_dash_if = (function(form){
 assert((length(form) > 2),str("`if` has no branches: ",inspect(form)));
-return generator["write_dash_if"](cadr(form),caddr(form),expr_p_,_per_parse,(function() {if(null_p_(cdddr(form))) {return false;
+return generator["write-if"](cadr(form),caddr(form),expr_p_,_per_parse,(function() {if(null_p_(cdddr(form))) {return false;
 } else {return car(cdddr(form));
 }})()
 );
@@ -1402,7 +1388,7 @@ return generator["write_dash_if"](cadr(form),caddr(form),expr_p_,_per_parse,(fun
 var parse_dash_lambda = (function(form){
 assert((null_p_(cadr(form)) || list_p_(cadr(form)) || symbol_p_(cadr(form))),"lambda expects a list or symbol for arguments");
 return ((function() {var o108 = (function(args){
-return generator["write_dash_lambda"](args,cddr(form),expr_p_,_per_parse);
+return generator["write-lambda"](args,cddr(form),expr_p_,_per_parse);
 });
 var o109 = cadr(form);
 return o108(o109);
@@ -1411,7 +1397,7 @@ return o108(o109);
 var parse_dash_func_dash_call = (function(form){
 return ((function() {var o110 = (function(func){
 assert((symbol_p_(func) || list_p_(func)),str("operator is not a procedure: ",inspect(form)));
-return generator["write_dash_func_dash_call"](func,cdr(form),expr_p_,_per_parse);
+return generator["write-func-call"](func,cdr(form),expr_p_,_per_parse);
 });
 var o111 = car(form);
 return o110(o111);
@@ -1419,7 +1405,7 @@ return o110(o111);
 });
 var parse_dash_quoted = (function(form){
 return ((function() {var o112 = (function(src){
-return (function() {if(symbol_p_(src)) {return ((function() {return generator["write_dash_symbol"](src,not(expr_p_));
+return (function() {if(symbol_p_(src)) {return ((function() {return generator["write-symbol"](src,not(expr_p_));
 }))();
 } else {return (function() {if(literal_p_(src)) {return ((function() {return parse_dash_literal(src);
 }))();
@@ -1442,10 +1428,10 @@ return (function() {if(eq_p_(first,"\uFDD1if")) {return ((function() {return par
 }))();
 } else {return (function() {if(eq_p_(first,"\uFDD1quote")) {return ((function() {return parse_dash_quoted(form);
 }))();
-} else {return (function() {if((eq_p_(first,"\uFDD1set_excl_") || eq_p_(first,"\uFDD1set"))) {return ((function() {return parse_dash_set(form);
+} else {return (function() {if((eq_p_(first,"\uFDD1set!") || eq_p_(first,"\uFDD1set"))) {return ((function() {return parse_dash_set(form);
 }))();
-} else {return (function() {if(eq_p_(first,"\uFDD1_per_raw")) {return ((function() {assert(string_p_(cadr(form)),"%raw expects a string");
-return generator["write_dash_raw_dash_code"](cadr(form));
+} else {return (function() {if(eq_p_(first,"\uFDD1%raw")) {return ((function() {assert(string_p_(cadr(form)),"%raw expects a string");
+return generator["write-raw-code"](cadr(form));
 }))();
 } else {return (function() {if(native_p_(first)) {return ((function() {return native_dash_function(first)(form,generator,expr_p_,_per_parse);
 }))();
@@ -1491,7 +1477,7 @@ var o118 = 0;
 return o116(o117,o118);
 }))();
 });
-return (function() {if(symbol_p_(form)) {return ((function() {return generator["write_dash_term"](form,not(expr_p_));
+return (function() {if(symbol_p_(form)) {return ((function() {return generator["write-term"](form,not(expr_p_));
 }))();
 } else {return (function() {if(literal_p_(form)) {return ((function() {return parse_dash_literal(form);
 }))();
@@ -1537,7 +1523,7 @@ return parse(expand(form),generator);
 } else {return parse(expand(forms),generator);
 }})()
 ;
-return generator["get_dash_code"]();
+return generator["get-code"]();
 });
 var o122 = (function() {if(string_p_(src)) {return read(src);
 } else {return src;
@@ -1546,7 +1532,7 @@ var o122 = (function() {if(string_p_(src)) {return read(src);
 return o121(o122);
 }))();
 });
-module["exports"] = dict("\uFDD1read",read,"\uFDD1expand",expand,"\uFDD1parse",parse,"\uFDD1compile",compile,"\uFDD1install_dash_expander",install_dash_expander,"\uFDD1expand_dash_once",expand_dash_once,"\uFDD1expand_dash_nth",expand_dash_nth,"\uFDD1pp",pp,"\uFDD1set_dash_macro_dash_generator",(function(g){
+module["exports"] = dict("\uFDD1read",read,"\uFDD1expand",expand,"\uFDD1parse",parse,"\uFDD1compile",compile,"\uFDD1install-expander",install_dash_expander,"\uFDD1expand-once",expand_dash_once,"\uFDD1expand-nth",expand_dash_nth,"\uFDD1pp",pp,"\uFDD1set-macro-generator",(function(g){
 return (function() {if(not(macro_dash_generator)) {macro_dash_generator = g;
 } else {return false;
 }})()

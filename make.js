@@ -36,7 +36,7 @@ var srcfile = args[0];
 var src = fs.readFileSync(srcfile, 'utf-8');
 var js = js_generator();
 
-js.write_dash_runtime(opts.no_runtime ? 'no-runtime' :
+js['write-runtime'](opts.no_runtime ? 'no-runtime' :
                           (opts.with_eval ?
                            'js' :
                            'js-noeval'),

@@ -70,13 +70,6 @@ return (acc + (function() {if(string_p_(el)) {return el;
 });
 var string_dash__gt_symbol = (function(str){
 return ((function() {var o1 = (function(s){
-s = s["replace"](RegExp("-","g"),"_dash_");
-s = s["replace"](RegExp("\\?","g"),"_p_");
-s = s["replace"](RegExp("\\!","g"),"_excl_");
-s = s["replace"](RegExp(">","g"),"_gt_");
-s = s["replace"](RegExp("<","g"),"_lt_");
-s = s["replace"](RegExp("%","g"),"_per_");
-s = s["replace"](RegExp("=","g"),"_eq_");
 return ("\uFDD1" + s);
 });
 var o2 = str;
@@ -85,13 +78,6 @@ return o1(o2);
 });
 var symbol_dash__gt_string = (function(sym){
 return ((function() {var o3 = (function(s){
-s = s["replace"](RegExp("_dash_","g"),"-");
-s = s["replace"](RegExp("_p_","g"),"?");
-s = s["replace"](RegExp("_excl_","g"),"!");
-s = s["replace"](RegExp("_gt_","g"),">");
-s = s["replace"](RegExp("_lt_","g"),"<");
-s = s["replace"](RegExp("_per_","g"),"%");
-s = s["replace"](RegExp("_eq_","g"),"=");
 return s;
 });
 var o4 = sym["substring"](1);
@@ -742,11 +728,10 @@ var fs = require("fs");var compiler = require("./compiler");var boot = require("
 ;
 ((function() {var o1 = (function(filename){
 return ((function() {var o3 = (function(src,gen,comp,comp){
-gen["write_dash_runtime"]("js");
-comp["set_dash_macro_dash_generator"](gen);
+comp["set-macro-generator"](gen);
 return ((function() {var o8 = (function(f){
 comp["parse"](f,gen);
-return eval(gen["get_dash_code"]());
+return eval(gen["get-code"]());
 });
 var o9 = comp["expand"](comp["read"](src));
 return o8(o9);

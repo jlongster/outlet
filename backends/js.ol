@@ -84,22 +84,24 @@
 
       (define parts (obj.split "."))
 
-      ;; (set! obj (obj.replace (RegExp "-" "g") "_dash_"))
-      ;; (set! obj (obj.replace (RegExp "\\?" "g") "_p_"))
-      ;; (set! obj (obj.replace (RegExp "\\!" "g") "_excl_"))
-      ;; (set! obj (obj.replace (RegExp ">" "g") "_gt_"))
-      ;; (set! obj (obj.replace (RegExp "<" "g") "_lt_"))
-      ;; (set! obj (obj.replace (RegExp "%" "g") "_per_"))
-      ;; (set! obj (obj.replace (RegExp "=" "g") "_eq_"))
-
+      (let ((name (vector-ref parts 0)))
+        (set! name (name.replace (RegExp "-" "g") "_dash_"))
+        (set! name (name.replace (RegExp "\\?" "g") "_p_"))
+        (set! name (name.replace (RegExp "\\!" "g") "_excl_"))
+        (set! name (name.replace (RegExp ">" "g") "_gt_"))
+        (set! name (name.replace (RegExp "<" "g") "_lt_"))
+        (set! name (name.replace (RegExp "%" "g") "_per_"))
+        (set! name (name.replace (RegExp "=" "g") "_eq_"))
+        (write name))
+      
       ;; Convert dots to brackets:
       ;; foo.bar -> foo["bar"]
       ;; foo.bar.baz -> foo["bar"]["baz"]
-      (write (vector-ref parts 0))
       (vector-for-each
        (lambda (part)
          (write (str "[\"" part "\"]")))
        (vector-slice parts 1))
+      
       (terminate-expr (not top?))))
 
   (define (write-set lval rval parse)
