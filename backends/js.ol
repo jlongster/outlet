@@ -73,14 +73,24 @@
       (terminate-expr (not top?))))
 
   (define (write-symbol obj top?)
-    (write (+ "string_dash__gt_symbol(\"" obj.str "\")"))
+    (write (+ "\"\\uFDD1" (obj.substring 1) "\""))
     (terminate-expr (not top?)))
 
   (define (write-term obj top?)
-    (let ((obj (if (= obj 'var)
+    (let ((obj (if (== obj 'var)
                    '_var_
-                   obj)))
-      (write obj.str)
+                   obj))
+          (obj (obj.substring 1)))
+
+      ;; (set! obj (obj.replace (RegExp "-" "g") "_dash_"))
+      ;; (set! obj (obj.replace (RegExp "\\?" "g") "_p_"))
+      ;; (set! obj (obj.replace (RegExp "\\!" "g") "_excl_"))
+      ;; (set! obj (obj.replace (RegExp ">" "g") "_gt_"))
+      ;; (set! obj (obj.replace (RegExp "<" "g") "_lt_"))
+      ;; (set! obj (obj.replace (RegExp "%" "g") "_per_"))
+      ;; (set! obj (obj.replace (RegExp "=" "g") "_eq_"))
+      
+      (write obj)
       (terminate-expr (not top?))))
   
   (define (write-set lval rval parse)

@@ -30,13 +30,13 @@ return (function() {if(number_p_(obj)) {return ((function() {return string_dash_
 ;
 });
 var number_p_ = (function(obj){
-return eq_p_(typeof obj,"number");
+return _eq__eq_(typeof obj,"number");
 });
 var string_p_ = (function(obj){
-return eq_p_(typeof obj,"string");
+return (_eq__eq_(typeof obj,"string") && not(_eq__eq_(obj[0],"\uFDD1")));
 });
 var symbol_p_ = (function(obj){
-return (!!obj && obj.str !== undefined && obj.symbol !== undefined);
+return (_eq__eq_(typeof obj,"string") && _eq__eq_(obj[0],"\uFDD1"));
 });
 var boolean_p_ = (function(obj){
 return (eq_p_(obj,true) || eq_p_(obj,false));
@@ -77,7 +77,8 @@ s = s.replace(RegExp(">","g"),"_gt_");
 s = s.replace(RegExp("<","g"),"_lt_");
 s = s.replace(RegExp("%","g"),"_per_");
 s = s.replace(RegExp("=","g"),"_eq_");
-return {str:s, symbol:true}});
+return ("\uFDD1" + s);
+});
 var o2 = str;
 return o1(o2);
 }))();
@@ -93,7 +94,7 @@ s = s.replace(RegExp("_per_","g"),"%");
 s = s.replace(RegExp("_eq_","g"),"=");
 return s;
 });
-var o4 = sym.str;
+var o4 = sym.substring(1);
 return o3(o4);
 }))();
 });
@@ -181,15 +182,14 @@ return ((function() {var o10 = (function(access){
 return ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return false;
 } else {return (function() {if(_eq__eq_(access(car(lst)),val)) {return lst;
-} else {return vector("__tco_call",(function() {return loop(cdr(lst));
-}));
+} else {return loop(cdr(lst));
 }})()
 ;
 }})()
 ;
 });
 var o12 = lst;
-return trampoline(loop(o12));
+return loop(o12);
 }))();
 });
 var o11 = (function() {if(null_p_(rst)) {return (function(x){
@@ -210,15 +210,14 @@ return (function() {if(null_p_(lst)) {return _emptylst;
 var for_dash_each = (function(func,lst){
 return ((function() {var loop = (function(lst){
 return (function() {if(not(null_p_(lst))) {return ((function() {func(car(lst));
-return vector("__tco_call",(function() {return loop(cdr(lst));
-}));
+return loop(cdr(lst));
 }))();
 } else {return false;
 }})()
 ;
 });
 var o13 = lst;
-return trampoline(loop(o13));
+return loop(o13);
 }))();
 });
 var fold = (function(func,acc,lst){
@@ -247,15 +246,14 @@ var make_dash_vector = (function(count,val){
 return ((function() {var o15 = (function(v){
 return ((function() {var loop = (function(i){
 return (function() {if((i < count)) {return ((function() {vector_dash_put_excl_(v,i,val);
-return vector("__tco_call",(function() {return loop((i + 1));
-}));
+return loop((i + 1));
 }))();
 } else {return v;
 }})()
 ;
 });
 var o17 = 0;
-return trampoline(loop(o17));
+return loop(o17);
 }))();
 });
 var o16 = new Array(count);
@@ -276,8 +274,7 @@ return vec.push(obj)});
 var vector_dash_find = (function(vec,val){
 return ((function() {var loop = (function(i){
 return (function() {if((i < vec.length)) {return (function() {if(eq_p_(vector_dash_ref(vec,i),val)) {return i;
-} else {return vector("__tco_call",(function() {return loop((i + 1));
-}));
+} else {return loop((i + 1));
 }})()
 ;
 } else {return false;
@@ -285,7 +282,7 @@ return (function() {if((i < vec.length)) {return (function() {if(eq_p_(vector_da
 ;
 });
 var o18 = 0;
-return trampoline(loop(o18));
+return loop(o18);
 }))();
 });
 var vector_dash_length = (function(vec){
@@ -302,43 +299,40 @@ var vector_dash_map = (function(func,vec){
 var res = [];
 ((function() {var loop = (function(i){
 return (function() {if((i < vec.length)) {return ((function() {res.push(func(vector_dash_ref(vec,i)));
-return vector("__tco_call",(function() {return loop((i + 1));
-}));
+return loop((i + 1));
 }))();
 } else {return false;
 }})()
 ;
 });
 var o19 = 0;
-return trampoline(loop(o19));
+return loop(o19);
 }))();
 return res;
 });
 var vector_dash_for_dash_each = (function(func,vec){
 return ((function() {var loop = (function(i){
 return (function() {if((i < vec.length)) {return ((function() {func(vector_dash_ref(vec,i));
-return vector("__tco_call",(function() {return loop((i + 1));
-}));
+return loop((i + 1));
 }))();
 } else {return false;
 }})()
 ;
 });
 var o20 = 0;
-return trampoline(loop(o20));
+return loop(o20);
 }))();
 });
 var vector_dash_fold = (function(func,acc,vec){
 return ((function() {var loop = (function(i,acc){
-return (function() {if((i < vector_dash_length(vec))) {return vector("__tco_call",(function() {return loop((i + 1),func(vector_dash_ref(vec,i),acc));
-}));
+return (function() {if((i < vector_dash_length(vec))) {return loop((i + 1),func(vector_dash_ref(vec,i),acc));
 } else {return acc;
 }})()
 ;
 });
 var o21 = 0;
 var o22 = acc;
-return trampoline(loop(o21,o22));
+return loop(o21,o22);
 }))();
 });
 var dict = (function() {
@@ -347,8 +341,7 @@ var res = {};
 ((function() {var loop = (function(lst){
 return (function() {if(not(null_p_(lst))) {return ((function() {var o24 = (function(key,val){
 dict_dash_put_excl_(res,key,val);
-return vector("__tco_call",(function() {return loop(cddr(lst));
-}));
+return loop(cddr(lst));
 });
 var o25 = car(lst);
 var o26 = cadr(lst);
@@ -359,21 +352,20 @@ return o24(o25,o26);
 ;
 });
 var o23 = args;
-return trampoline(loop(o23));
+return loop(o23);
 }))();
 return res;
 });
 var dict_dash_put_excl_ = (function(dct,k,v){
-return dct[k.str] = v});
+return dct[k.substring(1)] = v});
 var dict_dash_ref = (function(dct,k){
-return dct[k.str]});
+return dct[k.substring(1)]});
 var dict_dash_map = (function(func,dct){
 var res = dict();
 ((function() {var loop = (function(lst){
 return (function() {if(not(null_p_(lst))) {return ((function() {var o28 = (function(k){
 dict_dash_put_excl_(res,k,func(dict_dash_ref(dct,k)));
-return vector("__tco_call",(function() {return loop(cdr(lst));
-}));
+return loop(cdr(lst));
 });
 var o29 = car(lst);
 return o28(o29);
@@ -383,7 +375,7 @@ return o28(o29);
 ;
 });
 var o27 = keys(dct);
-return trampoline(loop(o27));
+return loop(o27);
 }))();
 return res;
 });
@@ -406,15 +398,14 @@ var res = vector();
 ((function() {var loop = (function(lst){
 return (function() {if(not(null_p_(lst))) {return ((function() {vector_dash_push_excl_(res,car(lst));
 vector_dash_push_excl_(res,dict_dash_ref(dct,car(lst)));
-return vector("__tco_call",(function() {return loop(cdr(lst));
-}));
+return loop(cdr(lst));
 }))();
 } else {return false;
 }})()
 ;
 });
 var o32 = keys(dct);
-return trampoline(loop(o32));
+return loop(o32);
 }))();
 return res;
 });
@@ -440,8 +431,7 @@ var zip = (function(keys,vals){
 var res = dict();
 ((function() {var loop = (function(ks,vs){
 return (function() {if(not(null_p_(ks))) {return ((function() {dict_dash_put_excl_(res,car(ks),car(vs));
-return vector("__tco_call",(function() {return loop(cdr(ks),cdr(vs));
-}));
+return loop(cdr(ks),cdr(vs));
 }))();
 } else {return false;
 }})()
@@ -449,7 +439,7 @@ return vector("__tco_call",(function() {return loop(cdr(ks),cdr(vs));
 });
 var o35 = keys;
 var o36 = vals;
-return trampoline(loop(o35,o36));
+return loop(o35,o36);
 }))();
 return res;
 });
@@ -457,9 +447,7 @@ var not = (function(obj){
 return (typeof obj !== 'number' && !obj);
 });
 var _eq__eq_ = (function(obj1,obj2){
-return (function() {if((symbol_p_(obj1) && symbol_p_(obj2))) {return obj1.str === obj2.str} else {return obj1 === obj2}})()
-;
-});
+return obj1 === obj2});
 var _eq_ = (function(obj1,obj2){
 return (function() {if((list_p_(obj1) && list_p_(obj2))) {return ((function() {return ((function() {var loop = (function(lst1,lst2){
 var n1 = null_p_(lst1);
@@ -505,8 +493,7 @@ return loop(o39);
 } else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {return ((function() {var o40 = (function(keys1,keys2){
 return (eq_p_(length(keys1),length(keys2)) && ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return true;
-} else {return (function() {if(equal_p_(dict_dash_ref(obj1,car(lst)),dict_dash_ref(obj2,car(lst)))) {return vector("__tco_call",(function() {return loop(cdr(lst));
-}));
+} else {return (function() {if(equal_p_(dict_dash_ref(obj1,car(lst)),dict_dash_ref(obj2,car(lst)))) {return loop(cdr(lst));
 } else {return false;
 }})()
 ;
@@ -514,7 +501,7 @@ return (function() {if(null_p_(lst)) {return true;
 ;
 });
 var o43 = keys1;
-return trampoline(loop(o43));
+return loop(o43);
 }))());
 });
 var o41 = keys(obj1);

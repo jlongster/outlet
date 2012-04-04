@@ -14,15 +14,15 @@
    ((dict? obj) 'dict)))
 
 (define (number? obj)
-  (eq? (%raw "typeof obj") "number"))
+  (== (%raw "typeof obj") "number"))
 
 (define (string? obj)
-  (eq? (%raw "typeof obj") "string"))
+  (and (== (%raw "typeof obj") "string")
+       (not (== (%raw "obj[0]") (%raw "\"\\uFDD1\"")))))
 
 (define (symbol? obj)
-  (and (%raw "!!obj")
-       (%raw "obj.str !== undefined")
-       (%raw "obj.symbol !== undefined")))
+  (and (== (%raw "typeof obj") "string")
+       (== (%raw "obj[0]") (%raw "\"\\uFDD1\""))))
 
 (define (boolean? obj)
   (or (eq? obj (%raw "true"))
@@ -81,10 +81,10 @@
     (set! s (s.replace (RegExp "%" "g") "_per_"))
     (set! s (s.replace (RegExp "=" "g") "_eq_"))
     ;; raw code so that the compiler doesn't see this as a symbol
-    (%raw "{str:s, symbol:true}")))
+    (+ (%raw "\"\\uFDD1\"") s)))
 
 (define (symbol->string sym)
-  (let ((s sym.str))
+  (let ((s (sym.substring 1)))
     (set! s (s.replace (RegExp "_dash_" "g") "-"))
     (set! s (s.replace (RegExp "_p_" "g") "?"))
     (set! s (s.replace (RegExp "_excl_" "g") "!"))
@@ -271,10 +271,10 @@
     res))
 
 (define (dict-put! dct k v)
-  (%raw "dct[k.str] = v"))
+  (%raw "dct[k.substring(1)] = v"))
 
 (define (dict-ref dct k)
-  (%raw "dct[k.str]"))
+  (%raw "dct[k.substring(1)]"))
 
 (define (dict-map func dct)
   (define res {})
@@ -337,9 +337,7 @@
 ;; equality
 
 (define (== obj1 obj2)
-  (if (and (symbol? obj1) (symbol? obj2))
-      (%raw "obj1.str === obj2.str")
-      (%raw "obj1 === obj2")))
+  (%raw "obj1 === obj2"))
 
 (define (= obj1 obj2)
   (cond
@@ -403,6 +401,7 @@
   (println (inspect obj)))
 
 (define (%inspect-non-sequence obj)
+  ;;(console.log "%inspect-non-sequence: " obj)
   (cond
    ((number? obj) (+ "" obj))
    ((string? obj)
@@ -427,6 +426,7 @@
                                         (cons obj parents)))))))
 
 (define (%space obj)
+  ;;(console.log "%space: " (util.inspect obj))
   (%recur-protect
    obj
    #f
@@ -450,6 +450,7 @@
    (vector-length "<circular>")))
 
 (define (inspect obj . rest)
+  ;;(console.log "inspect: " obj)
   (let ((no-newlines (if (null? rest) #f (car rest))))
     (%recur-protect
      obj
