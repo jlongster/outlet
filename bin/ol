@@ -73,10 +73,10 @@ else {
     var js = js_backend();
 
     if(compiler_path) {
-        js.write_dash_runtime(rt, compiler_path);
+        js['write-runtime'](rt, compiler_path);
     }
     else {
-        js.write_dash_runtime(rt);
+        js['write-runtime'](rt);
     }
 
     var output = compiler.compile(src, js);

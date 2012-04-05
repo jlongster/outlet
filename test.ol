@@ -2,8 +2,7 @@
          (compiler "./compiler")
          (boot "./boot/compiler")
          (util "util")
-         (js "./backends/js")
-         (trace "./trace"))
+         (js "./backends/js"))
 
 (if (< process.argv.length 3)
     (throw "must pass a filename"))
@@ -18,17 +17,19 @@
         ;; current compiler and using `read` will compare the results
         (comp (if (= filename "syntax.ol")
                   boot
-                  compiler)))
+                  compiler))
+
+        ;; just kidding, always use the current compiler
+        (comp compiler))
       
+    ;; if dumping to an external file, need to write the runtime
+    ;;(gen.write-runtime "js")
 
-      ;; if dumping to an external file, need to write the runtime
-      ;; (gen.write-runtime "js")
+    (comp.set-macro-generator gen)
 
-      (comp.set-macro-generator gen)
-
-      (let ((f (comp.expand (read src))))
-        ;;(pp f)
-        (comp.parse f gen)
-        ((%raw "eval") (gen.get-code))
-        ;;(display (gen.get-code))
-        )))
+    (let ((f (comp.expand (comp.read src))))
+      ;;(pp f)
+      (comp.parse f gen)
+      ((%raw "eval") (gen.get-code))
+      ;;(println (gen.get-code))
+      )))

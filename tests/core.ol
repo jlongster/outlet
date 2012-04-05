@@ -5,11 +5,11 @@
          (res (,hook ,src)))
      (if (not (comp res ,val))
          (throw (str "FAILURE with " (inspect ',hook) ": "
-                     (inspect ,src)
+                     (util.inspect ,src)
                      " got "
-                     (inspect res)
+                     (util.inspect res)
                      " but expected "
-                     (inspect ,val))))))
+                     (util.inspect ,val))))))
 
 (define-macro (test-read src val . args)
   `(%test read ,src ,val ,@args))
@@ -219,7 +219,7 @@
 (test-eval (== {:one 1} {:one 1}) #f)
 (test-assert (= {:one 1} {:one 1}))
 
-;; types
+;; ;; types
 
 (define-macro (ensure-type val truthy)
   (cons 'begin
