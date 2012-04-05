@@ -367,22 +367,22 @@ return not(x);
 var self_dash_evaluating_p_ = literal_p_;
 var variable_p_ = symbol_p_;
 var quoted_p_ = (function(expr){
-return eq_p_(car(expr),string_dash__gt_symbol("quote"));
+return eq_p_(car(expr),"\uFDD1quote");
 });
 var assignment_p_ = (function(expr){
-return eq_p_(car(expr),string_dash__gt_symbol("set_excl_"));
+return eq_p_(car(expr),"\uFDD1set!");
 });
 var definition_p_ = (function(expr){
-return eq_p_(car(expr),string_dash__gt_symbol("define"));
+return eq_p_(car(expr),"\uFDD1define");
 });
 var if_p_ = (function(expr){
-return eq_p_(car(expr),string_dash__gt_symbol("if"));
+return eq_p_(car(expr),"\uFDD1if");
 });
 var lambda_p_ = (function(expr){
-return eq_p_(car(expr),string_dash__gt_symbol("lambda"));
+return eq_p_(car(expr),"\uFDD1lambda");
 });
 var begin_p_ = (function(expr){
-return eq_p_(car(expr),string_dash__gt_symbol("begin"));
+return eq_p_(car(expr),"\uFDD1begin");
 });
 var application_p_ = list_p_;
 var text_dash_of_dash_quotation = (function(expr){
@@ -391,7 +391,7 @@ return cadr(expr);
 var assignment_dash_variable = cadr;
 var assignment_dash_value = caddr;
 var make_dash_lambda = (function(args,body){
-return cons(string_dash__gt_symbol("lambda"),cons(args,body));
+return cons("\uFDD1lambda",cons(args,body));
 });
 var definition_dash_variable = (function(expr){
 return (function() {if(symbol_p_(cadr(expr))) {return cadr(expr);
@@ -434,9 +434,9 @@ var always_dash_should_dash_break = false;
 var should_dash_break = false;
 var breakpoint = (function(exp){
 return (function() {if((always_dash_should_dash_break || should_dash_break)) {return ((function() {should_dash_break = false;
-return list(list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("exp"),list(string_dash__gt_symbol("const"),exp)),list(string_dash__gt_symbol("break")));
+return list(list("\uFDD1assign","\uFDD1exp",list("\uFDD1const",exp)),list("\uFDD1break"));
 }))();
-} else {return list(list(string_dash__gt_symbol("nop")));
+} else {return list(list("\uFDD1nop"));
 }})()
 ;
 });
@@ -485,7 +485,7 @@ return append_dash_seq_dash_list(seqs);
 var preserving = (function(regs,seq1,seq2){
 return (function() {if(null_p_(regs)) {return append_dash_instruction_dash_sequences(seq1,seq2);
 } else {return ((function() {var o1 = (function(first_dash_reg){
-return (function() {if((needs_dash_register_p_(seq2,first_dash_reg) && modifies_dash_register_p_(seq1,first_dash_reg))) {return preserving(cdr(regs),make_dash_instruction_dash_sequence(list_dash_union(list(first_dash_reg),registers_dash_needed(seq1)),list_dash_difference(registers_dash_modified(seq1),list(first_dash_reg)),list_dash_append(list(list(string_dash__gt_symbol("save"),first_dash_reg)),list_dash_append(statements(seq1),list(list(string_dash__gt_symbol("restore"),first_dash_reg))))),seq2);
+return (function() {if((needs_dash_register_p_(seq2,first_dash_reg) && modifies_dash_register_p_(seq1,first_dash_reg))) {return preserving(cdr(regs),make_dash_instruction_dash_sequence(list_dash_union(list(first_dash_reg),registers_dash_needed(seq1)),list_dash_difference(registers_dash_modified(seq1),list(first_dash_reg)),list_dash_append(list(list("\uFDD1save",first_dash_reg)),list_dash_append(statements(seq1),list(list("\uFDD1restore",first_dash_reg))))),seq2);
 } else {return preserving(cdr(regs),seq1,seq2);
 }})()
 ;
@@ -571,45 +571,45 @@ var o10 = last_dash_frame(global_dash_environment);
 return o9(o10);
 }))();
 });
-var primitive_dash_procedures = dict(string_dash__gt_symbol("car"),car,string_dash__gt_symbol("cdr"),cdr,string_dash__gt_symbol("cons"),cons,string_dash__gt_symbol("list"),list,string_dash__gt_symbol("null_p_"),null_p_,string_dash__gt_symbol("pp"),pp,string_dash__gt_symbol("+"),(function(x,y){
+var primitive_dash_procedures = dict("\uFDD1car",car,"\uFDD1cdr",cdr,"\uFDD1cons",cons,"\uFDD1list",list,"\uFDD1null?",null_p_,"\uFDD1pp",pp,"\uFDD1+",(function(x,y){
 return (x + y);
-}),string_dash__gt_symbol("_dash_"),(function(x,y){
+}),"\uFDD1-",(function(x,y){
 return (x - y);
-}),string_dash__gt_symbol("*"),(function(x,y){
+}),"\uFDD1*",(function(x,y){
 return (x * y);
-}),string_dash__gt_symbol("_gt_"),(function(x,y){
+}),"\uFDD1>",(function(x,y){
 return (x > y);
-}),string_dash__gt_symbol("_lt_"),(function(x,y){
+}),"\uFDD1<",(function(x,y){
 return (x < y);
-}),string_dash__gt_symbol("_eq__eq_"),_eq__eq_);
+}),"\uFDD1==",_eq__eq_);
 var primitive_dash_procedure_dash_names = (function() {return keys(primitive_dash_procedures);
 });
 var primitive_dash_procedure_dash_objects = (function() {return map(make_dash_primitive_dash_procedure,vals(primitive_dash_procedures));
 });
 var make_dash_primitive_dash_procedure = (function(proc){
-return list(string_dash__gt_symbol("primitive"),proc);
+return list("\uFDD1primitive",proc);
 });
 var primitive_dash_procedure_p_ = (function(proc){
-return eq_p_(car(proc),string_dash__gt_symbol("primitive"));
+return eq_p_(car(proc),"\uFDD1primitive");
 });
 var primitive_dash_implementation = cadr;
 var apply_dash_primitive_dash_procedure = (function(proc,args){
 return apply(primitive_dash_implementation(proc),args);
 });
 var make_dash_compiled_dash_procedure = (function(entry,env){
-return list(string_dash__gt_symbol("compiled_dash_procedure"),entry,env);
+return list("\uFDD1compiled-procedure",entry,env);
 });
 var compiled_dash_procedure_p_ = (function(proc){
-return eq_p_(car(proc),string_dash__gt_symbol("compiled_dash_procedure"));
+return eq_p_(car(proc),"\uFDD1compiled-procedure");
 });
 var compiled_dash_procedure_dash_entry = cadr;
 var compiled_dash_procedure_dash_env = caddr;
 var compile_dash_linkage = (function(linkage){
-return (function() {if(eq_p_(linkage,string_dash__gt_symbol("return"))) {return ((function() {return make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("continue")),_emptylst,list(list(string_dash__gt_symbol("goto"),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("continue")))));
+return (function() {if(eq_p_(linkage,"\uFDD1return")) {return ((function() {return make_dash_instruction_dash_sequence(list("\uFDD1continue"),_emptylst,list(list("\uFDD1goto",list("\uFDD1reg","\uFDD1continue"))));
 }))();
-} else {return (function() {if(eq_p_(linkage,string_dash__gt_symbol("next"))) {return ((function() {return empty_dash_instruction_dash_sequence();
+} else {return (function() {if(eq_p_(linkage,"\uFDD1next")) {return ((function() {return empty_dash_instruction_dash_sequence();
 }))();
-} else {return ((function() {return make_dash_instruction_dash_sequence(_emptylst,_emptylst,list(list(string_dash__gt_symbol("goto"),list(string_dash__gt_symbol("label"),linkage))));
+} else {return ((function() {return make_dash_instruction_dash_sequence(_emptylst,_emptylst,list(list("\uFDD1goto",list("\uFDD1label",linkage))));
 }))();
 }})()
 ;
@@ -617,7 +617,7 @@ return (function() {if(eq_p_(linkage,string_dash__gt_symbol("return"))) {return 
 ;
 });
 var end_dash_with_dash_linkage = (function(linkage,instruction_dash_sequence){
-return preserving(list(string_dash__gt_symbol("continue")),instruction_dash_sequence,compile_dash_linkage(linkage));
+return preserving(list("\uFDD1continue"),instruction_dash_sequence,compile_dash_linkage(linkage));
 });
 var compile_dash_self_dash_evaluating = (function(exp,target,linkage){
 return end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(_emptylst,list(target),list_dash_append(((function() {var o12 = (function(o11){
@@ -628,7 +628,7 @@ return (function() {if(vector_p_(o11)) {return vector_dash__gt_list(o11);
 });
 var o13 = breakpoint(exp);
 return o12(o13);
-}))(),list(list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("const"),exp))))));
+}))(),list(list("\uFDD1assign",target,list("\uFDD1const",exp))))));
 });
 var compile_dash_quoted = (function(exp,target,linkage){
 return end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(_emptylst,list(target),list_dash_append(((function() {var o15 = (function(o14){
@@ -639,10 +639,10 @@ return (function() {if(vector_p_(o14)) {return vector_dash__gt_list(o14);
 });
 var o16 = breakpoint(exp);
 return o15(o16);
-}))(),list(list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("const"),text_dash_of_dash_quotation(exp)))))));
+}))(),list(list("\uFDD1assign",target,list("\uFDD1const",text_dash_of_dash_quotation(exp)))))));
 });
 var compile_dash_variable = (function(exp,target,linkage){
-return end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("env")),list(target),list_dash_append(((function() {var o18 = (function(o17){
+return end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(list("\uFDD1env"),list(target),list_dash_append(((function() {var o18 = (function(o17){
 return (function() {if(vector_p_(o17)) {return vector_dash__gt_list(o17);
 } else {return o17;
 }})()
@@ -650,11 +650,11 @@ return (function() {if(vector_p_(o17)) {return vector_dash__gt_list(o17);
 });
 var o19 = breakpoint(exp);
 return o18(o19);
-}))(),list(list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("op"),string_dash__gt_symbol("lookup_dash_variable_dash_value")),list(string_dash__gt_symbol("const"),exp),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("env")))))));
+}))(),list(list("\uFDD1assign",target,list("\uFDD1op","\uFDD1lookup-variable-value"),list("\uFDD1const",exp),list("\uFDD1reg","\uFDD1env"))))));
 });
 var compile_dash_assignment = (function(exp,target,linkage){
 return ((function() {var o20 = (function(_var_,value_dash_code){
-return end_dash_with_dash_linkage(linkage,preserving(list(string_dash__gt_symbol("env")),value_dash_code,make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("env"),string_dash__gt_symbol("val")),list(target),list_dash_append(((function() {var o24 = (function(o23){
+return end_dash_with_dash_linkage(linkage,preserving(list("\uFDD1env"),value_dash_code,make_dash_instruction_dash_sequence(list("\uFDD1env","\uFDD1val"),list(target),list_dash_append(((function() {var o24 = (function(o23){
 return (function() {if(vector_p_(o23)) {return vector_dash__gt_list(o23);
 } else {return o23;
 }})()
@@ -662,16 +662,16 @@ return (function() {if(vector_p_(o23)) {return vector_dash__gt_list(o23);
 });
 var o25 = breakpoint(exp);
 return o24(o25);
-}))(),list(list(string_dash__gt_symbol("perform"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("set_dash_variable_dash_value_excl_")),list(string_dash__gt_symbol("const"),_var_),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("env"))),list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("const"),string_dash__gt_symbol("ok"))))))));
+}))(),list(list("\uFDD1perform",list("\uFDD1op","\uFDD1set-variable-value!"),list("\uFDD1const",_var_),list("\uFDD1reg","\uFDD1val"),list("\uFDD1reg","\uFDD1env")),list("\uFDD1assign",target,list("\uFDD1const","\uFDD1ok")))))));
 });
 var o21 = assignment_dash_variable(exp);
-var o22 = compile(assignment_dash_value(exp),string_dash__gt_symbol("val"),string_dash__gt_symbol("next"));
+var o22 = compile(assignment_dash_value(exp),"\uFDD1val","\uFDD1next");
 return o20(o21,o22);
 }))();
 });
 var compile_dash_definition = (function(exp,target,linkage){
 return ((function() {var o26 = (function(_var_,value_dash_code){
-return end_dash_with_dash_linkage(linkage,preserving(list(string_dash__gt_symbol("env")),value_dash_code,make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("env"),string_dash__gt_symbol("val")),list(target),list_dash_append(((function() {var o30 = (function(o29){
+return end_dash_with_dash_linkage(linkage,preserving(list("\uFDD1env"),value_dash_code,make_dash_instruction_dash_sequence(list("\uFDD1env","\uFDD1val"),list(target),list_dash_append(((function() {var o30 = (function(o29){
 return (function() {if(vector_p_(o29)) {return vector_dash__gt_list(o29);
 } else {return o29;
 }})()
@@ -679,16 +679,16 @@ return (function() {if(vector_p_(o29)) {return vector_dash__gt_list(o29);
 });
 var o31 = breakpoint(exp);
 return o30(o31);
-}))(),list(list(string_dash__gt_symbol("perform"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("define_dash_variable_excl_")),list(string_dash__gt_symbol("const"),_var_),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("env"))),list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("const"),string_dash__gt_symbol("ok"))))))));
+}))(),list(list("\uFDD1perform",list("\uFDD1op","\uFDD1define-variable!"),list("\uFDD1const",_var_),list("\uFDD1reg","\uFDD1val"),list("\uFDD1reg","\uFDD1env")),list("\uFDD1assign",target,list("\uFDD1const","\uFDD1ok")))))));
 });
 var o27 = definition_dash_variable(exp);
-var o28 = compile(definition_dash_value(exp),string_dash__gt_symbol("val"),string_dash__gt_symbol("next"));
+var o28 = compile(definition_dash_value(exp),"\uFDD1val","\uFDD1next");
 return o26(o27,o28);
 }))();
 });
 var compile_dash_if = (function(exp,target,linkage){
 return ((function() {var o32 = (function(t_dash_branch,f_dash_branch,after_dash_if,consequent_dash_linkage,p_dash_code,c_dash_code,a_dash_code){
-return preserving(list(string_dash__gt_symbol("env"),string_dash__gt_symbol("continue")),p_dash_code,append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("val")),_emptylst,list_dash_append(((function() {var o41 = (function(o40){
+return preserving(list("\uFDD1env","\uFDD1continue"),p_dash_code,append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(list("\uFDD1val"),_emptylst,list_dash_append(((function() {var o41 = (function(o40){
 return (function() {if(vector_p_(o40)) {return vector_dash__gt_list(o40);
 } else {return o40;
 }})()
@@ -696,16 +696,16 @@ return (function() {if(vector_p_(o40)) {return vector_dash__gt_list(o40);
 });
 var o42 = breakpoint(exp);
 return o41(o42);
-}))(),list(list(string_dash__gt_symbol("test"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("false_p_")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val"))),list(string_dash__gt_symbol("branch"),list(string_dash__gt_symbol("label"),f_dash_branch))))),parallel_dash_instruction_dash_sequences(append_dash_instruction_dash_sequences(t_dash_branch,c_dash_code),append_dash_instruction_dash_sequences(f_dash_branch,a_dash_code)),after_dash_if));
+}))(),list(list("\uFDD1test",list("\uFDD1op","\uFDD1false?"),list("\uFDD1reg","\uFDD1val")),list("\uFDD1branch",list("\uFDD1label",f_dash_branch))))),parallel_dash_instruction_dash_sequences(append_dash_instruction_dash_sequences(t_dash_branch,c_dash_code),append_dash_instruction_dash_sequences(f_dash_branch,a_dash_code)),after_dash_if));
 });
-var o33 = make_dash_label(string_dash__gt_symbol("true_dash_branch"));
-var o34 = make_dash_label(string_dash__gt_symbol("false_dash_branch"));
-var o35 = make_dash_label(string_dash__gt_symbol("after_dash_if"));
-var o36 = (function() {if(eq_p_(linkage,string_dash__gt_symbol("next"))) {return o35;
+var o33 = make_dash_label("\uFDD1true-branch");
+var o34 = make_dash_label("\uFDD1false-branch");
+var o35 = make_dash_label("\uFDD1after-if");
+var o36 = (function() {if(eq_p_(linkage,"\uFDD1next")) {return o35;
 } else {return linkage;
 }})()
 ;
-var o37 = compile(if_dash_predicate(exp),string_dash__gt_symbol("val"),string_dash__gt_symbol("next"));
+var o37 = compile(if_dash_predicate(exp),"\uFDD1val","\uFDD1next");
 var o38 = compile(if_dash_consequent(exp),target,o36);
 var o39 = compile(if_dash_alternative(exp),target,linkage);
 return o32(o33,o34,o35,o36,o37,o38,o39);
@@ -713,13 +713,13 @@ return o32(o33,o34,o35,o36,o37,o38,o39);
 });
 var compile_dash_sequence = (function(seq,target,linkage){
 return (function() {if(last_dash_exp_p_(seq)) {return compile(first_dash_exp(seq),target,linkage);
-} else {return preserving(list(string_dash__gt_symbol("env"),string_dash__gt_symbol("continue")),compile(first_dash_exp(seq),target,string_dash__gt_symbol("next")),compile_dash_sequence(rest_dash_exps(seq),target,linkage));
+} else {return preserving(list("\uFDD1env","\uFDD1continue"),compile(first_dash_exp(seq),target,"\uFDD1next"),compile_dash_sequence(rest_dash_exps(seq),target,linkage));
 }})()
 ;
 });
 var compile_dash_lambda = (function(exp,target,linkage){
 return ((function() {var o43 = (function(proc_dash_entry,after_dash_lambda,lambda_dash_linkage){
-return append_dash_instruction_dash_sequences(tack_dash_on_dash_instruction_dash_sequence(end_dash_with_dash_linkage(lambda_dash_linkage,make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("env")),list(target),list_dash_append(((function() {var o48 = (function(o47){
+return append_dash_instruction_dash_sequences(tack_dash_on_dash_instruction_dash_sequence(end_dash_with_dash_linkage(lambda_dash_linkage,make_dash_instruction_dash_sequence(list("\uFDD1env"),list(target),list_dash_append(((function() {var o48 = (function(o47){
 return (function() {if(vector_p_(o47)) {return vector_dash__gt_list(o47);
 } else {return o47;
 }})()
@@ -727,11 +727,11 @@ return (function() {if(vector_p_(o47)) {return vector_dash__gt_list(o47);
 });
 var o49 = breakpoint(exp);
 return o48(o49);
-}))(),list(list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("op"),string_dash__gt_symbol("make_dash_compiled_dash_procedure")),list(string_dash__gt_symbol("label"),proc_dash_entry),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("env"))))))),compile_dash_lambda_dash_body(exp,proc_dash_entry)),after_dash_lambda);
+}))(),list(list("\uFDD1assign",target,list("\uFDD1op","\uFDD1make-compiled-procedure"),list("\uFDD1label",proc_dash_entry),list("\uFDD1reg","\uFDD1env")))))),compile_dash_lambda_dash_body(exp,proc_dash_entry)),after_dash_lambda);
 });
-var o44 = make_dash_label(string_dash__gt_symbol("entry"));
-var o45 = make_dash_label(string_dash__gt_symbol("after_dash_lambda"));
-var o46 = (function() {if(eq_p_(linkage,string_dash__gt_symbol("next"))) {return o45;
+var o44 = make_dash_label("\uFDD1entry");
+var o45 = make_dash_label("\uFDD1after-lambda");
+var o46 = (function() {if(eq_p_(linkage,"\uFDD1next")) {return o45;
 } else {return linkage;
 }})()
 ;
@@ -740,7 +740,7 @@ return o43(o44,o45,o46);
 });
 var compile_dash_lambda_dash_body = (function(exp,proc_dash_entry){
 return ((function() {var o50 = (function(formals){
-return append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("env"),string_dash__gt_symbol("proc"),string_dash__gt_symbol("arg1")),list(string_dash__gt_symbol("env")),list(proc_dash_entry,list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("env"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("compiled_dash_procedure_dash_env")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("proc"))),list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("env"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("extend_dash_environment")),list(string_dash__gt_symbol("const"),formals),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("arg1")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("env"))))),compile_dash_sequence(lambda_dash_body(exp),string_dash__gt_symbol("val"),string_dash__gt_symbol("return")));
+return append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(list("\uFDD1env","\uFDD1proc","\uFDD1arg1"),list("\uFDD1env"),list(proc_dash_entry,list("\uFDD1assign","\uFDD1env",list("\uFDD1op","\uFDD1compiled-procedure-env"),list("\uFDD1reg","\uFDD1proc")),list("\uFDD1assign","\uFDD1env",list("\uFDD1op","\uFDD1extend-environment"),list("\uFDD1const",formals),list("\uFDD1reg","\uFDD1arg1"),list("\uFDD1reg","\uFDD1env")))),compile_dash_sequence(lambda_dash_body(exp),"\uFDD1val","\uFDD1return"));
 });
 var o51 = lambda_dash_parameters(exp);
 return o50(o51);
@@ -748,26 +748,26 @@ return o50(o51);
 });
 var compile_dash_application = (function(exp,target,linkage){
 return ((function() {var o52 = (function(bp,proc_dash_code,operand_dash_codes){
-return preserving(list(string_dash__gt_symbol("env"),string_dash__gt_symbol("continue")),proc_dash_code,preserving(list(string_dash__gt_symbol("proc"),string_dash__gt_symbol("continue")),construct_dash_arglist(operand_dash_codes),append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(_emptylst,_emptylst,bp),compile_dash_procedure_dash_call(exp,target,linkage))));
+return preserving(list("\uFDD1env","\uFDD1continue"),proc_dash_code,preserving(list("\uFDD1proc","\uFDD1continue"),construct_dash_arglist(operand_dash_codes),append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(_emptylst,_emptylst,bp),compile_dash_procedure_dash_call(exp,target,linkage))));
 });
 var o53 = breakpoint(exp);
-var o54 = compile(operator(exp),string_dash__gt_symbol("proc"),string_dash__gt_symbol("next"));
+var o54 = compile(operator(exp),"\uFDD1proc","\uFDD1next");
 var o55 = map((function(operand){
-return compile(operand,string_dash__gt_symbol("val"),string_dash__gt_symbol("next"));
+return compile(operand,"\uFDD1val","\uFDD1next");
 }),operands(exp));
 return o52(o53,o54,o55);
 }))();
 });
 var construct_dash_arglist = (function(operand_dash_codes){
 return ((function() {var o56 = (function(operand_dash_codes){
-return (function() {if(null_p_(operand_dash_codes)) {return make_dash_instruction_dash_sequence(_emptylst,list(string_dash__gt_symbol("arg1")),list(list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("arg1"),list(string_dash__gt_symbol("const"),_emptylst))));
+return (function() {if(null_p_(operand_dash_codes)) {return make_dash_instruction_dash_sequence(_emptylst,list("\uFDD1arg1"),list(list("\uFDD1assign","\uFDD1arg1",list("\uFDD1const",_emptylst))));
 } else {return ((function() {var o58 = (function(code_dash_to_dash_get_dash_last_dash_arg){
 return (function() {if(null_p_(cdr(operand_dash_codes))) {return code_dash_to_dash_get_dash_last_dash_arg;
-} else {return preserving(list(string_dash__gt_symbol("env")),code_dash_to_dash_get_dash_last_dash_arg,code_dash_to_dash_get_dash_rest_dash_args(cdr(operand_dash_codes)));
+} else {return preserving(list("\uFDD1env"),code_dash_to_dash_get_dash_last_dash_arg,code_dash_to_dash_get_dash_rest_dash_args(cdr(operand_dash_codes)));
 }})()
 ;
 });
-var o59 = append_dash_instruction_dash_sequences(car(operand_dash_codes),make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("val")),list(string_dash__gt_symbol("arg1")),list(list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("arg1"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("list")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val"))))));
+var o59 = append_dash_instruction_dash_sequences(car(operand_dash_codes),make_dash_instruction_dash_sequence(list("\uFDD1val"),list("\uFDD1arg1"),list(list("\uFDD1assign","\uFDD1arg1",list("\uFDD1op","\uFDD1list"),list("\uFDD1reg","\uFDD1val")))));
 return o58(o59);
 }))();
 }})()
@@ -780,22 +780,22 @@ return o56(o57);
 var code_dash_to_dash_get_dash_rest_dash_args = (function(operand_dash_codes){
 return ((function() {var o60 = (function(code_dash_for_dash_next_dash_arg){
 return (function() {if(null_p_(cdr(operand_dash_codes))) {return code_dash_for_dash_next_dash_arg;
-} else {return preserving(list(string_dash__gt_symbol("env")),code_dash_for_dash_next_dash_arg,code_dash_to_dash_get_dash_rest_dash_args(cdr(operand_dash_codes)));
+} else {return preserving(list("\uFDD1env"),code_dash_for_dash_next_dash_arg,code_dash_to_dash_get_dash_rest_dash_args(cdr(operand_dash_codes)));
 }})()
 ;
 });
-var o61 = preserving(list(string_dash__gt_symbol("arg1")),car(operand_dash_codes),make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("val"),string_dash__gt_symbol("arg1")),list(string_dash__gt_symbol("arg1")),list(list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("arg1"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("cons")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("arg1"))))));
+var o61 = preserving(list("\uFDD1arg1"),car(operand_dash_codes),make_dash_instruction_dash_sequence(list("\uFDD1val","\uFDD1arg1"),list("\uFDD1arg1"),list(list("\uFDD1assign","\uFDD1arg1",list("\uFDD1op","\uFDD1cons"),list("\uFDD1reg","\uFDD1val"),list("\uFDD1reg","\uFDD1arg1")))));
 return o60(o61);
 }))();
 });
 var compile_dash_procedure_dash_call = (function(exp,target,linkage){
 return ((function() {var o62 = (function(primitive_dash_branch,compiled_dash_branch,after_dash_call,compiled_dash_linkage){
-return append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("proc")),_emptylst,list(list(string_dash__gt_symbol("test"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("primitive_dash_procedure_p_")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("proc"))),list(string_dash__gt_symbol("branch"),list(string_dash__gt_symbol("label"),primitive_dash_branch)))),parallel_dash_instruction_dash_sequences(append_dash_instruction_dash_sequences(compiled_dash_branch,compile_dash_proc_dash_app1(target,compiled_dash_linkage)),append_dash_instruction_dash_sequences(primitive_dash_branch,end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("proc"),string_dash__gt_symbol("arg1")),list(target),list(list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("op"),string_dash__gt_symbol("apply_dash_primitive_dash_procedure")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("proc")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("arg1")))))))),after_dash_call);
+return append_dash_instruction_dash_sequences(make_dash_instruction_dash_sequence(list("\uFDD1proc"),_emptylst,list(list("\uFDD1test",list("\uFDD1op","\uFDD1primitive-procedure?"),list("\uFDD1reg","\uFDD1proc")),list("\uFDD1branch",list("\uFDD1label",primitive_dash_branch)))),parallel_dash_instruction_dash_sequences(append_dash_instruction_dash_sequences(compiled_dash_branch,compile_dash_proc_dash_app1(target,compiled_dash_linkage)),append_dash_instruction_dash_sequences(primitive_dash_branch,end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(list("\uFDD1proc","\uFDD1arg1"),list(target),list(list("\uFDD1assign",target,list("\uFDD1op","\uFDD1apply-primitive-procedure"),list("\uFDD1reg","\uFDD1proc"),list("\uFDD1reg","\uFDD1arg1"))))))),after_dash_call);
 });
-var o63 = make_dash_label(string_dash__gt_symbol("primitive_dash_branch"));
-var o64 = make_dash_label(string_dash__gt_symbol("compiled_dash_branch"));
-var o65 = make_dash_label(string_dash__gt_symbol("after_dash_call"));
-var o66 = (function() {if(eq_p_(linkage,string_dash__gt_symbol("next"))) {return o65;
+var o63 = make_dash_label("\uFDD1primitive-branch");
+var o64 = make_dash_label("\uFDD1compiled-branch");
+var o65 = make_dash_label("\uFDD1after-call");
+var o66 = (function() {if(eq_p_(linkage,"\uFDD1next")) {return o65;
 } else {return linkage;
 }})()
 ;
@@ -803,13 +803,13 @@ return o62(o63,o64,o65,o66);
 }))();
 });
 var compile_dash_proc_dash_app1 = (function(target,linkage){
-return (function() {if((eq_p_(target,string_dash__gt_symbol("val")) && not(eq_p_(linkage,string_dash__gt_symbol("return"))))) {return ((function() {return make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("proc")),all_dash_regs,list(list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("continue"),list(string_dash__gt_symbol("label"),linkage)),list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("val"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("compiled_dash_procedure_dash_entry")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("proc"))),list(string_dash__gt_symbol("goto"),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val")))));
+return (function() {if((eq_p_(target,"\uFDD1val") && not(eq_p_(linkage,"\uFDD1return")))) {return ((function() {return make_dash_instruction_dash_sequence(list("\uFDD1proc"),all_dash_regs,list(list("\uFDD1assign","\uFDD1continue",list("\uFDD1label",linkage)),list("\uFDD1assign","\uFDD1val",list("\uFDD1op","\uFDD1compiled-procedure-entry"),list("\uFDD1reg","\uFDD1proc")),list("\uFDD1goto",list("\uFDD1reg","\uFDD1val"))));
 }))();
-} else {return (function() {if((not(eq_p_(target,string_dash__gt_symbol("val"))) && not(eq_p_(linkage,string_dash__gt_symbol("return"))))) {return ((function() {return make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("proc")),all_dash_regs,list(list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("continue"),list(string_dash__gt_symbol("label"),proc_dash_return)),list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("val"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("compiled_dash_procedure_dash_entry")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("proc"))),list(string_dash__gt_symbol("goto"),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val"))),proc_dash_return,list(string_dash__gt_symbol("assign"),target,list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val"))),list(string_dash__gt_symbol("goto"),list(string_dash__gt_symbol("label"),linkage))));
+} else {return (function() {if((not(eq_p_(target,"\uFDD1val")) && not(eq_p_(linkage,"\uFDD1return")))) {return ((function() {return make_dash_instruction_dash_sequence(list("\uFDD1proc"),all_dash_regs,list(list("\uFDD1assign","\uFDD1continue",list("\uFDD1label",proc_dash_return)),list("\uFDD1assign","\uFDD1val",list("\uFDD1op","\uFDD1compiled-procedure-entry"),list("\uFDD1reg","\uFDD1proc")),list("\uFDD1goto",list("\uFDD1reg","\uFDD1val")),proc_dash_return,list("\uFDD1assign",target,list("\uFDD1reg","\uFDD1val")),list("\uFDD1goto",list("\uFDD1label",linkage))));
 }))();
-} else {return (function() {if((eq_p_(target,string_dash__gt_symbol("val")) && eq_p_(linkage,string_dash__gt_symbol("return")))) {return ((function() {return make_dash_instruction_dash_sequence(list(string_dash__gt_symbol("proc"),string_dash__gt_symbol("continue")),all_dash_regs,list(list(string_dash__gt_symbol("assign"),string_dash__gt_symbol("val"),list(string_dash__gt_symbol("op"),string_dash__gt_symbol("compiled_dash_procedure_dash_entry")),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("proc"))),list(string_dash__gt_symbol("goto"),list(string_dash__gt_symbol("reg"),string_dash__gt_symbol("val")))));
+} else {return (function() {if((eq_p_(target,"\uFDD1val") && eq_p_(linkage,"\uFDD1return"))) {return ((function() {return make_dash_instruction_dash_sequence(list("\uFDD1proc","\uFDD1continue"),all_dash_regs,list(list("\uFDD1assign","\uFDD1val",list("\uFDD1op","\uFDD1compiled-procedure-entry"),list("\uFDD1reg","\uFDD1proc")),list("\uFDD1goto",list("\uFDD1reg","\uFDD1val"))));
 }))();
-} else {return (function() {if((not(eq_p_(target,string_dash__gt_symbol("val"))) && eq_p_(linkage,string_dash__gt_symbol("return")))) {return ((function() {throw(str("compile-proc-app1: return linkage, target not val: ",target));
+} else {return (function() {if((not(eq_p_(target,"\uFDD1val")) && eq_p_(linkage,"\uFDD1return"))) {return ((function() {throw(str("compile-proc-app1: return linkage, target not val: ",target));
 }))();
 } else {return false;
 }})()
@@ -822,12 +822,12 @@ return (function() {if((eq_p_(target,string_dash__gt_symbol("val")) && not(eq_p_
 ;
 });
 var next_p_ = (function(exp){
-return (list_p_(exp) && eq_p_(car(exp),string_dash__gt_symbol("next")));
+return (list_p_(exp) && eq_p_(car(exp),"\uFDD1next"));
 });
 var compile_dash_next = (function(linkage){
-return end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(_emptylst,_emptylst,list(list(string_dash__gt_symbol("next")))));
+return end_dash_with_dash_linkage(linkage,make_dash_instruction_dash_sequence(_emptylst,_emptylst,list(list("\uFDD1next"))));
 });
-var all_dash_regs = list(string_dash__gt_symbol("env"),string_dash__gt_symbol("proc"),string_dash__gt_symbol("val"),string_dash__gt_symbol("arg1"),string_dash__gt_symbol("continue"),string_dash__gt_symbol("exp"));
+var all_dash_regs = list("\uFDD1env","\uFDD1proc","\uFDD1val","\uFDD1arg1","\uFDD1continue","\uFDD1exp");
 var compile = (function(exp,target,linkage){
 return (function() {if(next_p_(exp)) {return ((function() {return compile_dash_next(linkage);
 }))();
@@ -847,7 +847,7 @@ return (function() {if(next_p_(exp)) {return ((function() {return compile_dash_n
 }))();
 } else {return (function() {if(begin_p_(exp)) {return ((function() {return compile_dash_sequence(begin_dash_actions(exp),target,linkage);
 }))();
-} else {return (function() {if(application_p_(exp)) {return ((function() {return (function() {if(eq_p_(car(exp),string_dash__gt_symbol("break"))) {return ((function() {should_dash_break = true;
+} else {return (function() {if(application_p_(exp)) {return ((function() {return (function() {if(eq_p_(car(exp),"\uFDD1break")) {return ((function() {should_dash_break = true;
 return empty_dash_instruction_dash_sequence();
 }))();
 } else {return compile_dash_application(exp,target,linkage);
@@ -877,12 +877,12 @@ return empty_dash_instruction_dash_sequence();
 }})()
 ;
 });
-var runtime_dash_ops = dict(string_dash__gt_symbol("make_dash_compiled_dash_procedure"),make_dash_compiled_dash_procedure,string_dash__gt_symbol("compiled_dash_procedure_p_"),compiled_dash_procedure_p_,string_dash__gt_symbol("compiled_dash_procedure_dash_env"),compiled_dash_procedure_dash_env,string_dash__gt_symbol("compiled_dash_procedure_dash_entry"),compiled_dash_procedure_dash_entry,string_dash__gt_symbol("extend_dash_environment"),extend_dash_environment,string_dash__gt_symbol("lookup_dash_variable_dash_value"),lookup_dash_variable_dash_value,string_dash__gt_symbol("define_dash_variable_excl_"),define_dash_variable_excl_,string_dash__gt_symbol("list"),list,string_dash__gt_symbol("cons"),cons,string_dash__gt_symbol("primitive_dash_procedure_p_"),primitive_dash_procedure_p_,string_dash__gt_symbol("apply_dash_primitive_dash_procedure"),apply_dash_primitive_dash_procedure,string_dash__gt_symbol("false_p_"),false_p_,string_dash__gt_symbol("true_p_"),true_p_);
+var runtime_dash_ops = dict("\uFDD1make-compiled-procedure",make_dash_compiled_dash_procedure,"\uFDD1compiled-procedure?",compiled_dash_procedure_p_,"\uFDD1compiled-procedure-env",compiled_dash_procedure_dash_env,"\uFDD1compiled-procedure-entry",compiled_dash_procedure_dash_entry,"\uFDD1extend-environment",extend_dash_environment,"\uFDD1lookup-variable-value",lookup_dash_variable_dash_value,"\uFDD1define-variable!",define_dash_variable_excl_,"\uFDD1list",list,"\uFDD1cons",cons,"\uFDD1primitive-procedure?",primitive_dash_procedure_p_,"\uFDD1apply-primitive-procedure",apply_dash_primitive_dash_procedure,"\uFDD1false?",false_p_,"\uFDD1true?",true_p_);
 var global_dash_environment = setup_dash_environment();
-module.exports = dict(string_dash__gt_symbol("compile"),(function(src){
-return statements(compile(src,string_dash__gt_symbol("val"),string_dash__gt_symbol("next")));
-}),string_dash__gt_symbol("ops"),runtime_dash_ops,string_dash__gt_symbol("first_dash_frame"),first_dash_frame,string_dash__gt_symbol("install_dash_primitives"),install_dash_primitives,string_dash__gt_symbol("stepping_dash_mode"),(function() {always_dash_should_dash_break = true;
-}),string_dash__gt_symbol("primitive_dash_procedure_p_"),primitive_dash_procedure_p_,string_dash__gt_symbol("compiled_dash_procedure_p_"),compiled_dash_procedure_p_,string_dash__gt_symbol("global_dash_environment"),global_dash_environment);
+module["exports"] = dict("\uFDD1compile",(function(src){
+return statements(compile(src,"\uFDD1val","\uFDD1next"));
+}),"\uFDD1ops",runtime_dash_ops,"\uFDD1first-frame",first_dash_frame,"\uFDD1install-primitives",install_dash_primitives,"\uFDD1stepping-mode",(function() {always_dash_should_dash_break = true;
+}),"\uFDD1primitive-procedure?",primitive_dash_procedure_p_,"\uFDD1compiled-procedure?",compiled_dash_procedure_p_,"\uFDD1global-environment",global_dash_environment);
 
 
 });
@@ -891,10 +891,10 @@ require.define("/machine.js", function (require, module, exports, __dirname, __f
 var __args = process.argv.slice(2);var fs = require("fs");var compiler = require("./compiler");var make_dash_machine = (function(regs,ops,controller){
 return ((function() {var o1 = (function(machine){
 for_dash_each((function(reg){
-return machine.allocate_dash_register(reg);
+return machine["allocate-register"](reg);
 }),regs);
-machine.install_dash_operations(ops);
-machine.install_dash_instruction_dash_sequence(assemble(controller,machine));
+machine["install-operations"](ops);
+machine["install-instruction-sequence"](assemble(controller,machine));
 return machine;
 });
 var o2 = make_dash_new_dash_machine();
@@ -902,19 +902,19 @@ return o1(o2);
 }))();
 });
 var make_dash_register = (function() {return ((function() {var o3 = (function(contents){
-return dict(string_dash__gt_symbol("get"),(function() {return contents;
-}),string_dash__gt_symbol("set_excl_"),(function(val){
+return dict("\uFDD1get",(function() {return contents;
+}),"\uFDD1set!",(function(val){
 contents = val;
 }));
 });
-var o4 = string_dash__gt_symbol("_unassigned_");
+var o4 = "\uFDD1_unassigned_";
 return o3(o4);
 }))();
 });
 var make_dash_stack = (function() {return ((function() {var o5 = (function(s){
-return dict(string_dash__gt_symbol("push"),(function(x){
+return dict("\uFDD1push",(function(x){
 s = cons(x,s);
-}),string_dash__gt_symbol("pop_excl_"),(function() {return (function() {if(null_p_(s)) {throw("pop: empty stack");
+}),"\uFDD1pop!",(function() {return (function() {if(null_p_(s)) {throw("pop: empty stack");
 } else {return ((function() {var o7 = (function(top){
 s = cdr(s);
 return top;
@@ -924,7 +924,7 @@ return o7(o8);
 }))();
 }})()
 ;
-}),string_dash__gt_symbol("initialize"),(function() {s = _emptylst;
+}),"\uFDD1initialize",(function() {s = _emptylst;
 }));
 });
 var o6 = _emptylst;
@@ -952,7 +952,7 @@ return (function() {if(on_dash_break) {return on_dash_break();
 ;
 });
 var execute = (function() {return ((function() {var loop = (function() {return ((function() {var o19 = (function(insts){
-return (function() {if(null_p_(insts)) {return string_dash__gt_symbol("done");
+return (function() {if(null_p_(insts)) {return "\uFDD1done";
 } else {return ((function() {var o21 = (function(inst){
 return (function() {if(not(paused)) {return ((function() {var o23 = (function(proc){
 (function() {if(proc) {return proc();
@@ -975,30 +975,30 @@ return o21(o22);
 }})()
 ;
 });
-var o20 = pc.get();
+var o20 = pc["get"]();
 return o19(o20);
 }))();
 });
 return trampoline(loop());
 }))();
 });
-return dict(string_dash__gt_symbol("start"),(function() {pc.set_excl_(instruction_dash_sequence);
+return dict("\uFDD1start",(function() {pc["set!"](instruction_dash_sequence);
 return execute();
-}),string_dash__gt_symbol("install_dash_instruction_dash_sequence"),(function(seq){
+}),"\uFDD1install-instruction-sequence",(function(seq){
 instruction_dash_sequence = seq;
-}),string_dash__gt_symbol("allocate_dash_register"),allocate_dash_register,string_dash__gt_symbol("get_dash_register"),lookup_dash_register,string_dash__gt_symbol("install_dash_operations"),(function(dct){
+}),"\uFDD1allocate-register",allocate_dash_register,"\uFDD1get-register",lookup_dash_register,"\uFDD1install-operations",(function(dct){
 ops = dict_dash_merge(ops,dct);
-}),string_dash__gt_symbol("stack"),(function() {return stack;
-}),string_dash__gt_symbol("operations"),(function() {return ops;
-}),string_dash__gt_symbol("registers"),(function() {return keys(reg_dash_table);
-}),string_dash__gt_symbol("pause"),pause,string_dash__gt_symbol("proceed"),(function() {paused = false;
+}),"\uFDD1stack",(function() {return stack;
+}),"\uFDD1operations",(function() {return ops;
+}),"\uFDD1registers",(function() {return keys(reg_dash_table);
+}),"\uFDD1pause",pause,"\uFDD1proceed",(function() {paused = false;
 return execute();
-}),string_dash__gt_symbol("set_dash_break_dash_handler"),(function(func){
+}),"\uFDD1set-break-handler",(function(func){
 on_dash_break = func;
-}),string_dash__gt_symbol("on_dash_input"),(function(txt){
+}),"\uFDD1on-input",(function(txt){
 return ((function() {var o25 = (function(exp){
-(function() {if(eq_p_(car(exp),string_dash__gt_symbol("read_dash_into_dash_reg"))) {return ((function() {var o27 = (function(reg){
-return reg.set_excl_(read(txt));
+(function() {if(eq_p_(car(exp),"\uFDD1read-into-reg")) {return ((function() {var o27 = (function(reg){
+return reg["set!"](read(txt));
 });
 var o28 = lookup_dash_register(cadr(exp));
 return o27(o28);
@@ -1011,13 +1011,13 @@ stop_dash_stdin();
 paused = false;
 return execute();
 });
-var o26 = instruction_dash_text(car(pc.get()));
+var o26 = instruction_dash_text(car(pc["get"]()));
 return o25(o26);
 }))();
 }));
 });
-var o17 = dict(string_dash__gt_symbol("initialize_dash_stack"),stack.initialize);
-var o18 = dict(string_dash__gt_symbol("flag"),flag,string_dash__gt_symbol("pc"),pc);
+var o17 = dict("\uFDD1initialize-stack",stack["initialize"]);
+var o18 = dict("\uFDD1flag",flag,"\uFDD1pc",pc);
 return o16(o17,o18);
 }))();
 });
@@ -1031,10 +1031,10 @@ return o9(o10,o11,o12,o13,o14,o15);
 }))();
 });
 var get_dash_register_dash_contents = (function(machine,name){
-return dict_dash_ref(machine.get_dash_register(name),string_dash__gt_symbol("get"))();
+return dict_dash_ref(machine["get-register"](name),"\uFDD1get")();
 });
 var set_dash_register_dash_contents_excl_ = (function(machine,name,val){
-return dict_dash_ref(machine.get_dash_register(name),string_dash__gt_symbol("set_excl_"))(val);
+return dict_dash_ref(machine["get-register"](name),"\uFDD1set!")(val);
 });
 var assemble = (function(controller,machine){
 return extract_dash_labels(controller,(function(insts,labels){
@@ -1076,10 +1076,10 @@ return o36(o37);
 }))();
 }),labels);
 });
-var o32 = machine.get_dash_register(string_dash__gt_symbol("pc"));
-var o33 = machine.get_dash_register(string_dash__gt_symbol("flag"));
-var o34 = machine.stack();
-var o35 = machine.operations();
+var o32 = machine["get-register"]("\uFDD1pc");
+var o33 = machine["get-register"]("\uFDD1flag");
+var o34 = machine["stack"]();
+var o35 = machine["operations"]();
 return o31(o32,o33,o34,o35);
 }))();
 });
@@ -1130,31 +1130,31 @@ return o38(o39);
 }))();
 });
 var advance_dash_pc = (function(pc){
-return pc.set_excl_(cdr(pc.get()));
+return pc["set!"](cdr(pc["get"]()));
 });
 var make_dash_execution_dash_procedure = (function(inst,labels,machine,pc,flag,stack,ops){
 return ((function() {var o40 = (function(top){
-return (function() {if(_eq__eq_(top,string_dash__gt_symbol("assign"))) {return ((function() {return make_dash_assign(inst,machine,labels,ops,pc);
+return (function() {if(_eq__eq_(top,"\uFDD1assign")) {return ((function() {return make_dash_assign(inst,machine,labels,ops,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("test"))) {return ((function() {return make_dash_test(inst,machine,labels,ops,flag,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1test")) {return ((function() {return make_dash_test(inst,machine,labels,ops,flag,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("branch"))) {return ((function() {return make_dash_branch(inst,machine,labels,flag,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1branch")) {return ((function() {return make_dash_branch(inst,machine,labels,flag,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("goto"))) {return ((function() {return make_dash_goto(inst,machine,labels,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1goto")) {return ((function() {return make_dash_goto(inst,machine,labels,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("save"))) {return ((function() {return make_dash_save(inst,machine,stack,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1save")) {return ((function() {return make_dash_save(inst,machine,stack,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("restore"))) {return ((function() {return make_dash_restore(inst,machine,stack,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1restore")) {return ((function() {return make_dash_restore(inst,machine,stack,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("perform"))) {return ((function() {return make_dash_perform(inst,machine,labels,ops,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1perform")) {return ((function() {return make_dash_perform(inst,machine,labels,ops,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("read_dash_into_dash_reg"))) {return ((function() {return make_dash_read(inst,machine,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1read-into-reg")) {return ((function() {return make_dash_read(inst,machine,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("break"))) {return ((function() {return make_dash_break(machine,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1break")) {return ((function() {return make_dash_break(machine,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("next"))) {return ((function() {return make_dash_next(machine,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1next")) {return ((function() {return make_dash_next(machine,pc);
 }))();
-} else {return (function() {if(_eq__eq_(top,string_dash__gt_symbol("nop"))) {return ((function() {return make_dash_nop(machine,pc);
+} else {return (function() {if(_eq__eq_(top,"\uFDD1nop")) {return ((function() {return make_dash_nop(machine,pc);
 }))();
 } else {return false;
 }})()
@@ -1187,7 +1187,7 @@ return o40(o41);
 var make_dash_assign = (function(inst,machine,labels,ops,pc){
 return ((function() {var o42 = (function(target,expr){
 return ((function() {var o45 = (function(value_dash_proc){
-return (function() {target.set_excl_(value_dash_proc());
+return (function() {target["set!"](value_dash_proc());
 return advance_dash_pc(pc);
 });
 });
@@ -1198,7 +1198,7 @@ var o46 = (function() {if(operation_dash_exp_p_(expr)) {return make_dash_operati
 return o45(o46);
 }))();
 });
-var o43 = machine.get_dash_register(cadr(inst));
+var o43 = machine["get-register"](cadr(inst));
 var o44 = cddr(inst);
 return o42(o43,o44);
 }))();
@@ -1206,7 +1206,7 @@ return o42(o43,o44);
 var make_dash_test = (function(inst,machine,labels,ops,flag,pc){
 return ((function() {var o47 = (function(condition){
 return (function() {if(operation_dash_exp_p_(condition)) {return ((function() {var o49 = (function(condition_dash_proc){
-return (function() {flag.set_excl_(condition_dash_proc());
+return (function() {flag["set!"](condition_dash_proc());
 return advance_dash_pc(pc);
 });
 });
@@ -1224,7 +1224,7 @@ return o47(o48);
 var make_dash_branch = (function(inst,machine,labels,flag,pc){
 return ((function() {var o51 = (function(dest){
 return (function() {if(label_dash_exp_p_(dest)) {return ((function() {var o53 = (function(insts){
-return (function() {return (function() {if(flag.get()) {return pc.set_excl_(insts);
+return (function() {return (function() {if(flag["get"]()) {return pc["set!"](insts);
 } else {return advance_dash_pc(pc);
 }})()
 ;
@@ -1244,7 +1244,7 @@ return o51(o52);
 var make_dash_goto = (function(inst,machine,labels,pc){
 return ((function() {var o55 = (function(dest){
 return (function() {if(label_dash_exp_p_(dest)) {return ((function() {return ((function() {var o57 = (function(insts){
-return (function() {return pc.set_excl_(insts);
+return (function() {return pc["set!"](insts);
 });
 });
 var o58 = lookup_dash_label(labels,label_dash_exp_dash_label(dest));
@@ -1252,10 +1252,10 @@ return o57(o58);
 }))();
 }))();
 } else {return (function() {if(register_dash_exp_p_(dest)) {return ((function() {return ((function() {var o59 = (function(reg){
-return (function() {return pc.set_excl_(reg.get());
+return (function() {return pc["set!"](reg["get"]());
 });
 });
-var o60 = machine.get_dash_register(register_dash_exp_dash_reg(dest));
+var o60 = machine["get-register"](register_dash_exp_dash_reg(dest));
 return o59(o60);
 }))();
 }))();
@@ -1272,21 +1272,21 @@ return o55(o56);
 });
 var make_dash_save = (function(inst,machine,stack,pc){
 return ((function() {var o61 = (function(reg){
-return (function() {stack.push(reg.get());
+return (function() {stack["push"](reg["get"]());
 return advance_dash_pc(pc);
 });
 });
-var o62 = machine.get_dash_register(cadr(inst));
+var o62 = machine["get-register"](cadr(inst));
 return o61(o62);
 }))();
 });
 var make_dash_restore = (function(inst,machine,stack,pc){
 return ((function() {var o63 = (function(reg){
-return (function() {reg.set_excl_(stack.pop_excl_());
+return (function() {reg["set!"](stack["pop!"]());
 return advance_dash_pc(pc);
 });
 });
-var o64 = machine.get_dash_register(cadr(inst));
+var o64 = machine["get-register"](cadr(inst));
 return o63(o64);
 }))();
 });
@@ -1310,25 +1310,25 @@ return o65(o66);
 });
 var make_dash_read = (function(inst,machine,pc){
 return ((function() {var o69 = (function(reg){
-return (function() {start_dash_stdin(string_dash__gt_symbol("repl"));
-return machine.pause();
+return (function() {start_dash_stdin("\uFDD1repl");
+return machine["pause"]();
 });
 });
-var o70 = machine.get_dash_register(cadr(inst));
+var o70 = machine["get-register"](cadr(inst));
 return o69(o70);
 }))();
 });
 var make_dash_break = (function(machine,pc){
 return (function() {advance_dash_pc(pc);
-start_dash_stdin(string_dash__gt_symbol("break"));
-println(str("break: ",get_dash_register_dash_contents(machine,string_dash__gt_symbol("exp"))));
-return machine.pause();
+start_dash_stdin("\uFDD1break");
+println(str("break: ",get_dash_register_dash_contents(machine,"\uFDD1exp")));
+return machine["pause"]();
 });
 });
 var make_dash_next = (function(machine,pc){
 return (function() {advance_dash_pc(pc);
-machine.pause();
-return setTimeout((function() {return machine.proceed();
+machine["pause"]();
+return setTimeout((function() {return machine["proceed"]();
 }),1);
 });
 });
@@ -1354,10 +1354,10 @@ return o73(o74);
 }))();
 }))();
 } else {return (function() {if(register_dash_exp_p_(exp)) {return ((function() {return ((function() {var o75 = (function(r){
-return (function() {return r.get();
+return (function() {return r["get"]();
 });
 });
-var o76 = machine.get_dash_register(cadr(exp));
+var o76 = machine["get-register"](cadr(exp));
 return o75(o76);
 }))();
 }))();
@@ -1371,19 +1371,19 @@ return o75(o76);
 ;
 });
 var label_dash_exp_p_ = (function(exp){
-return (list_p_(exp) && _eq__eq_(car(exp),string_dash__gt_symbol("label")));
+return (list_p_(exp) && _eq__eq_(car(exp),"\uFDD1label"));
 });
 var label_dash_exp_dash_label = (function(exp){
 return cadr(exp);
 });
 var register_dash_exp_p_ = (function(exp){
-return (list_p_(exp) && _eq__eq_(car(exp),string_dash__gt_symbol("reg")));
+return (list_p_(exp) && _eq__eq_(car(exp),"\uFDD1reg"));
 });
 var register_dash_exp_dash_reg = (function(exp){
 return cadr(exp);
 });
 var const_dash_exp_p_ = (function(exp){
-return (list_p_(exp) && _eq__eq_(car(exp),string_dash__gt_symbol("const")));
+return (list_p_(exp) && _eq__eq_(car(exp),"\uFDD1const"));
 });
 var const_dash_exp_dash_value = (function(exp){
 return cadr(exp);
@@ -1403,7 +1403,7 @@ return o77(o78,o79);
 }))();
 });
 var operation_dash_exp_p_ = (function(exp){
-return (list_p_(exp) && eq_p_(car(car(exp)),string_dash__gt_symbol("op")));
+return (list_p_(exp) && eq_p_(car(car(exp)),"\uFDD1op"));
 });
 var lookup_dash_prim = (function(sym,ops){
 return ((function() {var o80 = (function(prim){
@@ -1422,20 +1422,20 @@ var start_dash_stdin = (function(mode){
 stdin_dash_mode = mode;
 return get_dash_stdin_dash_handler()();
 });
-var stdin_dash_handler = (function() {return process.stdin.resume();
+var stdin_dash_handler = (function() {return process["stdin"]["resume"]();
 });
 var get_dash_stdin_dash_handler = (function() {return stdin_dash_handler;
 });
 var set_dash_stdin_dash_handler_excl_ = (function(func){
 stdin_dash_handler = func;
 });
-var stop_dash_stdin = (function() {return process.stdin.pause();
+var stop_dash_stdin = (function() {return process["stdin"]["pause"]();
 });
-process.stdin.on("data",(function(txt){
+process["stdin"]["on"]("data",(function(txt){
 return ((function() {var o82 = (function(txt){
-return (function() {if(_eq_(stdin_dash_mode,string_dash__gt_symbol("repl"))) {return ((function() {return on_dash_repl_dash_input(txt);
+return (function() {if(_eq_(stdin_dash_mode,"\uFDD1repl")) {return ((function() {return on_dash_repl_dash_input(txt);
 }))();
-} else {return (function() {if(_eq_(stdin_dash_mode,string_dash__gt_symbol("break"))) {return ((function() {return on_dash_break_dash_input(txt);
+} else {return (function() {if(_eq_(stdin_dash_mode,"\uFDD1break")) {return ((function() {return on_dash_break_dash_input(txt);
 }))();
 } else {return false;
 }})()
@@ -1447,14 +1447,14 @@ var o83 = (txt + "");
 return o82(o83);
 }))();
 }));
-process.stdin.pause();
-var continue_dash_machine = (function() {process.stdin.pause();
-return current_dash_machine.proceed();
+process["stdin"]["pause"]();
+var continue_dash_machine = (function() {process["stdin"]["pause"]();
+return current_dash_machine["proceed"]();
 });
 var inspect_dash_var = (function(v){
-return (function() {if((v && compiler.compiled_dash_procedure_p_(v))) {return ((function() {return "<compiled-function>";
+return (function() {if((v && compiler["compiled-procedure?"](v))) {return ((function() {return "<compiled-function>";
 }))();
-} else {return (function() {if((v && compiler.primitive_dash_procedure_p_(v))) {return ((function() {return "<native-function>";
+} else {return (function() {if((v && compiler["primitive-procedure?"](v))) {return ((function() {return "<native-function>";
 }))();
 } else {return ((function() {return inspect(v);
 }))();
@@ -1474,7 +1474,7 @@ return o86(o87,o88);
 }))();
 }),"",keys(frame));
 });
-var o85 = compiler.first_dash_frame(get_dash_register_dash_contents(current_dash_machine,string_dash__gt_symbol("env")));
+var o85 = compiler["first-frame"](get_dash_register_dash_contents(current_dash_machine,"\uFDD1env"));
 return o84(o85);
 }))();
 });
@@ -1487,27 +1487,27 @@ return (function() {if(_eq_(txt,"v")) {return ((function() {return println(inspe
 }})()
 ;
 });
-var o90 = txt.trim();
+var o90 = txt["trim"]();
 return o89(o90);
 }))();
 });
 var current_dash_machine = false;
 var on_dash_repl_dash_input = (function(txt){
-return current_dash_machine.on_dash_input(txt);
+return current_dash_machine["on-input"](txt);
 });
 var on_dash_break_dash_input = debugger_dash_handle;
 var feed_dash_asm = (function(src){
 return ((function() {var o91 = (function(machine){
-set_dash_register_dash_contents_excl_(machine,string_dash__gt_symbol("env"),compiler.global_dash_environment);
+set_dash_register_dash_contents_excl_(machine,"\uFDD1env",compiler["global-environment"]);
 current_dash_machine = machine;
 return machine;
 });
-var o92 = make_dash_machine(list(string_dash__gt_symbol("env"),string_dash__gt_symbol("proc"),string_dash__gt_symbol("val"),string_dash__gt_symbol("arg1"),string_dash__gt_symbol("continue"),string_dash__gt_symbol("input"),string_dash__gt_symbol("exp")),compiler.ops,src);
+var o92 = make_dash_machine(list("\uFDD1env","\uFDD1proc","\uFDD1val","\uFDD1arg1","\uFDD1continue","\uFDD1input","\uFDD1exp"),compiler["ops"],src);
 return o91(o92);
 }))();
 });
-module.exports = dict(string_dash__gt_symbol("feed_dash_asm"),feed_dash_asm,string_dash__gt_symbol("set_dash_stdin_dash_handler_excl_"),set_dash_stdin_dash_handler_excl_,string_dash__gt_symbol("instance"),(function() {return current_dash_machine;
-}),string_dash__gt_symbol("inspect_dash_environment"),inspect_dash_environment,string_dash__gt_symbol("get_dash_register_dash_contents"),get_dash_register_dash_contents,string_dash__gt_symbol("result"),(function() {return get_dash_register_dash_contents(current_dash_machine,string_dash__gt_symbol("val"));
+module["exports"] = dict("\uFDD1feed-asm",feed_dash_asm,"\uFDD1set-stdin-handler!",set_dash_stdin_dash_handler_excl_,"\uFDD1instance",(function() {return current_dash_machine;
+}),"\uFDD1inspect-environment",inspect_dash_environment,"\uFDD1get-register-contents",get_dash_register_dash_contents,"\uFDD1result",(function() {return get_dash_register_dash_contents(current_dash_machine,"\uFDD1val");
 }));
 
 
@@ -1521,32 +1521,32 @@ require.define("fs", function (require, module, exports, __dirname, __filename) 
 require.define("/vm.js", function (require, module, exports, __dirname, __filename) {
     var __args = process.argv.slice(2);var compiler = require("./compiler");var machine = require("./machine");var run = (function(src){
 return ((function() {var o1 = (function(statements,m){
-m.set_dash_break_dash_handler(break_dash_handler);
-return m.start();
+m["set-break-handler"](break_dash_handler);
+return m["start"]();
 });
-var o2 = compiler.compile(src);
-var o3 = machine.feed_dash_asm(o2);
+var o2 = compiler["compile"](src);
+var o3 = machine["feed-asm"](o2);
 return o1(o2,o3);
 }))();
 });
 var resume = (function() {return ((function() {var o4 = (function(m){
-return m.proceed();
+return m["proceed"]();
 });
-var o5 = machine.instance();
+var o5 = machine["instance"]();
 return o4(o5);
 }))();
 });
 var asm = (function(src){
-return pp(compiler.compile(src));
+return pp(compiler["compile"](src));
 });
 var break_dash_handler = false;
 var set_dash_break_dash_handler = (function(func){
 break_dash_handler = func;
 });
 var install_dash_primitives = (function(procs){
-return compiler.install_dash_primitives(procs);
+return compiler["install-primitives"](procs);
 });
-module.exports = dict(string_dash__gt_symbol("run"),run,string_dash__gt_symbol("asm"),asm,string_dash__gt_symbol("stepping_dash_mode"),compiler.stepping_dash_mode,string_dash__gt_symbol("set_dash_break_dash_handler"),set_dash_break_dash_handler,string_dash__gt_symbol("install_dash_primitives"),install_dash_primitives);
+module["exports"] = dict("\uFDD1run",run,"\uFDD1asm",asm,"\uFDD1stepping-mode",compiler["stepping-mode"],"\uFDD1set-break-handler",set_dash_break_dash_handler,"\uFDD1install-primitives",install_dash_primitives);
 
 
 });

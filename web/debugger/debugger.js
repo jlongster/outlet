@@ -5,7 +5,7 @@ fs.readFileSync = function(src) {
     return '1';
 };
 
-machine.set_dash_stdin_dash_handler_excl_(function() {
+machine['set-stdin-handler!'] = (function() {
     outlet_display(
         '<div><strong>breakpoint</strong> w/expression:</div>' +
             inspect(
