@@ -92,6 +92,8 @@
         (set! name (name.replace (RegExp "<" "g") "_lt_"))
         (set! name (name.replace (RegExp "%" "g") "_per_"))
         (set! name (name.replace (RegExp "=" "g") "_eq_"))
+        (set! name (name.replace (RegExp "\\*" "g") "_star_"))
+        (set! name (name.replace (RegExp "\\+" "g") "_plus_"))
         (write name))
       
       ;; Convert dots to brackets:

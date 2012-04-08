@@ -60,10 +60,10 @@ else {
 }
 
 if(expand) {
-    compiler.set_dash_macro_dash_generator(js_backend());
+    compiler['set-macro-generator'](js_backend());
 
     if(amt) {
-        compiler.pp(compiler.expand_dash_nth(compiler.read(src), amt));
+        compiler.pp(compiler['expand-nth'](compiler.read(src), amt));
     }
     else {
         compiler.pp(compiler.expand(compiler.read(src)));

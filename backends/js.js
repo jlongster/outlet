@@ -821,6 +821,8 @@ name = name["replace"](RegExp(">","g"),"_gt_");
 name = name["replace"](RegExp("<","g"),"_lt_");
 name = name["replace"](RegExp("%","g"),"_per_");
 name = name["replace"](RegExp("=","g"),"_eq_");
+name = name["replace"](RegExp("\\*","g"),"_star_");
+name = name["replace"](RegExp("\\+","g"),"_plus_");
 return write(name);
 });
 var o10 = vector_dash_ref(parts,0);
