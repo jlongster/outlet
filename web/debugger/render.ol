@@ -51,7 +51,7 @@
          (* (rand) 150))
        
        (define (render-rand x y width height)
-         ;;(break)
+         (break)
          (render-box "green" x y width height))
 
        (define (render-n n i)
@@ -67,7 +67,7 @@
        (define (render)
          ;;(timer-start)
          (render-clear)
-         (render-n 500 0)
+         (render-n 50 0)
          ;;(timer-end)
 
          (next)
