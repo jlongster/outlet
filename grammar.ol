@@ -12,13 +12,23 @@
                        (repeated (not-char "\n"))
                        space))
 
-  (define number
+  (define number-int/float
     (capture (all (optional (char "-"))
                   (repeated (char "1234567890"))
                   (optional (all (char ".")
                                  (repeated (char "1234567890")))))
              (lambda (text state)
                (parseFloat text))))
+  
+  (define number-hex
+    (capture (all (char "0")
+                  (char "x")
+                  (repeated (char "1234567890")))
+             (lambda (text state)
+               (parseInt (text.slice 2) 16))))
+
+  (define number
+    (any number-hex number-int/float))
 
   (define boolean
     (capture (any (all (char "#") (char "f"))

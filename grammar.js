@@ -151,7 +151,21 @@ return fold((function(el,acc){
 return (acc + 1);
 }),0,lst);
 });
-var list_dash_append = (function(lst1,lst2){
+var list_dash_append = (function(){
+var lsts = vector_dash__gt_list(Array.prototype.slice.call(arguments, 0));
+var l_star_ = (function() {if(null_p_(lsts)) {return _emptylst;
+} else {return lsts;
+}})()
+;
+return (function() {if(null_p_(l_star_)) {return _emptylst;
+} else {return (function() {if(null_p_(cdr(l_star_))) {return car(l_star_);
+} else {return _list_dash_append(car(l_star_),apply(list_dash_append,cdr(l_star_)));
+}})()
+;
+}})()
+;
+});
+var _list_dash_append = (function(lst1,lst2){
 return ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return lst2;
 } else {return cons(car(lst),loop(cdr(lst)));
@@ -468,24 +482,22 @@ var o38 = obj2;
 return loop(o37,o38);
 }))();
 }))();
-} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return ((function() {var loop = (function(i){
-return (function() {if(((i < obj1["length"]) && (i < obj2["length"]))) {return ((function() {return true;
-}))();
-} else {return (function() {if(((i < obj1["length"]) || (i < obj2["length"]))) {return ((function() {return false;
-}))();
-} else {return ((function() {return (function() {if(equal_p_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return loop((i + 1));
+} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return (function() {if(not(_eq_(obj1["length"],obj2["length"]))) {return false;
+} else {return ((function() {var loop = (function(i){
+return (function() {if((i < obj1["length"])) {return (function() {if(_eq_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return vector("__tco_call",(function() {return loop((i + 1));
+}));
 } else {return false;
 }})()
 ;
-}))();
-}})()
-;
+} else {return true;
 }})()
 ;
 });
 var o39 = 0;
-return loop(o39);
+return trampoline(loop(o39));
 }))();
+}})()
+;
 }))();
 } else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {return ((function() {var o40 = (function(keys1,keys2){
 return (eq_p_(length(keys1),length(keys2)) && ((function() {var loop = (function(lst){
@@ -728,9 +740,13 @@ return any(all(rule,seq),rule);
 var space_dash_char = " \n\t\r";
 var space = repeated(char(space_dash_char));
 var comment = all(optional(space),char(";"),repeated(not_dash_char("\n")),space);
-var number = capture(all(optional(char("-")),repeated(char("1234567890")),optional(all(char("."),repeated(char("1234567890"))))),(function(text,state){
+var number_dash_int_slash_float = capture(all(optional(char("-")),repeated(char("1234567890")),optional(all(char("."),repeated(char("1234567890"))))),(function(text,state){
 return parseFloat(text);
 }));
+var number_dash_hex = capture(all(char("0"),char("x"),repeated(char("1234567890"))),(function(text,state){
+return parseInt(text["slice"](2),16);
+}));
+var number = any(number_dash_hex,number_dash_int_slash_float);
 var boolean = capture(any(all(char("#"),char("f")),all(char("#"),char("t"))),(function(text,state){
 return (function() {if(equal_p_(text,"#f")) {return false;
 } else {return true;

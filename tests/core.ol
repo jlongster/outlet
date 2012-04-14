@@ -28,7 +28,7 @@
 (test-eval (foo 1 2 3) 6)
 
 (define (bar t) (* (foo 1 2 3) t))
-(test-eval (bar 5) 30)
+(test-eval (bar 5.123) 30.738)
 
 (test-eval ((lambda (x)
                (bar (+ x 2))) 5)
