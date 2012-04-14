@@ -92,6 +92,7 @@
         (set! name (name.replace (RegExp "<" "g") "_lt_"))
         (set! name (name.replace (RegExp "%" "g") "_per_"))
         (set! name (name.replace (RegExp "=" "g") "_eq_"))
+        (set! name (name.replace (RegExp "\\/" "g") "_slash_"))
         (set! name (name.replace (RegExp "\\*" "g") "_star_"))
         (set! name (name.replace (RegExp "\\+" "g") "_plus_"))
         (write name))
@@ -270,7 +271,13 @@
    :write-divide (make-op-writer "/")
    :write-gt (make-op-writer ">")
    :write-lt (make-op-writer "<")
+   :write-gteq (make-op-writer ">=")
+   :write-lteq (make-op-writer "<=")
    :write-mod (make-op-writer "%")
+   :write-rshift (make-op-writer ">>")
+   :write-lshift (make-op-writer "<<")
+   :write-bitwise-or (make-op-writer "|")
+   :write-bitwise-and (make-op-writer "&")
 
    :make-fresh make-fresh
    :get-code (lambda () (code.join ""))})

@@ -468,24 +468,22 @@ var o38 = obj2;
 return loop(o37,o38);
 }))();
 }))();
-} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return ((function() {var loop = (function(i){
-return (function() {if(((i < obj1["length"]) && (i < obj2["length"]))) {return ((function() {return true;
-}))();
-} else {return (function() {if(((i < obj1["length"]) || (i < obj2["length"]))) {return ((function() {return false;
-}))();
-} else {return ((function() {return (function() {if(equal_p_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return loop((i + 1));
+} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return (function() {if(not(_eq_(obj1["length"],obj2["length"]))) {return false;
+} else {return ((function() {var loop = (function(i){
+return (function() {if((i < obj1["length"])) {return (function() {if(_eq_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return vector("__tco_call",(function() {return loop((i + 1));
+}));
 } else {return false;
 }})()
 ;
-}))();
-}})()
-;
+} else {return true;
 }})()
 ;
 });
 var o39 = 0;
-return loop(o39);
+return trampoline(loop(o39));
 }))();
+}})()
+;
 }))();
 } else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {return ((function() {var o40 = (function(keys1,keys2){
 return (eq_p_(length(keys1),length(keys2)) && ((function() {var loop = (function(lst){
@@ -1340,6 +1338,12 @@ install_dash_native("\uFDD1*","\uFDD1write-multiply",verify_dash_not_dash_single
 install_dash_native("\uFDD1/","\uFDD1write-divide",verify_dash_not_dash_single);
 install_dash_native("\uFDD1>","\uFDD1write-gt",verify_dash_not_dash_single);
 install_dash_native("\uFDD1<","\uFDD1write-lt",verify_dash_not_dash_single);
+install_dash_native("\uFDD1<=","\uFDD1write-lteq",verify_dash_not_dash_single);
+install_dash_native("\uFDD1>=","\uFDD1write-gteq",verify_dash_not_dash_single);
+install_dash_native("\uFDD1>>","\uFDD1write-rshift",verify_dash_not_dash_single);
+install_dash_native("\uFDD1<<","\uFDD1write-lshift",verify_dash_not_dash_single);
+install_dash_native("\uFDD1bitwise-or","\uFDD1write-bitwise-or",verify_dash_not_dash_single);
+install_dash_native("\uFDD1bitwise-and","\uFDD1write-bitwise-and",verify_dash_not_dash_single);
 install_dash_native("\uFDD1%","\uFDD1write-mod",verify_dash_not_dash_single);
 install_dash_native("\uFDD1require","\uFDD1write-require",(function(form){
 verify_dash_not_dash_single(form);

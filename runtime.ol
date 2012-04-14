@@ -136,7 +136,16 @@
         0
         lst))
 
-(define (list-append lst1 lst2)
+(define (list-append . lsts)
+  (define l* (if (null? lsts) '() lsts))
+  (if (null? l*)
+      '()
+      (if (null? (cdr l*))
+          (car l*)
+          (_list-append (car l*)
+                        (apply list-append (cdr l*))))))
+
+(define (_list-append lst1 lst2)
   (let loop ((lst lst1))
     (if (null? lst)
         lst2
@@ -357,19 +366,15 @@
             #f)))))
    ((and (vector? obj1)
          (vector? obj2))
-    (let loop ((i 0))
-      (cond
-       ((and (< i obj1.length)
-             (< i obj2.length))
-        #t)
-       ((or (< i obj1.length)
-            (< i obj2.length))
-        #f)
-       (else
-        (if (equal? (vector-ref obj1 i)
-                    (vector-ref obj2 i))
-            (loop (+ i 1))
-            #f)))))
+    (if (not (= obj1.length obj2.length))
+        #f
+        (let loop ((i 0))
+          (if (< i obj1.length)
+              (if (= (vector-ref obj1 i)
+                     (vector-ref obj2 i))
+                  (loop (+ i 1))
+                  #f)
+              #t))))
    ((and (dict? obj1)
          (dict? obj2))
     (let ((keys1 (keys obj1))

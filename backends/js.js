@@ -151,7 +151,21 @@ return fold((function(el,acc){
 return (acc + 1);
 }),0,lst);
 });
-var list_dash_append = (function(lst1,lst2){
+var list_dash_append = (function(){
+var lsts = vector_dash__gt_list(Array.prototype.slice.call(arguments, 0));
+var l_star_ = (function() {if(null_p_(lsts)) {return _emptylst;
+} else {return lsts;
+}})()
+;
+return (function() {if(null_p_(l_star_)) {return _emptylst;
+} else {return (function() {if(null_p_(cdr(l_star_))) {return car(l_star_);
+} else {return _list_dash_append(car(l_star_),apply(list_dash_append,cdr(l_star_)));
+}})()
+;
+}})()
+;
+});
+var _list_dash_append = (function(lst1,lst2){
 return ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return lst2;
 } else {return cons(car(lst),loop(cdr(lst)));
@@ -468,24 +482,22 @@ var o38 = obj2;
 return loop(o37,o38);
 }))();
 }))();
-} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return ((function() {var loop = (function(i){
-return (function() {if(((i < obj1["length"]) && (i < obj2["length"]))) {return ((function() {return true;
-}))();
-} else {return (function() {if(((i < obj1["length"]) || (i < obj2["length"]))) {return ((function() {return false;
-}))();
-} else {return ((function() {return (function() {if(equal_p_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return loop((i + 1));
+} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return (function() {if(not(_eq_(obj1["length"],obj2["length"]))) {return false;
+} else {return ((function() {var loop = (function(i){
+return (function() {if((i < obj1["length"])) {return (function() {if(_eq_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return vector("__tco_call",(function() {return loop((i + 1));
+}));
 } else {return false;
 }})()
 ;
-}))();
-}})()
-;
+} else {return true;
 }})()
 ;
 });
 var o39 = 0;
-return loop(o39);
+return trampoline(loop(o39));
 }))();
+}})()
+;
 }))();
 } else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {return ((function() {var o40 = (function(keys1,keys2){
 return (eq_p_(length(keys1),length(keys2)) && ((function() {var loop = (function(lst){
@@ -821,6 +833,7 @@ name = name["replace"](RegExp(">","g"),"_gt_");
 name = name["replace"](RegExp("<","g"),"_lt_");
 name = name["replace"](RegExp("%","g"),"_per_");
 name = name["replace"](RegExp("=","g"),"_eq_");
+name = name["replace"](RegExp("\\/","g"),"_slash_");
 name = name["replace"](RegExp("\\*","g"),"_star_");
 name = name["replace"](RegExp("\\+","g"),"_plus_");
 return write(name);
@@ -995,7 +1008,7 @@ write_dash_string(cadr(el));
 return write(");");
 }),args);
 });
-return dict("\uFDD1write-runtime",write_dash_runtime,"\uFDD1write-number",write_dash_number,"\uFDD1write-string",write_dash_string,"\uFDD1write-boolean",write_dash_boolean,"\uFDD1write-term",write_dash_term,"\uFDD1write-symbol",write_dash_symbol,"\uFDD1write-empty-list",write_dash_empty_dash_list,"\uFDD1write-set",write_dash_set,"\uFDD1write-set!",write_dash_set_excl_,"\uFDD1write-if",write_dash_if,"\uFDD1write-lambda",write_dash_lambda,"\uFDD1write-func-call",write_dash_func_dash_call,"\uFDD1write-raw-code",write_dash_raw_dash_code,"\uFDD1write-require",write_dash_require,"\uFDD1write-and",make_dash_op_dash_writer("&&"),"\uFDD1write-or",make_dash_op_dash_writer("||"),"\uFDD1write-add",make_dash_op_dash_writer("+"),"\uFDD1write-subtract",make_dash_op_dash_writer("-"),"\uFDD1write-multiply",make_dash_op_dash_writer("*"),"\uFDD1write-divide",make_dash_op_dash_writer("/"),"\uFDD1write-gt",make_dash_op_dash_writer(">"),"\uFDD1write-lt",make_dash_op_dash_writer("<"),"\uFDD1write-mod",make_dash_op_dash_writer("%"),"\uFDD1make-fresh",make_dash_fresh,"\uFDD1get-code",(function() {return code["join"]("");
+return dict("\uFDD1write-runtime",write_dash_runtime,"\uFDD1write-number",write_dash_number,"\uFDD1write-string",write_dash_string,"\uFDD1write-boolean",write_dash_boolean,"\uFDD1write-term",write_dash_term,"\uFDD1write-symbol",write_dash_symbol,"\uFDD1write-empty-list",write_dash_empty_dash_list,"\uFDD1write-set",write_dash_set,"\uFDD1write-set!",write_dash_set_excl_,"\uFDD1write-if",write_dash_if,"\uFDD1write-lambda",write_dash_lambda,"\uFDD1write-func-call",write_dash_func_dash_call,"\uFDD1write-raw-code",write_dash_raw_dash_code,"\uFDD1write-require",write_dash_require,"\uFDD1write-and",make_dash_op_dash_writer("&&"),"\uFDD1write-or",make_dash_op_dash_writer("||"),"\uFDD1write-add",make_dash_op_dash_writer("+"),"\uFDD1write-subtract",make_dash_op_dash_writer("-"),"\uFDD1write-multiply",make_dash_op_dash_writer("*"),"\uFDD1write-divide",make_dash_op_dash_writer("/"),"\uFDD1write-gt",make_dash_op_dash_writer(">"),"\uFDD1write-lt",make_dash_op_dash_writer("<"),"\uFDD1write-gteq",make_dash_op_dash_writer(">="),"\uFDD1write-lteq",make_dash_op_dash_writer("<="),"\uFDD1write-mod",make_dash_op_dash_writer("%"),"\uFDD1write-rshift",make_dash_op_dash_writer(">>"),"\uFDD1write-lshift",make_dash_op_dash_writer("<<"),"\uFDD1write-bitwise-or",make_dash_op_dash_writer("|"),"\uFDD1write-bitwise-and",make_dash_op_dash_writer("&"),"\uFDD1make-fresh",make_dash_fresh,"\uFDD1get-code",(function() {return code["join"]("");
 }));
 });
 module["exports"] = generator;

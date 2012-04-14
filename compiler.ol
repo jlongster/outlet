@@ -452,6 +452,12 @@
 (install-native '/ 'write-divide verify-not-single)
 (install-native '> 'write-gt verify-not-single)
 (install-native '< 'write-lt verify-not-single)
+(install-native '<= 'write-lteq verify-not-single)
+(install-native '>= 'write-gteq verify-not-single)
+(install-native '>> 'write-rshift verify-not-single)
+(install-native '<< 'write-lshift verify-not-single)
+(install-native 'bitwise-or 'write-bitwise-or verify-not-single)
+(install-native 'bitwise-and 'write-bitwise-and verify-not-single)
 (install-native '% 'write-mod verify-not-single)
 
 (install-native 'require 'write-require
