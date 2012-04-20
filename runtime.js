@@ -560,7 +560,7 @@ return ("\"" + obj + "\"");
 }))();
 } else {return (function() {if(function_p_(obj)) {return ((function() {return "<function>";
 }))();
-} else {return ((function() {throw("%inspect-non-sequence: unexpected type");
+} else {return ((function() {return ("<unknown " + obj + ">");
 }))();
 }})()
 ;
@@ -725,8 +725,6 @@ return (vector_p_(value) && _eq_(vector_dash_ref(value,0),"__tco_call"));
 var trampoline = (function(value){
 while(trampoline_dash_result_p_(value)) { value = value[1](); }return value;
 });
-var _gensym = 0;
-var gensym = (function() {_gensym = (_gensym + 1);
-return string_dash__gt_symbol(("o" + _gensym));
+var gensym = (function() {return string_dash__gt_symbol(("o" + Math["floor"]((Math["random"]() * 10000000))));
 });
 

@@ -743,7 +743,7 @@ var comment = all(optional(space),char(";"),repeated(not_dash_char("\n")),space)
 var number_dash_int_slash_float = capture(all(optional(char("-")),repeated(char("1234567890")),optional(all(char("."),repeated(char("1234567890"))))),(function(text,state){
 return parseFloat(text);
 }));
-var number_dash_hex = capture(all(char("0"),char("x"),repeated(char("1234567890"))),(function(text,state){
+var number_dash_hex = capture(all(char("0"),char("x"),repeated(char("1234567890abcdefABCDEF"))),(function(text,state){
 return parseInt(text["slice"](2),16);
 }));
 var number = any(number_dash_hex,number_dash_int_slash_float);

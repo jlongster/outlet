@@ -420,7 +420,7 @@
    ((boolean? obj) (if obj "#t" "#f"))
    ((null? obj) "()")
    ((function? obj) "<function>")
-   (else (throw "%inspect-non-sequence: unexpected type"))))
+   (else (+ "<unknown " obj ">"))))
 
 (define (%recur-protect obj arg func halt . rest)
   (let ((parents (if (null? rest) '() (car rest))))
@@ -543,8 +543,6 @@
   (%raw "while(trampoline_dash_result_p_(value)) { value = value[1](); }")
   value)
 
-;; TODO: need to randomize
-(define _gensym 0)
+;; TODO: this needs better randomization
 (define (gensym)
-  (set! _gensym (+ _gensym 1))
-  (string->symbol (+ "o" _gensym)))
+  (string->symbol (+ "o" (Math.floor (* (Math.random) 10000000)))))

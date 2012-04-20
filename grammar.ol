@@ -23,7 +23,7 @@
   (define number-hex
     (capture (all (char "0")
                   (char "x")
-                  (repeated (char "1234567890")))
+                  (repeated (char "1234567890abcdefABCDEF")))
              (lambda (text state)
                (parseInt (text.slice 2) 16))))
 
