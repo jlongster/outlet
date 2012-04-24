@@ -20,7 +20,8 @@
                   compiler))
 
         ;; just kidding, always use the current compiler
-        (comp compiler))
+        (comp compiler)
+        )
       
     ;; if dumping to an external file, need to write the runtime
     ;;(gen.write-runtime "js")
@@ -28,7 +29,6 @@
     (comp.set-macro-generator gen)
 
     (let ((f (comp.expand (comp.read src))))
-      ;;(pp f)
       (comp.parse f gen)
       ((%raw "eval") (gen.get-code))
       ;;(println (gen.get-code))

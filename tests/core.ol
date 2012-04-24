@@ -124,7 +124,7 @@
 
 (test-eval (vector-concat [1 2] [3 4]) [1 2 3 4])
 (test-eval (vector-slice [1 2 3 4] 1) [2 3 4])
-(test-eval (vector-slice [1 2 3 4] 1 2) [2 3])
+(test-eval (vector-slice [1 2 3 4] 1 3) [2 3])
 
 (define vec [1 2 3 4])
 (vector-push! vec 5)

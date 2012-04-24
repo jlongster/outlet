@@ -8,7 +8,7 @@
 
 (define (application? form)
   (and (list? form)
-       (not (expander? (car form)))))
+       (not (macro? (car form)))))
 
 (define (opt arg def)
   (if (null? arg) def (car arg)))
@@ -17,103 +17,49 @@
   (if (not cnd)
       (throw msg)))
 
-;; expanders
+;; macros
 
-(define _expanders_ {})
-
-(define (expander-function name)
-  (dict-ref _expanders_ name))
-
-(define (install-expander name func)
-  (dict-put! _expanders_ name func))
-
-(define (expander? name)
-  (and (symbol? name)
-       (not (eq? (dict-ref _expanders_ name)
-                 undefined))))
-
-(define (expand form)
-  (initial-expander form initial-expander))
-
-(define (expand-once form)
-  (initial-expander form (lambda (x e) x)))
-
-(define (expand-nth form n)
-  (let ((i 0))
-    (let ((e1 (lambda (x e2)
-                (if (not (< i n))
-                    x
-                    (begin
-                      (if (and (list? x)
-                               (expander? (car x))
-                               (not (eq? (car x) 'lambda)))
-                          (set! i (+ i 1)))
-                      (initial-expander x e2))))))
-      (e1 form e1))))
-
-(define (initial-expander form e)
+(define (expand exp)
   (cond
-   ((symbol? form) form)
-   ((literal? form) form)
-   ((vector? form) (vector-map (lambda (el) (e el e))
-                               form))
-   ((dict? form) (dict-map (lambda (el) (e el e))
-                           form))
-   ((expander? (car form))
-    ((expander-function (car form)) form e))
-   (else
-    (map (lambda (subform) (e subform e)) form))))
+   ((or (symbol? exp)
+        (literal? exp)) exp)
+   ((vector? exp) (vector-map (lambda (e) (expand e))
+                              exp))
+   ((dict? exp) (dict-map (lambda (e) (expand e))
+                          exp))
+   ((eq? (car exp) 'lambda)
+    `(lambda ,(cadr exp)
+       ,@(map expand (cddr exp))))
+   ((macro? (car exp))
+    (expand ((macro-function (car exp)) exp)))
+   (else (map expand exp))))
 
-(install-expander 'define-expander
-                  (lambda (form e)
-                    (let ((sig (cadr form)))
-                      (let ((name (car sig))
-                            (arg-names (cdr sig))
-                            (body (cddr form)))
-                        (install-expander name (make-expander arg-names body))
-                        #t))))
+(define %macros {})
 
-(define (make-expander arg-names body)
-  (assert (eq? (length arg-names) 2)
-          "define-expander functions must take two arguments")
-  ;; see notes in make-macro, does the same thing
-  (eval
-   (compile
-    `(lambda ,arg-names
-       ,@body)
-    (macro-generator.make-fresh))))
+(define (macro-function name)
+  (dict-ref %macros name))
 
-;; define-macro implementation on top of expanders
+(define (install-macro name f)
+  (dict-put! %macros name f))
 
-(install-expander 'define-macro
-                  (lambda (form e)
-                    (let ((sig (cadr form)))
-                      (let ((name (car sig))
-                            (pattern (cdr sig))
-                            (body (cddr form)))
-                        ;; install it during expand-time
-                        (install-macro name pattern body)
-                        #t))))
-
+(define (macro? name)
+  (and (symbol? name)
+       (dict-ref %macros name)
+       #t))
 
 (define macro-generator #f)
 
-(define (install-macro name pattern body)
-  (install-expander name (make-macro pattern body)))
-
 (define (make-macro pattern body)
-  (let ((x (gensym))
-        (e (gensym)))
+  (let ((x (gensym)))
     ;; compile the macro into native code and use the host's native
     ;; eval to eval it into a function. we don't use outlet's eval
-    ;; because that only works outside the compiler (see comments on
-    ;; `eval`).
-    (let ((src
-           `(lambda (,x ,e)
-              (,e (let ,(destructure pattern `(cdr ,x) '())
-                    ,@body)
-                  ,e))))
-      ((%raw "eval") (compile src (macro-generator.make-fresh))))))
+    ;; because that would create a circular dependency.
+    ((%raw "eval")
+     (compile
+      `(lambda (,x)
+         (let ,(destructure pattern `(cdr ,x) '())
+           ,@body))
+      (macro-generator.make-fresh)))))
 
 (define (destructure pattern access bindings)
   (cond
@@ -125,47 +71,54 @@
           (destructure (cdr pattern) `(cdr ,access)
                        bindings)))))
 
+(install-macro 'define-macro
+               (lambda (form)
+                 (let ((sig (cadr form)))
+                   (let ((name (car sig))
+                         (pattern (cdr sig))
+                         (body (cddr form)))
+                     ;; install it during expand-time
+                     (install-macro name (make-macro pattern body))
+                     #f))))
+
 ;; system macros
 
-(install-expander
- 'lambda
- (lambda (form e)
-   `(lambda ,(car (cdr form))
-      ,@(map (lambda (subform) (e subform e)) (cdr (cdr form))))))
+(install-macro
+ 'cond
+ (lambda (form)
+   (if (null? (cdr form))
+       #f
+       (let ((forms (cdr form)))
+         (let ((f (car forms)))
+           (if (eq? (car f) 'else)
+               `(begin ,@(cdr f))
+               `(if ,(car f)
+                    (begin ,@(cdr f))
+                    (cond ,@(cdr forms)))))))))
 
-(install-expander 'cond
-                  (lambda (form e)
-                    (if (null? (cdr form))
-                        #f
-                        (let ((forms (cdr form)))
-                          (let ((f (car forms)))
-                            (if (eq? (car f) 'else)
-                                (e `(begin ,@(cdr f)) e)
-                                (e `(if ,(car f)
-                                        (begin ,@(cdr f))
-                                        (cond ,@(cdr forms))) e)))))))
+(install-macro
+ 'begin
+ (lambda (form)
+   `((lambda () ,@(cdr form)))))
 
-(install-expander 'begin
-                  (lambda (form e)
-                    (e `((lambda () ,@(cdr form))) e)))
+(install-macro
+ 'define
+ (lambda (form)
+   (let ((sig (cadr form)))
+     (cond
+      ((list? sig)
+       `(set ,(car sig) (lambda ,(cdr sig)
+                          ,@(cddr form))))
+      ((symbol? sig)
+       `(set ,sig ,(caddr form)))
+      (else
+       (throw (str "define requires a list"
+                   " or symbol to operate on: "
+                   (inspect form))))))))
 
-(install-expander 'define
-                  (lambda (form e)
-                    (let ((sig (cadr form)))
-                      (cond
-                       ((list? sig)
-                        (e `(set ,(car sig) (lambda ,(cdr sig)
-                                              ,@(cddr form))) e))
-                       ((symbol? sig)
-                        (e `(set ,sig ,(caddr form)) e))
-                       (else
-                        (throw (str "define requires a list"
-                                              " or symbol to operate on: "
-                                              (inspect form))))))))
-
-(install-expander
+(install-macro
  'let
- (lambda (form e)
+ (lambda (form)
    (define (replace expr old sym)
      (cond
       ((symbol? expr) (if (== expr old)
@@ -284,76 +237,77 @@
                        (cdddr form)
                        (cddr form))))
        (let ((tco-ed (tco body name)))
-         (e `((lambda ()
-                (define (,name ,@(map car forms))
-                  ,@tco-ed)
-                ;; todo, bug here. splicing in
-                ;; var-defs and then putting (,name
-                ;; ,@vars) after it didn't work
-                ,@(list-append
-                   (generate-defs syms forms)
-                   (if (tco-call? name tco-ed)
-                       `((trampoline (,name ,@syms)))
-                       `((,name ,@syms))))))
-            e))))))
+         `((lambda ()
+             (define (,name ,@(map car forms))
+               ,@tco-ed)
+             ;; todo, bug here. splicing in
+             ;; var-defs and then putting (,name
+             ;; ,@vars) after it didn't work
+             ,@(list-append
+                (generate-defs syms forms)
+                (if (tco-call? name tco-ed)
+                    `((trampoline (,name ,@syms)))
+                    `((,name ,@syms)))))))))))
 
 ;; quoting
 
-(install-expander 'quote
-                  (lambda (form e)
-                    (let ((src (cadr form)))
-                      ;; convert quoted lists into a list function
-                      ;; call with quoted subelements. literals strip
-                      ;; out the quote, and symbols keep the quote.
-                      ;; the parser implements the low-level `quote`
-                      ;; form.
-                      (let ((q (lambda (el) (e (list 'quote el) e))))
-                        (cond
-                         ((symbol? src) (list 'quote src))
-                         ((literal? src) src)
-                         ((vector? src) (vector-map q src))
-                         ((dict? src) (dict-map q src))
-                         ((list? src) (cons 'list (map q src)))
-                         (else
-                          (throw (str "invalid type of expression: "
-                                                (inspect src)))))))))
+(install-macro
+ 'quote
+ (lambda (form)
+   (let ((src (cadr form)))
+     ;; convert quoted lists into a list function
+     ;; called with quoted subelements. literals strip
+     ;; out the quote, and symbols keep the quote.
+     ;; the parser implements the low-level `quote`
+     ;; form.
+     (let ((q (lambda (e) (list 'quote e))))
+       (cond
+        ((symbol? src) (list '%quoted src))
+        ((literal? src) src)
+        ((vector? src) (vector-map q src))
+        ((dict? src) (dict-map q src))
+        ((list? src) (cons 'list (map q src)))
+        (else
+         (throw (str "invalid type of expression: "
+                     (inspect src)))))))))
 
-(install-expander 'quasiquote
-                  (lambda (form e)
-                    (let ((src (cadr form)))
-                      (cond
-                       ((symbol? src) (list 'quote src))
-                       ((literal? src) src)
-                       ((vector? src) `(list->vector
-                                        ,(unquote-splice-expand (vector->list src) e)))
-                       ((dict? src)
-                        ;; dicts only support the `unquote` form in
-                        ;; the value position. `unquote-splicing`
-                        ;; isn't supported because of flaws in
-                        ;; the reader (need to convert it to use real
-                        ;; AST instead of native javascript types)
-                        (dict-map (lambda (el)
-                                    (if (and (list? el)
-                                             (eq? (car src) 'unquote))
-                                        (e (cadr el) e)
-                                        (e (list 'quasiquote el) e)))
-                                  src))
-                       ((list? src)
-                        ;; lists with `unquote` in car return the cadr
-                        ;; as an unquoted & expanded expression
-                        (if (eq? (car src) 'unquote)
-                            (e (cadr src) e)
-                            ;; other lists need to be searched for the
-                            ;; `unquote-splicing` form, and quote
-                            ;; everything else
-                            (unquote-splice-expand src e)))
-                       (else
-                        (throw (str "invalid type of expression: "
-                                              (inspect src))))))))
+(install-macro
+ 'quasiquote
+ (lambda (form)
+   (let ((src (cadr form)))
+     (cond
+      ((symbol? src) (list '%quoted src))
+      ((literal? src) src)
+      ((vector? src) `(list->vector
+                       ,(unquote-splice-expand (vector->list src))))
+      ((dict? src)
+       ;; dicts only support the `unquote` form in
+       ;; the value position. `unquote-splicing`
+       ;; isn't supported because of flaws in
+       ;; the reader (need to convert it to use real
+       ;; AST instead of native javascript types)
+       (dict-map (lambda (el)
+                   (if (and (list? el)
+                            (eq? (car src) 'unquote))
+                       (cadr el)
+                       (list 'quasiquote el)))
+                 src))
+      ((list? src)
+       ;; lists with `unquote` in car return the cadr
+       ;; as an unquoted & expanded expression
+       (if (eq? (car src) 'unquote)
+           (cadr src)
+           ;; other lists need to be searched for the
+           ;; `unquote-splicing` form, and quote
+           ;; everything else
+           (unquote-splice-expand src)))
+      (else
+       (throw (str "invalid type of expression: "
+                   (inspect src))))))))
 
 ;; handle the `unquote-splicing` form within a `quasiquote` form. only
 ;; works with lists
-(define (unquote-splice-expand lst e)
+(define (unquote-splice-expand lst)
   (define (list-push lst item)
     (if (null? item)
         lst
@@ -388,12 +342,12 @@
                                     (vector->list ,v)
                                     ,v)))))))
                 (quote-splice (cdr lst)
-                              (cons (e src e)
+                              (cons src
                                     (list-push lst-acc acc))
                               '()))
               (quote-splice (cdr lst)
                             lst-acc
-                            (cons (e (list 'quasiquote el) e)
+                            (cons (list 'quasiquote el)
                                   acc))))))
   ;; cut the list into sublists and return a form that melds them back
   ;; together
@@ -409,10 +363,11 @@
 ;; depends on two builtins which represent the current compiler and
 ;; generator.
 
-(install-expander 'eval
-                  (lambda (form e)
-                    `(eval
-                      (__compiler.compile ,(e (cadr form) e) (__generator)))))
+(install-macro
+ 'eval
+ (lambda (form)
+   `((%raw "eval")
+     (__compiler.compile ,(cadr form) (__generator)))))
 
 ;; natives
 ;;
@@ -556,7 +511,7 @@
         (cond
          ((eq? first 'if) (parse-if form))
          ((eq? first 'lambda) (parse-lambda form))
-         ((eq? first 'quote) (parse-quoted form))
+         ((eq? first '%quoted) (parse-quoted form))
          ((or (eq? first 'set!)
               (eq? first 'set)) (parse-set form))
          ((eq? first '%raw)
@@ -579,7 +534,7 @@
 
                            (set! i (+ i 1))
                            (if (eq? (% (- i 1) 2) 0)
-                               (list 'quote el)
+                               (list '%quoted el)
                                el))
                          lst)))
           (parse-list (cons 'dict qlst)))))
@@ -614,9 +569,7 @@
                       :expand expand
                       :parse parse
                       :compile compile
-                      :install-expander install-expander
-                      :expand-once expand-once
-                      :expand-nth expand-nth
+                      :install-macro install-macro
                       :pp pp
 
                       :set-macro-generator
