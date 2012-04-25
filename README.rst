@@ -19,6 +19,11 @@ Features
 * Javascript code generator
 * Several other things, it's hackable!
 
+Current Status: Refactoring
+---------------------------
+
+The current implementation is essentially a prototype. Although it provides a minimally feature-complete language, it has several flaws and hacks. Now that I've let this project simmer a little bit, it's time to refactor it into a more robust implementation. The result will be faster, better tooling, and more thought-out.
+
 Example
 -------
 
@@ -63,8 +68,8 @@ Example
            (begin
              ,@body)))
 
-Status
-------
+Notes
+-----
 
 The compiler is stable and a full runtime is available (see runtime.ol). It is written 100% in Outlet.
 
