@@ -77,9 +77,10 @@
     (terminate-expr (not top?)))
 
   (define (write-term obj top?)
-    (let ((obj (if (== obj 'var)
-                   '_var_
-                   obj)))
+    (let ((obj (cond
+                ((== obj 'var) '_var_)
+                ((== obj 'in) '_in_)
+                (else obj))))
 
       (define name (obj.substring 1))
       (define parts (name.split "."))

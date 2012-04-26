@@ -1,6 +1,6 @@
 (require (util "util")
          (fs "fs")
-         (reader "./parser")
+         (reader "./reader")
          (grammar "./grammar")
          (js "./backends/js"))
 
@@ -549,7 +549,7 @@
       (throw (str "Unkown thing: " form))))))
 
 (define (read src)
-  (reader grammar src []))
+  (reader.read src))
 
 (define (compile src generator)
   ;; eval needs a code generator
