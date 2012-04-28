@@ -1,5 +1,6 @@
 
-(require (fs "fs"))
+(require (fs "fs")
+         (ast "../ast"))
 
 (define (should-return? form)
   (not (and (list? form)
@@ -76,13 +77,14 @@
     (write (+ "\"\\uFDD1" (obj.substring 1) "\""))
     (terminate-expr (not top?)))
 
-  (define (write-term obj top?)
-    (let ((obj (cond
-                ((== obj 'var) '_var_)
-                ((== obj 'in) '_in_)
-                (else obj))))
+  (define (write-term node top?)
+    (let ((exp (ast.node-data node))
+          (exp (cond
+                ((== exp 'var) '_var_)
+                ((== exp 'in) '_in_)
+                (else exp))))
 
-      (define name (obj.substring 1))
+      (define name (exp.substring 1))
       (define parts (name.split "."))
 
       (let ((name (vector-ref parts 0)))
@@ -196,26 +198,26 @@
     (write "})")
     (terminate-expr expr?))
 
-  (define (write-func-call func args expr? parse)
+  (define (write-func-call func args expr? compile)
     ;; write the calling function, which can be a symbol, a lambda, or a
     ;; call to another function
-    (if (symbol? func)
+    (if (ast.type? func 'ATOM)
         (write-term func)
-        (if (eq? (car func) 'lambda)
+        (if (eq? (ast.first* func) 'lambda)
             (begin
               ;; need to wrap an anon function in parens so it's
               ;; valid syntax
               (write "(")
-              (parse func #t)
+              (compile func #t)
               (write ")"))
-            (parse func #t)))
+            (compile func #t)))
 
     ;; write the arguments
     (write "(")
     (let ((comma (inline-writer ",")))
       (for-each (lambda (arg)
                   (comma)
-                  (parse arg #t))
+                  (compile arg #t))
                 args))
     (write ")")
 

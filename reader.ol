@@ -1,5 +1,6 @@
 
-(require (fs "fs"))
+(require (fs "fs")
+         (ast "./ast"))
 
 (define chars-whitespace " \n\t\r")
 (define chars-special "(){}[],@'`:")
@@ -8,9 +9,15 @@
 (define (in str char)
   (number? (vector-find str char)))
 
+(define (vec-getter i)
+  (lambda (vec)
+    (vector-ref vec i)))
+
 (define (read src)
   (define index 0)
   (define len (vector-length src))
+  (define lineno 0)
+  (define colno 0)
 
   (define (current)
     (if (finished)
@@ -21,10 +28,19 @@
     (vector-ref src (- index 1)))
   
   (define (forward)
-    (set! index (+ index 1)))
+    (set! index (+ index 1))
+    
+    (if (== (previous) "\n")
+        (begin
+          (set! lineno (+ lineno 1))
+          (set! colno 0))
+        (set! colno (+ colno 1))))
 
   (define (back)
-    (set! index (- index 1)))
+    (set! index (- index 1))
+    
+    (if (== (current) "\n")
+        (set! lineno (- lineno 1))))
   
   (define (finished)
     (>= index len))
@@ -36,7 +52,7 @@
             (forward)
             (loop)))))
 
-  (define (parse-string)
+  (define (parse-string lineno colno)
     (let loop ((s ""))
       (forward)
       (cond
@@ -49,28 +65,28 @@
                    ((== c "t") "\t")
                    ((== c "r") "\r")
                    (else c))))))
-       ((== (current) "\"") s)
+       ((== (current) "\"") (make-token 'STRING s lineno colno))
        (else (loop (str s (current)))))))
 
-  (define (parse-token s)
+  (define (parse-token s lineno colno)
     (cond
-     ((s.match (RegExp "^[-+]?[0-9]+$")) (make-token 'INTEGER s))
-     ((s.match (RegExp "^[-+]?[0-9]+\\.[0-9]*$")) (make-token 'FLOAT s))
+     ((s.match (RegExp "^[-+]?[0-9]+$")) (make-token 'INTEGER s lineno colno))
+     ((s.match (RegExp "^[-+]?[0-9]+\\.[0-9]*$")) (make-token 'FLOAT s lineno colno))
      ((s.match (RegExp "^[-+]?0x"))
       (let ((m (s.match (RegExp "0x([0-9a-fA-F]+)$")))
             (prefix (if (== (vector-ref s 0) "-") "-" "")))
         (if m
-            (make-token 'HEX (str prefix (vector-ref m 1)))
+            (make-token 'HEX (str prefix (vector-ref m 1)) lineno colno)
             (throw (str "invalid hex value: " s)))))
-     ((or (== s "#f") (== s "#t")) (make-token 'BOOLEAN s))
-     (else (make-token 'SYMBOL s))))
+     ((or (== s "#f") (== s "#t")) (make-token 'BOOLEAN s lineno colno))
+     (else (make-token 'SYMBOL s lineno colno))))
 
-  (define (parse-comment)
+  (define (parse-comment lineno colno)
     (let loop ((s ""))
       (forward)
       (if (or (finished)
               (== (current) "\n"))
-          (make-token 'COMMENT s)
+          (make-token 'COMMENT s lineno colno)
           (loop (str s (current))))))
   
   ;; tokens
@@ -79,37 +95,40 @@
   ;; reader
   (define unique-obj (list #t))
   
-  (define (make-token type data)
-    (list unique-obj type data))
+  (define (make-token type data lineno colno)
+    [unique-obj type data lineno colno])
 
-  (define token-type cadr)
-  (define token-data caddr)
+  (define token-type (vec-getter 1))
+  (define token-data (vec-getter 2))
+  (define token-lineno (vec-getter 3))
+  (define token-colno (vec-getter 4))
 
   (define (token? tok)
-    (and (list? tok)
-         (== (car tok) unique-obj)))
+    (and (vector? tok)
+         (== (vector-ref tok 0) unique-obj)))
   
   (define (get-token)
     (skip-whitespace)
-    (let ((c (current)))
+    (let ((c (current))
+          (lineno lineno)
+          (colno colno))
       (cond
        ((in chars-special c)
         (forward)
-        (make-token 'SPECIAL c))
+        (make-token 'SPECIAL c lineno colno))
        ((== c "\"")
-        (let ((s (parse-string)))
+        (let ((s (parse-string lineno colno)))
           (forward)
-          (make-token 'STRING s)))
+          s))
        ((== c ";")
-        (parse-comment))
+        (parse-comment lineno colno))
        ((== c "") #f)
        ((finished) #f)
        (else
         (let loop ((s ""))
           (if (or (in chars-delim (current))
                   (finished))
-              (begin
-                (parse-token s))
+              (parse-token s lineno colno)
               (begin
                 (forward)
                 (loop (str s (previous))))))))))
@@ -159,7 +178,7 @@
         ;; knows when to end
         token)
        
-       ((compound-start? token)
+       ((compound-start? token)        
         (let loop ((lst '())
                    (exp (read-exp)))
           (if (or (end? exp)
@@ -173,25 +192,15 @@
                 (define in-dict? (special? token "{"))
                 
                 (cond
-                 ((and in-list? (special? exp ")")) (reverse lst))
-                 ((and in-vector? (special? exp "]")) (list->vector (reverse lst)))
-                 ((and in-dict? (special? exp "}"))
-                  (let ((i 0))
-                    (apply dict
-                           (map
-                            (lambda (el)
-                              ;; unquote the keys. this is bad and I
-                              ;; have no idea why we need to do it here
-                              ;; but its leftover from the previous
-                              ;; reader. will fix son.
-                              (set! i (+ i 1))
-                              (if (eq? (% (- i 1) 2) 0)
-                                  (if (and (list? el)
-                                           (eq? (car el) 'quote))
-                                      (cadr el)
-                                      el)
-                                  el))
-                            (reverse lst)))))
+                 ((and in-list? (special? exp ")")) (ast.make-node 'LIST (reverse lst)
+                                                                   (token-lineno token)
+                                                                   (token-colno token)))
+                 ((and in-vector? (special? exp "]")) (ast.make-node 'VECTOR (reverse lst)
+                                                                     (token-lineno token)
+                                                                     (token-colno token)))
+                 ((and in-dict? (special? exp "}")) (ast.make-node 'DICT (reverse lst)
+                                                                   (token-lineno token)
+                                                                   (token-colno token)))
                  (else
                   (throw (str "unterminated "
                               (cond
@@ -203,31 +212,65 @@
        
        ((or (special? token "'")
             (special? token ":"))
-        (list 'quote (read-exp)))
+        (ast.make-node
+         'LIST
+         (list (ast.make-node 'ATOM 'quote
+                              (token-lineno token)
+                              (token-colno token))
+               (read-exp))
+         (token-lineno token)
+         (token-colno token)))
 
        ((special? token "`")
-        (list 'quasiquote (read-exp)))
+        (ast.make-node
+         'LIST
+         (list (ast.make-node 'ATOM 'quasiquote
+                              (token-lineno token)
+                              (token-colno token))
+               (read-exp))
+         (token-lineno token)
+         (token-colno token)))
 
        ((special? token ",")
         (let ((next (current)))
           (if (== next "@")
               (begin
                 (forward)
-                (list 'unquote-splicing (read-exp)))
+                (ast.make-node
+                 'LIST
+                 (list (ast.make-node 'ATOM 'unquote-splicing
+                                      (token-lineno token)
+                                      (token-colno token))
+                       (read-exp))
+                 (token-lineno token)
+                 (token-colno token)))
               (begin
-                (list 'unquote (read-exp))))))
+                (ast.make-node
+                 'LIST
+                 (list (ast.make-node 'ATOM 'unquote
+                                      (token-lineno token)
+                                      (token-colno token))
+                       (read-exp))
+                 (token-lineno token)
+                 (token-colno token))))))
 
        (else
         (if (== (token-type token) 'COMMENT)
             (read-exp)
-            (token->exp token))))))
+            (ast.make-node 'ATOM
+                           (token->exp token)
+                           (token-lineno token)
+                           (token-colno token)))))))
 
   (let loop ((e* '())
              (e (read-exp)))
     (if (end? e)
         (if (== (length e*) 1)
             (car e*)
-            (cons 'begin (reverse e*)))
+            (ast.make-node 'LIST
+                           (cons (ast.make-node 'ATOM 'begin 0 1)
+                                 (reverse e*))
+                           0 0))
         (loop (cons e e*) (read-exp)))))
 
 (set! module.exports {:read read})

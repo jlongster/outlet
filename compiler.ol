@@ -1,7 +1,6 @@
 (require (util "util")
          (fs "fs")
          (reader "./reader")
-         (grammar "./grammar")
          (js "./backends/js"))
 
 ;; runtime
