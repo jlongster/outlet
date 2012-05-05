@@ -10,6 +10,9 @@ all: compiler
 reader.js: reader.ol
 	$(NODE_MAKE) _current_runtime reader.ol > reader2.js && mv reader2.js reader.js
 
+ast.js: ast.ol
+	$(NODE_MAKE) _current_runtime ast.ol > ast2.js && mv ast2.js ast.js
+
 compiler.js: compiler.ol
 	$(NODE_MAKE) _current_runtime compiler.ol > compiler2.js && mv compiler2.js compiler.js
 
@@ -22,7 +25,7 @@ test.js: test.ol
 runtime.js: runtime.ol
 	$(NODE_MAKE) _no_runtime runtime.ol > runtime2.js && mv runtime2.js runtime.js
 
-compiler: runtime.js compiler.js reader.js backends/js.js test.js
+compiler: runtime.js compiler.js reader.js ast.js backends/js.js test.js
 
 test: compiler
 	node test syntax.ol

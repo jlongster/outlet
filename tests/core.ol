@@ -21,7 +21,6 @@
   `(%test eval ',src #t (lambda (res val)
                           (not (eq? res #f)))))
 
-
 ;; functions
 
 (define (foo x y z) (+ x y z))
@@ -149,169 +148,169 @@
 (test-eval (dict :one 1 :two 2) {:one 1 :two 2})
 (test-eval (dict-ref {:one 1 :two 2} :one) 1)
 
-(define dct {:foo "bar" :baz "bizz"})
-(dict-put! dct :mumble "nimble")
-(test-eval dct {:foo "bar" :baz "bizz" :mumble "nimble"})
-(test-eval (dict-map (lambda (el) (+ el 1))
-                     {:foo 1 :bar 2})
-           {:foo 2 :bar 3})
+;; (define dct {:foo "bar" :baz "bizz"})
+;; (dict-put! dct :mumble "nimble")
+;; (test-eval dct {:foo "bar" :baz "bizz" :mumble "nimble"})
+;; (test-eval (dict-map (lambda (el) (+ el 1))
+;;                      {:foo 1 :bar 2})
+;;            {:foo 2 :bar 3})
 
-(test-eval (dict-merge {:one 1 :two 2} {:three 3 :four 4})
-           {:one 1 :two 2 :three 3 :four 4})
+;; (test-eval (dict-merge {:one 1 :two 2} {:three 3 :four 4})
+;;            {:one 1 :two 2 :three 3 :four 4})
 
-(test-assert (let ((vec (dict->vector {:one 1 :two 2})))
-               ;; can't guarantee order
-               (and (vector-find vec 'one)
-                    (vector-find vec 1)
-                    (vector-find vec 'two)
-                    (vector-find vec 2))))
+;; (test-assert (let ((vec (dict->vector {:one 1 :two 2})))
+;;                ;; can't guarantee order
+;;                (and (vector-find vec 'one)
+;;                     (vector-find vec 1)
+;;                     (vector-find vec 'two)
+;;                     (vector-find vec 2))))
 
-(test-assert (let ((lst (dict->list {:one 1 :two 2})))
-               ;; can't guarantee order
-               (and (list-find lst 'one)
-                    (list-find lst 1)
-                    (list-find lst 'two)
-                    (list-find lst 2))))
+;; (test-assert (let ((lst (dict->list {:one 1 :two 2})))
+;;                ;; can't guarantee order
+;;                (and (list-find lst 'one)
+;;                     (list-find lst 1)
+;;                     (list-find lst 'two)
+;;                     (list-find lst 2))))
 
-(let ((k (keys {:foo 1 :bar 2})))
-  (test-assert (list-find k 'foo))
-  (test-assert (list-find k 'bar)))
+;; (let ((k (keys {:foo 1 :bar 2})))
+;;   (test-assert (list-find k 'foo))
+;;   (test-assert (list-find k 'bar)))
 
-(let ((v (vals {:foo 1 :bar 2})))
-  (test-assert (list-find v 1))
-  (test-assert (list-find v 2)))
+;; (let ((v (vals {:foo 1 :bar 2})))
+;;   (test-assert (list-find v 1))
+;;   (test-assert (list-find v 2)))
 
-(let ((dct (zip '(foo bar baz) '(1 2 3))))
-  (test-eval (dict-ref dct 'foo) 1)
-  (test-eval (dict-ref dct 'bar) 2))
+;; (let ((dct (zip '(foo bar baz) '(1 2 3))))
+;;   (test-eval (dict-ref dct 'foo) 1)
+;;   (test-eval (dict-ref dct 'bar) 2))
 
-;; not
+;; ;; not
 
-(test-eval (not #f) #t)
-(test-eval (not 0) #f)
-(test-eval (not "foo") #f)
+;; (test-eval (not #f) #t)
+;; (test-eval (not 0) #f)
+;; (test-eval (not "foo") #f)
 
-;; equality
+;; ;; equality
 
-(test-assert (== 3 3))
-(test-assert (= 3 3))
-(test-assert (== "foo" "foo"))
-(test-assert (= "foo" "foo"))
-(test-assert (== #t #t))
-(test-assert (= #t #t))
-(test-assert (== 'foo 'foo))
-(test-assert (= 'foo 'foo))
-(test-assert (== '() '()))
-(test-assert (= '() '()))
+;; (test-assert (== 3 3))
+;; (test-assert (= 3 3))
+;; (test-assert (== "foo" "foo"))
+;; (test-assert (= "foo" "foo"))
+;; (test-assert (== #t #t))
+;; (test-assert (= #t #t))
+;; (test-assert (== 'foo 'foo))
+;; (test-assert (= 'foo 'foo))
+;; (test-assert (== '() '()))
+;; (test-assert (= '() '()))
 
-(define foo '(1 2 3))
-(test-assert (== foo foo))
-(test-eval (== '(1 2 3) '(1 2 3)) #f)
-(test-assert (= '(1 2 3) '(1 2 3)))
+;; (define foo '(1 2 3))
+;; (test-assert (== foo foo))
+;; (test-eval (== '(1 2 3) '(1 2 3)) #f)
+;; (test-assert (= '(1 2 3) '(1 2 3)))
 
-(define foo [1 2 3])
-(test-assert (== foo foo))
-(test-eval (== [1 2 3] [1 2 3]) #f)
-(test-assert (= [1 2 3] [1 2 3]))
+;; (define foo [1 2 3])
+;; (test-assert (== foo foo))
+;; (test-eval (== [1 2 3] [1 2 3]) #f)
+;; (test-assert (= [1 2 3] [1 2 3]))
 
-(define foo {:one 1})
-(test-assert (== foo foo))
-(test-eval (== {:one 1} {:one 1}) #f)
-(test-assert (= {:one 1} {:one 1}))
+;; (define foo {:one 1})
+;; (test-assert (== foo foo))
+;; (test-eval (== {:one 1} {:one 1}) #f)
+;; (test-assert (= {:one 1} {:one 1}))
 
 ;; ;; types
 
-(define-macro (ensure-type val truthy)
-  (cons 'begin
-        (map (lambda (func)
-               `(test-eval (,func ,val)
-                           ,(eq? func truthy)))
-             '(boolean?
-               number?
-               symbol?
-               string?
-               list?
-               vector?
-               dict?))))
+;; (define-macro (ensure-type val truthy)
+;;   (cons 'begin
+;;         (map (lambda (func)
+;;                `(test-eval (,func ,val)
+;;                            ,(eq? func truthy)))
+;;              '(boolean?
+;;                number?
+;;                symbol?
+;;                string?
+;;                list?
+;;                vector?
+;;                dict?))))
 
-(ensure-type 5 number?)
-(ensure-type #t boolean?)
-(ensure-type 'foo symbol?)
-(ensure-type "foo" string?)
-(ensure-type '(1 2 3) list?)
-(ensure-type [1 2 3] vector?)
-(ensure-type {:one 1} dict?)
+;; (ensure-type 5 number?)
+;; (ensure-type #t boolean?)
+;; (ensure-type 'foo symbol?)
+;; (ensure-type "foo" string?)
+;; (ensure-type '(1 2 3) list?)
+;; (ensure-type [1 2 3] vector?)
+;; (ensure-type {:one 1} dict?)
 
-;; if
+;; ;; if
 
-(test-eval (if #t 1 2) 1)
-(test-eval (if #f 1 2) 2)
-(test-eval (if true
-               (begin
-                 (define a 5)
-                 (* a 2)))
-           10)
+;; (test-eval (if #t 1 2) 1)
+;; (test-eval (if #f 1 2) 2)
+;; (test-eval (if true
+;;                (begin
+;;                  (define a 5)
+;;                  (* a 2)))
+;;            10)
 
-;; cond
+;; ;; cond
 
-(define x 3)
-(test-eval (cond
-             ((eq? x 0) 'zero)
-             ((eq? x 1) 'one)
-             ((eq? x 2) 'two)
-             ((eq? x 3) 'three))
-           'three)
+;; (define x 3)
+;; (test-eval (cond
+;;              ((eq? x 0) 'zero)
+;;              ((eq? x 1) 'one)
+;;              ((eq? x 2) 'two)
+;;              ((eq? x 3) 'three))
+;;            'three)
 
-(test-eval (cond
-            ((eq? x 0) 'zero)
-            ((eq? x 1) 'one)
-            ((eq? x 2) 'two)
-            (else 'none))
-           'none)
+;; (test-eval (cond
+;;             ((eq? x 0) 'zero)
+;;             ((eq? x 1) 'one)
+;;             ((eq? x 2) 'two)
+;;             (else 'none))
+;;            'none)
 
-;; misc
+;; ;; misc
 
-;; test code following an `if`
-(define (func)
-  (if #t "yes" "no")
-  (+ 1 2))
-(test-eval (func) 3)
+;; ;; test code following an `if`
+;; (define (func)
+;;   (if #t "yes" "no")
+;;   (+ 1 2))
+;; (test-eval (func) 3)
 
-;; test set! as last expression
-(define (faz)
-  (let ((x 1))
-    (+ 2 3)
-    (set! x 3)))
-(test-eval (faz) undefined)
+;; ;; test set! as last expression
+;; (define (faz)
+;;   (let ((x 1))
+;;     (+ 2 3)
+;;     (set! x 3)))
+;; (test-eval (faz) undefined)
 
-;; test define as last expression (this won't be valid in the future)
-(define (buz)
-  (+ 2 3)
-  (define a 4))
-(test-eval (buz) undefined)
+;; ;; test define as last expression (this won't be valid in the future)
+;; (define (buz)
+;;   (+ 2 3)
+;;   (define a 4))
+;; (test-eval (buz) undefined)
 
-;; test a few edge cases
-(test-eval (not (list? 0)) #t)
+;; ;; test a few edge cases
+;; (test-eval (not (list? 0)) #t)
 
-;; let
+;; ;; let
 
-;; vars should be able to reference each other within a let
-(let ((x 0)
-      (y (+ x 1)))
-  (test-eval y 1))
+;; ;; vars should be able to reference each other within a let
+;; (let ((x 0)
+;;       (y (+ x 1)))
+;;   (test-eval y 1))
 
-;; functions can reference vars too and order matters
-(define foo 5)
-(let ((baz foo)
-      (bar (lambda () (* baz 5))))
-  (test-eval (bar) 25))
+;; ;; functions can reference vars too and order matters
+;; (define foo 5)
+;; (let ((baz foo)
+;;       (bar (lambda () (* baz 5))))
+;;   (test-eval (bar) 25))
 
-;; vars can also reference themselves
-(define foo 5)
-(let ((foo foo)
-      (bar (+ foo 1)))
-  (test-eval foo 5)
-  (test-eval bar 6)
-  (set! foo 6)
-  (test-eval foo 6))
-(test-eval foo 5)
+;; ;; vars can also reference themselves
+;; (define foo 5)
+;; (let ((foo foo)
+;;       (bar (+ foo 1)))
+;;   (test-eval foo 5)
+;;   (test-eval bar 6)
+;;   (set! foo 6)
+;;   (test-eval foo 6))
+;; (test-eval foo 5)

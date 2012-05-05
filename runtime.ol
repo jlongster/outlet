@@ -18,11 +18,16 @@
 
 (define (string? obj)
   (and (== (%raw "typeof obj") "string")
+       (not (== (%raw "obj[0]") (%raw "\"\\uFDD0\"")))
        (not (== (%raw "obj[0]") (%raw "\"\\uFDD1\"")))))
 
 (define (symbol? obj)
+  (or (and (== (%raw "typeof obj") "string")
+           (== (%raw "obj[0]") (%raw "\"\\uFDD1\"")))))
+
+(define (key? obj)
   (and (== (%raw "typeof obj") "string")
-       (== (%raw "obj[0]") (%raw "\"\\uFDD1\""))))
+       (== (%raw "obj[0]") (%raw "\"\\uFDD0\""))))
 
 (define (boolean? obj)
   (or (eq? obj (%raw "true"))
@@ -71,28 +76,17 @@
           ""
           args)))
 
+(define (symbol->key sym)
+  (+ (%raw "\"\\uFDD0\"") (sym.substring 1)))
+
+(define (string->key str)
+  (+ (%raw "\"\\uFDD0\"") str))
+
 (define (string->symbol str)
-  (let ((s str))
-    ;; (set! s (s.replace (RegExp "-" "g") "_dash_"))
-    ;; (set! s (s.replace (RegExp "\\?" "g") "_p_"))
-    ;; (set! s (s.replace (RegExp "\\!" "g") "_excl_"))
-    ;; (set! s (s.replace (RegExp ">" "g") "_gt_"))
-    ;; (set! s (s.replace (RegExp "<" "g") "_lt_"))
-    ;; (set! s (s.replace (RegExp "%" "g") "_per_"))
-    ;; (set! s (s.replace (RegExp "=" "g") "_eq_"))
-    ;; raw code so that the compiler doesn't see this as a symbol
-    (+ (%raw "\"\\uFDD1\"") s)))
+  (+ (%raw "\"\\uFDD1\"") str))
 
 (define (symbol->string sym)
-  (let ((s (sym.substring 1)))
-    ;; (set! s (s.replace (RegExp "_dash_" "g") "-"))
-    ;; (set! s (s.replace (RegExp "_p_" "g") "?"))
-    ;; (set! s (s.replace (RegExp "_excl_" "g") "!"))
-    ;; (set! s (s.replace (RegExp "_gt_" "g") ">"))
-    ;; (set! s (s.replace (RegExp "_lt_" "g") "<"))
-    ;; (set! s (s.replace (RegExp "_per_" "g") "%"))
-    ;; (set! s (s.replace (RegExp "_eq_" "g") "="))
-    s))
+  (sym.substring 1))
 
 ;; lists
 
@@ -216,8 +210,13 @@
 (define (vector-put! vec i obj)
   (%raw "vec[i] = obj"))
 
-(define (vector-concat vec1 vec2)
-  (%raw "vec1.concat(vec2)"))
+(define (vector-concat . vecs)
+  (let loop ((lst (cdr vecs))
+             (res (car vecs)))
+    (if (null? lst)
+        res
+        (loop (cdr lst)
+              (res.concat (car lst))))))
 
 (define (vector-slice vec start end)
   (%raw "vec.slice(start, end)"))
@@ -295,12 +294,13 @@
           (loop (cdr lst)))))
   res)
 
-(define (dict-merge dct1 dct2)
+(define (dict-merge . dcts)
   (let ((res {}))
-    (map (lambda (k) (dict-put! res k (dict-ref dct1 k)))
-         (keys dct1))
-    (map (lambda (k) (dict-put! res k (dict-ref dct2 k)))
-         (keys dct2))
+    (for-each
+     (lambda (dct)
+       (for-each (lambda (k) (dict-put! res k (dict-ref dct k)))
+                 (keys dct)))
+     dcts)
     res))
 
 (define (dict->vector dct)
@@ -319,7 +319,7 @@
 (define (keys dct)
   (let ((res '()))
     (%raw "for(var k in dct) {
-       res = cons(string_dash__gt_symbol(k), res);
+       res = cons(string_dash__gt_key(k), res);
     }")
     res))
 
@@ -416,6 +416,7 @@
     (set! obj (obj.replace (RegExp "\t" "g") "\\t"))
     (set! obj (obj.replace (RegExp "\"" "g") "\\\""))
     (+ "\"" obj "\""))
+   ((key? obj) (+ ":" (symbol->string obj)))
    ((symbol? obj) (symbol->string obj))
    ((boolean? obj) (if obj "#t" "#f"))
    ((null? obj) "()")
@@ -513,7 +514,6 @@
                                (begin (disp "\n")
                                       (pad i))
                                (disp " ")))
-                       (disp ":")
                        (disp (recur k i))
                        (disp " ")
                        (disp (recur (dict-ref obj k)

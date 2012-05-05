@@ -22,11 +22,13 @@
 (define (assert-node node)
   (if (not (and (vector? node)
                 (== (vector-ref node 0) unique-obj)))
-      (throw (str "not a node: " node))))
+      (begin
+        (pp node)
+        (throw (Error (str "not a node"))))))
 
 (define (assert-type node type)
   (if (not (== (node-type node) type))
-      (throw (str "expected node type " type ": " node))))
+      (throw (Error (str "expected node type " type ": " node)))))
 
 (define (is-type? node type)
   (assert-node node)
@@ -50,10 +52,18 @@
              (node-colno parent)))
 
 (define (make-list . children)
+  (make-list* children))
+
+(define (make-list* children)
   (let ((first (car children)))
     (make-node 'LIST children
                (node-lineno first)
                (node-colno first))))
+
+(define (make-empty-list parent)
+  (make-node 'LIST '()
+             (node-lineno parent)
+             (node-colno parent)))
 
 (define (prepend node lst)
   (make-node 'LIST
@@ -87,6 +97,8 @@
                       :empty-list? is-empty-list?
 
                       :make-list make-list
+                      :make-list* make-list*
+                      :make-empty-list make-empty-list
                       :make-atom make-atom
                       :prepend prepend
                       :map-children map-children

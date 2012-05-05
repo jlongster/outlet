@@ -210,8 +210,7 @@
               (begin
                 (loop (cons exp lst) (read-exp))))))
        
-       ((or (special? token "'")
-            (special? token ":"))
+       ((special? token "'")
         (ast.make-node
          'LIST
          (list (ast.make-node 'ATOM 'quote
@@ -220,6 +219,15 @@
                (read-exp))
          (token-lineno token)
          (token-colno token)))
+
+       ((special? token ":")
+        (let ((e (read-exp)))
+          (if (or (not (ast.atom? e))
+                  (not (symbol? (ast.node-data e))))
+              (throw (str "invalid key expression: " (ast.node-data e))))
+          (ast.make-node 'ATOM (symbol->key (ast.node-data e))
+                         (token-lineno token)
+                         (token-colno token))))
 
        ((special? token "`")
         (ast.make-node
