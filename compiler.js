@@ -60,7 +60,7 @@ var function_p_ = (function(obj){
 return eq_p_(typeof obj,"function");
 });
 var literal_p_ = (function(x){
-return (number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
+return (key_p_(x) || number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
 });
 var str = (function() {
 var args = vector_dash__gt_list(Array.prototype.slice.call(arguments));
@@ -74,8 +74,14 @@ return (acc + (function() {if(string_p_(el)) {return el;
 var symbol_dash__gt_key = (function(sym){
 return ("\uFDD0" + sym["substring"](1));
 });
+var key_dash__gt_symbol = (function(sym){
+return ("\uFDD1" + sym["substring"](1));
+});
 var string_dash__gt_key = (function(str){
 return ("\uFDD0" + str);
+});
+var key_dash__gt_string = (function(key){
+return key["substring"](1);
 });
 var string_dash__gt_symbol = (function(str){
 return ("\uFDD1" + str);
@@ -1012,7 +1018,7 @@ return reverse(((function() {var loop = (function(lst,forms,vars,acc){
 return (function() {if(null_p_(lst)) {return acc;
 } else {return ((function() {var o39 = (function(sym,name,code){
 return vector("__tco_call",(function() {return loop(cdr(lst),cdr(forms),dict_dash_merge(vars,dict(name,sym)),cons(list("\uFDD1define",car(lst),fold((function(el,acc){
-return replace(acc,el,dict_dash_ref(vars,el));
+return replace(acc,key_dash__gt_symbol(el),dict_dash_ref(vars,el));
 }),code,keys(vars))),acc));
 }));
 });

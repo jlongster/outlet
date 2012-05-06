@@ -163,6 +163,7 @@
                     (begin ,@(cdr f))
                     (cond ,@(cdr forms)))))))))
 
+;; TODO: clean this up, make it more efficient
 (install-macro
  'let
  (lambda (form)
@@ -195,7 +196,7 @@
                     (dict-merge vars (dict name sym))
                     (cons `(define ,(car lst)
                              ,(fold (lambda (el acc)
-                                      (replace acc el (dict-ref vars el)))
+                                      (replace acc (key->symbol el) (dict-ref vars el)))
                                     code
                                     (keys vars)))
                           acc)))))))

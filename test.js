@@ -60,7 +60,7 @@ var function_p_ = (function(obj){
 return eq_p_(typeof obj,"function");
 });
 var literal_p_ = (function(x){
-return (number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
+return (key_p_(x) || number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
 });
 var str = (function() {
 var args = vector_dash__gt_list(Array.prototype.slice.call(arguments));
@@ -752,6 +752,7 @@ var fs = require("fs");var compiler = require("./compiler");var reader = require
 ;
 ((function() {var o1 = (function(filename){
 return ((function() {var o3 = (function(src,gen,comp,comp){
+gen["write-runtime"]("js");
 comp["set-macro-generator"](gen);
 return ((function() {var o8 = (function(s,f){
 comp["compile"](f,gen);

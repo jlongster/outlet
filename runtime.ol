@@ -61,7 +61,8 @@
   (eq? (%raw "typeof obj") "function"))
 
 (define (literal? x)
-  (or (number? x)
+  (or (key? x)
+      (number? x)
       (string? x)
       (boolean? x)
       (null? x)))
@@ -79,8 +80,14 @@
 (define (symbol->key sym)
   (+ (%raw "\"\\uFDD0\"") (sym.substring 1)))
 
+(define (key->symbol sym)
+  (+ (%raw "\"\\uFDD1\"") (sym.substring 1)))
+
 (define (string->key str)
   (+ (%raw "\"\\uFDD0\"") str))
+
+(define (key->string key)
+  (key.substring 1))
 
 (define (string->symbol str)
   (+ (%raw "\"\\uFDD1\"") str))

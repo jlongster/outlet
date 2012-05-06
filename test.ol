@@ -24,7 +24,7 @@
         (comp compiler))
       
     ;; if dumping to an external file, need to write the runtime
-    ;;(gen.write-runtime "js")
+    (gen.write-runtime "js")
 
     (comp.set-macro-generator gen)
 

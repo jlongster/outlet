@@ -60,7 +60,7 @@ var function_p_ = (function(obj){
 return eq_p_(typeof obj,"function");
 });
 var literal_p_ = (function(x){
-return (number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
+return (key_p_(x) || number_p_(x) || string_p_(x) || boolean_p_(x) || null_p_(x));
 });
 var str = (function() {
 var args = vector_dash__gt_list(Array.prototype.slice.call(arguments));
@@ -74,8 +74,14 @@ return (acc + (function() {if(string_p_(el)) {return el;
 var symbol_dash__gt_key = (function(sym){
 return ("\uFDD0" + sym["substring"](1));
 });
+var key_dash__gt_symbol = (function(sym){
+return ("\uFDD1" + sym["substring"](1));
+});
 var string_dash__gt_key = (function(str){
 return ("\uFDD0" + str);
+});
+var key_dash__gt_string = (function(key){
+return key["substring"](1);
 });
 var string_dash__gt_symbol = (function(str){
 return ("\uFDD1" + str);
