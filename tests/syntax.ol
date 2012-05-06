@@ -93,7 +93,7 @@ buz")
 (test-eval `[1 2 3 foo] (vector 1 2 3 'foo))
 (test-eval '[1 2 3 foo] (vector 1 2 3 'foo))
 (test-eval `[1 2 3 ,@[4 5]] (vector 1 2 3 4 5))
-;(test-eval `[1 2 3 ,@foo-vec] (vector 1 2 3 4 5))
+(test-eval `[1 2 3 ,@foo-vec] (vector 1 2 3 4 5))
 
 (test-eval '{:foo foo :bar bar} (dict :foo 'foo :bar 'bar))
 (test-eval `{:three 3 :four ,4} {:three 3 :four 4})

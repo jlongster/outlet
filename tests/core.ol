@@ -272,6 +272,11 @@
 
 ;; misc
 
+;; rest parameters
+(define (fizzle one . two)
+  two)
+(test-eval (fizzle 1 2 3 4) '(2 3 4))
+
 ;; test code following an `if`
 (define (func)
   (if #t "yes" "no")

@@ -38,12 +38,13 @@
                             (and (is-type? node 'LIST)
                                  (null? (node-data node)))))
 
-(define (is-list? node) (is-type? node 'LIST))
+(define (is-list? node) (and (is-type? node 'LIST)
+                             (not (null? (node-data node)))))
 (define (is-vector? node) (is-type? node 'VECTOR))
 (define (is-dict? node) (is-type? node 'DICT))
 
 (define (is-empty-list? node)
-  (and (is-list? node)
+  (and (is-type? node 'LIST)
        (null? (node-data node))))
 
 (define (make-atom type parent)

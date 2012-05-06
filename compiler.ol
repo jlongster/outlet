@@ -77,7 +77,7 @@
 
 (define (macro? name)
   (and (symbol? name)
-       (dict-ref %macros name)
+       (dict-ref %macros (symbol->key name))
        #t))
 
 (define macro-generator #f)
@@ -330,7 +330,7 @@
 
 (define (native? name)
   (and (symbol? name)
-       (not (eq? (dict-ref _natives_ name))
+       (not (eq? (dict-ref _natives_ (symbol->key name)))
             undefined)))
 
 (define (verify-not-single node)
@@ -338,23 +338,23 @@
           (str "form requires at least one operand:"
                (inspect (desourcify node)))))
 
-(install-native 'and 'write-and verify-not-single)
-(install-native 'or 'write-or verify-not-single)
-(install-native '+ 'write-add verify-not-single)
-(install-native '- 'write-subtract verify-not-single)
-(install-native '* 'write-multiply verify-not-single)
-(install-native '/ 'write-divide verify-not-single)
-(install-native '> 'write-gt verify-not-single)
-(install-native '< 'write-lt verify-not-single)
-(install-native '<= 'write-lteq verify-not-single)
-(install-native '>= 'write-gteq verify-not-single)
-(install-native '>> 'write-rshift verify-not-single)
-(install-native '<< 'write-lshift verify-not-single)
-(install-native 'bitwise-or 'write-bitwise-or verify-not-single)
-(install-native 'bitwise-and 'write-bitwise-and verify-not-single)
-(install-native '% 'write-mod verify-not-single)
+(install-native :and 'write-and verify-not-single)
+(install-native :or 'write-or verify-not-single)
+(install-native :+ 'write-add verify-not-single)
+(install-native :- 'write-subtract verify-not-single)
+(install-native :* 'write-multiply verify-not-single)
+(install-native :/ 'write-divide verify-not-single)
+(install-native :> 'write-gt verify-not-single)
+(install-native :< 'write-lt verify-not-single)
+(install-native :<= 'write-lteq verify-not-single)
+(install-native :>= 'write-gteq verify-not-single)
+(install-native :>> 'write-rshift verify-not-single)
+(install-native :<< 'write-lshift verify-not-single)
+(install-native :bitwise-or 'write-bitwise-or verify-not-single)
+(install-native :bitwise-and 'write-bitwise-and verify-not-single)
+(install-native :% 'write-mod verify-not-single)
 
-(install-native 'require 'write-require
+(install-native :require 'write-require
                 (lambda (node)
                   (verify-not-single node)
                   (for-each
@@ -442,13 +442,14 @@
      ((number? exp) (generator.write-number exp expr?))
      ((boolean? exp) (generator.write-boolean exp expr?))
      ((string? exp) (generator.write-string exp expr?))
-     ((null? exp) (generator.write-empty-list exp expr?))
-     ((ast.list? node)
-      (compile (apply-node 'list node quoted?) generator expr?))
      ((ast.dict? node)
       (compile (apply-node 'dict node quoted?) generator expr?))
      ((ast.vector? node)
       (compile (apply-node 'vector node quoted?) generator expr?))
+     ;; TODO: why doesn't ast.empty-list? work
+     ((null? exp) (generator.write-empty-list exp expr?))
+     ((ast.list? node)
+      (compile (apply-node 'list node quoted?) generator expr?))
      (else
       (throw (str "compile-object: unknown type: " exp))))))
 
@@ -570,6 +571,3 @@
                       (lambda (g)
                         (if (not macro-generator)
                             (set! macro-generator g)))})
-
-;; (define src (fs.readFileSync "prog.ol" "utf-8"))
-;; (pp ((%raw "eval") (compile-program src (js))))

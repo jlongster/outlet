@@ -40,12 +40,17 @@
             (set! first #f)
             (write str)))))
 
-  (define (terminate-expr expr?)
-    ;; this is important; if it's not an expression, terminate the
-    ;; statement so that js doesn't combine two function calls on
-    ;; separate lines into one call
-    (if (not expr?)
-        (write ";" #t)))
+  (define (terminate-expr expr? . node)
+    (let ((node (if (null? node) #f (car node))))
+      ;; this is important; if it's not an expression, terminate the
+      ;; statement so that js doesn't combine two function calls on
+      ;; separate lines into one call
+      (if (not expr?)
+          (begin
+            (write (str "; "
+                        "// Line " (ast.node-lineno node)
+                        " Column " (ast.node-colno node))
+                   #t)))))
 
   (define (write-number obj expr?)
     (write obj)
@@ -171,12 +176,12 @@
       (if capture-name
           (begin
             (write "var ")
-            (write-term capture-name)
+            (write-term capture-name #t)
             (write " = ")
             (write-term (ast.make-atom 'vector->list capture-name) #t)
             (write "(Array.prototype.slice.call(arguments, ")
             ;; only slice args from where the dot started
-            (write (- (length args) 2))
+            (write (- (length (ast.node-data args)) 2))
             (write "));" #t))))
      ((symbol? (ast.node-data args))
       (write "(function() {" #t)
@@ -224,7 +229,7 @@
                 args))
     (write ")")
 
-    (terminate-expr expr?))
+    (terminate-expr expr? func))
 
   (define (write-raw-code node)
     (write (ast.node-data node)))
