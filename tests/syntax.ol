@@ -7,23 +7,23 @@
 
 (define (test-read src expected)
   (if (not (= (read src) expected))
-      (throw (str "FAILURE: got "
-                  (util.inspect (read src) #t 20)
-                  " but expected "
-                  (util.inspect expected #t 20)))))
+      (throw (Error (str "FAILURE: got "
+                         (util.inspect (read src) #t 20)
+                         " but expected "
+                         (util.inspect expected #t 20))))))
 
 (define (test-eval val expected)
   (if (not (= val expected))
-      (throw (str "FAILURE: got "
-                  (util.inspect val #t 20)
-                  " but expected "
-                  (util.inspect expected #t 20)))))
+      (throw (Error (str "FAILURE: got "
+                         (util.inspect val #t 20)
+                         " but expected "
+                         (util.inspect expected #t 20))))))
 
 (define (test-assert val)
   (if (not val)
-      (throw (str "FAILURE: "
-                  (inspect val)
-                  " is false"))))
+      (throw (Error (str "FAILURE: "
+                         (inspect val)
+                         " is false")))))
 
 ;; integers
 (test-read "4.0" 4)
@@ -49,8 +49,8 @@ buz")
 (test-read "foo" 'foo)
 (test-read "bar-buz?!" 'bar-buz?!)
 (test-eval 'foo 'foo)
-(test-eval :key 'key)
-(test-eval :key-word 'key-word)
+(test-eval :key :key)
+(test-eval :key-word :key-word)
 
 ;; lists
 (define foo 4)

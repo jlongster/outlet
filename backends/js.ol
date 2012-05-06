@@ -1,11 +1,12 @@
 
-(require (fs "fs"))
+(require (fs "fs")
+         (ast "../ast"))
 
 (define (should-return? form)
-  (not (and (list? form)
-            (or (eq? (car form) 'throw)
-                (eq? (car form) 'set!)
-                (eq? (car form) 'set)))))
+  (not (and (ast.list? form)
+            (or (== (ast.first* form) 'throw)
+                (== (ast.first* form) 'set!)
+                (== (ast.first* form) 'define)))))
 
 (define (generator)
   (define code [])
@@ -39,30 +40,35 @@
             (set! first #f)
             (write str)))))
 
-  (define (terminate-expr expr?)
-    ;; this is important; if it's not an expression, terminate the
-    ;; statement so that js doesn't combine two function calls on
-    ;; separate lines into one call
-    (if (not expr?)
-        (write ";" #t)))
+  (define (terminate-expr expr? . node)
+    (let ((node (if (null? node) #f (car node))))
+      ;; this is important; if it's not an expression, terminate the
+      ;; statement so that js doesn't combine two function calls on
+      ;; separate lines into one call
+      (if (not expr?)
+          (begin
+            (write (str "; "
+                        "// Line " (ast.node-lineno node)
+                        " Column " (ast.node-colno node))
+                   #t)))))
 
-  (define (write-number obj top?)
+  (define (write-number obj expr?)
     (write obj)
-    (terminate-expr (not top?)))
+    (terminate-expr expr?))
 
-  (define (write-boolean obj top?)
+  (define (write-boolean obj expr?)
     (if obj
         (write "true")
         (write "false"))
-    (terminate-expr (not top?)))
+    (terminate-expr expr?))
 
-  (define (write-empty-list obj top?)
+  (define (write-empty-list obj expr?)
     ;; this is defined as a variable in the runtime to encapsulate the
     ;; list data structure implementation
     (write "_emptylst")
-    (terminate-expr (not top?)))
+    (terminate-expr expr?))
 
-  (define (write-string obj top?)
+  (define (write-string obj expr?)
     (let ((str obj))
       (set! str (str.replace (RegExp "\\\\" "g") "\\\\"))
       (set! str (str.replace (RegExp "\n" "g") "\\n"))
@@ -70,18 +76,24 @@
       (set! str (str.replace (RegExp "\t" "g") "\\t"))
       (set! str (str.replace (RegExp "\"" "g") "\\\""))
       (write (+ "\"" str "\""))
-      (terminate-expr (not top?))))
+      (terminate-expr expr?)))
 
-  (define (write-symbol obj top?)
+  (define (write-symbol obj expr?)
     (write (+ "\"\\uFDD1" (obj.substring 1) "\""))
-    (terminate-expr (not top?)))
+    (terminate-expr expr?))
 
-  (define (write-term obj top?)
-    (let ((obj (if (== obj 'var)
-                   '_var_
-                   obj)))
+  (define (write-key obj expr?)
+    (write (+ "\"\\uFDD0" (obj.substring 1) "\""))
+    (terminate-expr expr?))
 
-      (define name (obj.substring 1))
+  (define (write-term node expr?)
+    (let ((exp (ast.node-data node))
+          (exp (cond
+                ((== exp 'var) '_var_)
+                ((== exp 'in) '_in_)
+                (else exp))))
+
+      (define name (exp.substring 1))
       (define parts (name.split "."))
 
       (let ((name (vector-ref parts 0)))
@@ -105,145 +117,161 @@
          (write (str "[\"" part "\"]")))
        (vector-slice parts 1))
       
-      (terminate-expr (not top?))))
+      (terminate-expr expr?)))
 
-  (define (write-set lval rval parse)
+  (define (write-define lval rval compile)
     (write "var ")
-    (write-set! lval rval parse))
+    (write-set! lval rval compile))
 
-  (define (write-set! lval rval parse)
-    (write-term lval)
+  (define (write-set! lval rval compile)
+    (write-term lval #t)
     (write " = ")
-    (parse rval #t)
-    ;; since we parsed rval as an expression (passed #t to parse),
+    (compile rval #t)
+    ;; since we parsed rval as an expression (passed #t to compile),
     ;; need to manually terminate it
     (write ";" #t))
 
-  (define (write-if pred tru expr? parse . fal)
+  (define (write-if cnd tru alt expr? compile)
     (write "(function() {")
 
     (write "if(")
-    (parse pred #t)
+    (compile cnd #t)
     (write ") {")
     (if (should-return? tru)
         (write "return "))
-    (parse tru)
+    (compile tru)
     (write "}")
 
-    (if (not (null? fal))
+    (if alt
         (begin
           (write " else {")
-          (if (should-return? (car fal))
+          (if (should-return? alt)
               (write "return "))
-          (parse (car fal))
+          (compile alt)
           (write "}")))
 
     (write "})()" #t)
     (terminate-expr expr?))
 
-  (define (write-lambda args body expr? parse)
+  (define (write-lambda args body expr? compile)
     (cond
-     ((list? args)
+     ((ast.list? args)
       (define comma (inline-writer ","))
       (define capture-name #f)
+      (define opt-args #f)
+      (define opt-args-idx #f)      
 
-      (define (write-args args)
+      (define (write-args args i)
         (if (not (null? args))
-            (begin
-              (if (eq? (car args) '.)
-                  (set! capture-name (cadr args))
-                  (begin
-                    (comma)
-                    (write-term (car args))
-                    (write-args (cdr args)))))))
+            (let ((arg (ast.node-data (car args))))
+              (cond
+               ((== arg '.)
+                (set! capture-name (cadr args)))
+               ((== arg '&)
+                (set! opt-args (cdr args))
+                (set! opt-args-idx i))
+               (else
+                 (comma)
+                 (write-term (car args) #t)
+                 (write-args (cdr args) (+ i 1)))))))
 
       (write "(function(")
-      (write-args args)
+      (write-args (ast.node-data args) 0)
       (write "){" #t)
 
-      (if capture-name
-          (begin
-            (write "var ")
-            (write-term capture-name)
-            (write " = ")
-            (write-term 'vector->list)
-            (write "(Array.prototype.slice.call(arguments, ")
-            ;; only slice args from where the dot started
-            (write (- (length args) 2))
-            (write "));" #t))))
-     ((symbol? args)
+      (cond
+       (capture-name
+        (write "var ")
+        (write-term capture-name #t)
+        (write " = ")
+        (write-term (ast.make-atom 'vector->list capture-name) #t)
+        (write "(Array.prototype.slice.call(arguments, ")
+        ;; only slice args from where the dot started
+        
+        (write (- (length (ast.node-data args)) 2))
+        (write "));" #t))
+       (opt-args
+        (fold (lambda (arg i)
+                (write "var ")
+                (write-term arg #t)
+                (write (str " = arguments[" i "] || false;") #t)
+                (+ i 1))
+              opt-args-idx
+              opt-args))))
+     
+     ((symbol? (ast.node-data args))
       (write "(function() {" #t)
       (write "var ")
-      (write-term args)
+      (write-term args #t)
       (write " = ")
-      (write-term 'vector->list)
+      (write-term (ast.make-atom 'vector->list args) #t)
       (write "(Array.prototype.slice.call(arguments));" #t))
-     ((null? args)
+     ((null? (ast.node-data args))
       (write "(function() {")))
 
     (let ((i 0)
           (len (length body)))
       (for-each (lambda (form)
                   ;; return the last form (if it's not a throw or a set)
-                  (if (and (eq? i (- len 1))
+                  (if (and (== i (- len 1))
                            (should-return? form))
                       (write "return "))
 
-                  (parse form)
+                  (compile form)
                   (set! i (+ i 1)))
                 body))
     (write "})")
     (terminate-expr expr?))
 
-  (define (write-func-call func args expr? parse)
+  (define (write-func-call func args expr? compile)
     ;; write the calling function, which can be a symbol, a lambda, or a
     ;; call to another function
-    (if (symbol? func)
-        (write-term func)
-        (if (eq? (car func) 'lambda)
-            (begin
-              ;; need to wrap an anon function in parens so it's
-              ;; valid syntax
-              (write "(")
-              (parse func #t)
-              (write ")"))
-            (parse func #t)))
+    (if (and (ast.list? func)
+             (== (ast.first* func) 'lambda))
+        (begin
+          ;; need to wrap an anon function in parens so it's
+          ;; valid syntax
+          (write "(")
+          (compile func #t)
+          (write ")"))
+        (compile func #t))
 
     ;; write the arguments
     (write "(")
     (let ((comma (inline-writer ",")))
       (for-each (lambda (arg)
                   (comma)
-                  (parse arg #t))
+                  (compile arg #t))
                 args))
     (write ")")
 
-    (terminate-expr expr?))
+    (terminate-expr expr? func))
 
-  (define (write-raw-code code)
-    (write code))
+  (define (write-raw-code node)
+    (write (ast.node-data node)))
 
-  (define (write-op op vals expr? parse)
+  (define (write-op op vals expr? compile)
     (write "(")
     (let ((op-writer (inline-writer
                       (str " " op " "))))
       (for-each (lambda (arg)
                   (op-writer)
-                  (parse arg #t))
+                  (compile arg #t))
                 vals))
     (write ")")
     (terminate-expr expr?))
 
   (define (make-op-writer str)
-    (lambda (vals expr? parse)
-      (write-op str vals expr? parse)))
+    (lambda (vals expr? compile)
+      (write-op str vals expr? compile)))
 
-  (define (write-require args expr? parse)
+  (define (write-require args expr? compile)
     (for-each (lambda (el)
                 (write "var ")
-                (write-term (car el))
+                (write-term (ast.first el) #t)
                 (write " = require(")
-                (write-string (cadr el))
+                (write-string (ast.node-data
+                               (cadr (ast.node-data el))) #t)
                 (write ");"))
               args))
 
@@ -253,8 +281,9 @@
    :write-boolean write-boolean
    :write-term write-term
    :write-symbol write-symbol
+   :write-key write-key
    :write-empty-list write-empty-list
-   :write-set write-set
+   :write-define write-define
    :write-set! write-set!
    :write-if write-if
    :write-lambda write-lambda

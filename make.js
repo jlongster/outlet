@@ -41,4 +41,4 @@ js['write-runtime'](opts.no_runtime ? 'no-runtime' :
                            'js' :
                            'js-noeval'),
                       opts.current_runtime ? __dirname : __dirname + '/boot');
-util.puts(compiler.compile(src, js));
+util.puts(compiler["compile-program"](src, js));

@@ -3,6 +3,7 @@
 var util = require('util');
 var fs = require('fs');
 var compiler = require('../compiler');
+var reader = require('../reader');
 var js_backend = require('../backends/js');
 var runtime = require('../runtime');
 var src;
@@ -30,10 +31,6 @@ if(args[0] == '-c') {
 if(args[0] == '-p') {
     expand = true;
     args = args.slice(1);
-    if(args[0].indexOf('.ol') == -1) {
-        amt = args[0];
-        args = args.slice(1);
-    }
 }
 
 if(args[0] == '-r') {
@@ -62,12 +59,7 @@ else {
 if(expand) {
     compiler['set-macro-generator'](js_backend());
 
-    if(amt) {
-        compiler.pp(compiler['expand-nth'](compiler.read(src), amt));
-    }
-    else {
-        compiler.pp(compiler.expand(compiler.read(src)));
-    }
+    compiler.pp(compiler.desourcify(compiler.expand(reader.read(src))));
 }
 else {
     var js = js_backend();
@@ -79,7 +71,7 @@ else {
         js['write-runtime'](rt);
     }
 
-    var output = compiler.compile(src, js);
+    var output = compiler["compile-program"](src, js);
 
     if(compile) {
         output = 'var __args = process.argv.slice(2);' + output;

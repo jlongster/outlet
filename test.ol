@@ -1,5 +1,6 @@
 (require (fs "fs")
          (compiler "./compiler")
+         (reader "./reader")
          (boot "./boot/compiler")
          (util "util")
          (js "./backends/js"))
@@ -23,13 +24,11 @@
         (comp compiler))
       
     ;; if dumping to an external file, need to write the runtime
-    ;;(gen.write-runtime "js")
+    (gen.write-runtime "js")
 
     (comp.set-macro-generator gen)
 
-    (let ((f (comp.expand (comp.read src))))
-      ;;(pp f)
-      (comp.parse f gen)
-      ((%raw "eval") (gen.get-code))
-      ;;(println (gen.get-code))
-      )))
+    (let ((s (reader.read src))
+          (f (comp.expand s)))
+      (comp.compile f gen)
+      ((%raw "eval") (gen.get-code)))))

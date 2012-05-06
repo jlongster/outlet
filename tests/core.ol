@@ -21,7 +21,6 @@
   `(%test eval ',src #t (lambda (res val)
                           (not (eq? res #f)))))
 
-
 ;; functions
 
 (define (foo x y z) (+ x y z))
@@ -124,7 +123,7 @@
 
 (test-eval (vector-concat [1 2] [3 4]) [1 2 3 4])
 (test-eval (vector-slice [1 2 3 4] 1) [2 3 4])
-(test-eval (vector-slice [1 2 3 4] 1 2) [2 3])
+(test-eval (vector-slice [1 2 3 4] 1 3) [2 3])
 
 (define vec [1 2 3 4])
 (vector-push! vec 5)
@@ -161,29 +160,29 @@
 
 (test-assert (let ((vec (dict->vector {:one 1 :two 2})))
                ;; can't guarantee order
-               (and (vector-find vec 'one)
+               (and (vector-find vec :one)
                     (vector-find vec 1)
-                    (vector-find vec 'two)
+                    (vector-find vec :two)
                     (vector-find vec 2))))
 
 (test-assert (let ((lst (dict->list {:one 1 :two 2})))
                ;; can't guarantee order
-               (and (list-find lst 'one)
+               (and (list-find lst :one)
                     (list-find lst 1)
-                    (list-find lst 'two)
+                    (list-find lst :two)
                     (list-find lst 2))))
 
 (let ((k (keys {:foo 1 :bar 2})))
-  (test-assert (list-find k 'foo))
-  (test-assert (list-find k 'bar)))
+  (test-assert (list-find k :foo))
+  (test-assert (list-find k :bar)))
 
 (let ((v (vals {:foo 1 :bar 2})))
   (test-assert (list-find v 1))
   (test-assert (list-find v 2)))
 
 (let ((dct (zip '(foo bar baz) '(1 2 3))))
-  (test-eval (dict-ref dct 'foo) 1)
-  (test-eval (dict-ref dct 'bar) 2))
+  (test-eval (dict-ref dct :foo) 1)
+  (test-eval (dict-ref dct :bar) 2))
 
 ;; not
 
@@ -219,7 +218,7 @@
 (test-eval (== {:one 1} {:one 1}) #f)
 (test-assert (= {:one 1} {:one 1}))
 
-;; ;; types
+;; types
 
 (define-macro (ensure-type val truthy)
   (cons 'begin
@@ -229,6 +228,7 @@
              '(boolean?
                number?
                symbol?
+               key?
                string?
                list?
                vector?
@@ -237,6 +237,7 @@
 (ensure-type 5 number?)
 (ensure-type #t boolean?)
 (ensure-type 'foo symbol?)
+(ensure-type :foo key?)
 (ensure-type "foo" string?)
 (ensure-type '(1 2 3) list?)
 (ensure-type [1 2 3] vector?)
@@ -270,6 +271,11 @@
            'none)
 
 ;; misc
+
+;; rest parameters
+(define (fizzle one . two)
+  two)
+(test-eval (fizzle 1 2 3 4) '(2 3 4))
 
 ;; test code following an `if`
 (define (func)
