@@ -88,20 +88,10 @@
     ;; eval to eval it into a function. we don't use outlet's eval
     ;; because that would create a circular dependency.
     (let ((s `(lambda (,x)
-                (let ,(destructure pattern `(cdr ,x) '())
-                  ,@body)))
+                (apply (lambda ,pattern ,@body)
+                       (cdr ,x))))
           (p (compile-program s (macro-generator.make-fresh))))
       ((%raw "eval") p))))
-
-(define (destructure pattern access bindings)
-  (cond
-   ((null? pattern) bindings)
-   ((eq? (car pattern) '.) (cons (list (cadr pattern) access)
-                                bindings))
-   (else
-    (cons (list (car pattern) `(car ,access))
-          (destructure (cdr pattern) `(cdr ,access)
-                       bindings)))))
 
 (define (sourcify exp lineno colno)
   (cond

@@ -158,31 +158,47 @@
      ((ast.list? args)
       (define comma (inline-writer ","))
       (define capture-name #f)
+      (define opt-args #f)
+      (define opt-args-idx #f)      
 
-      (define (write-args args)
+      (define (write-args args i)
         (if (not (null? args))
             (let ((arg (ast.node-data (car args))))
-              (if (== arg '.)
-                  (set! capture-name (cadr args))
-                  (begin
-                    (comma)
-                    (write-term (car args) #t)
-                    (write-args (cdr args)))))))
+              (cond
+               ((== arg '.)
+                (set! capture-name (cadr args)))
+               ((== arg '&)
+                (set! opt-args (cdr args))
+                (set! opt-args-idx i))
+               (else
+                 (comma)
+                 (write-term (car args) #t)
+                 (write-args (cdr args) (+ i 1)))))))
 
       (write "(function(")
-      (write-args (ast.node-data args))
+      (write-args (ast.node-data args) 0)
       (write "){" #t)
 
-      (if capture-name
-          (begin
-            (write "var ")
-            (write-term capture-name #t)
-            (write " = ")
-            (write-term (ast.make-atom 'vector->list capture-name) #t)
-            (write "(Array.prototype.slice.call(arguments, ")
-            ;; only slice args from where the dot started
-            (write (- (length (ast.node-data args)) 2))
-            (write "));" #t))))
+      (cond
+       (capture-name
+        (write "var ")
+        (write-term capture-name #t)
+        (write " = ")
+        (write-term (ast.make-atom 'vector->list capture-name) #t)
+        (write "(Array.prototype.slice.call(arguments, ")
+        ;; only slice args from where the dot started
+        
+        (write (- (length (ast.node-data args)) 2))
+        (write "));" #t))
+       (opt-args
+        (fold (lambda (arg i)
+                (write "var ")
+                (write-term arg #t)
+                (write (str " = arguments[" i "] || false;") #t)
+                (+ i 1))
+              opt-args-idx
+              opt-args))))
+     
      ((symbol? (ast.node-data args))
       (write "(function() {" #t)
       (write "var ")
