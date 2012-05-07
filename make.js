@@ -32,13 +32,15 @@ else {
 var compiler = require(root + 'compiler');
 var js_generator = require(root + 'backends/js');
 var srcfile = args[0];
+var optimizations = 1;
 
 var src = fs.readFileSync(srcfile, 'utf-8');
-var js = js_generator();
+var js = js_generator(optimizations);
+compiler['set-optimizations'] = optimizations;
 
 js['write-runtime'](opts.no_runtime ? 'no-runtime' :
                           (opts.with_eval ?
                            'js' :
                            'js-noeval'),
                       opts.current_runtime ? __dirname : __dirname + '/boot');
-util.puts(compiler["compile-program"](src, js));
+util.puts(compiler['compile-program'](src, js));

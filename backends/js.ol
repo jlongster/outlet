@@ -8,8 +8,11 @@
                 (== (ast.first* form) 'set!)
                 (== (ast.first* form) 'define)))))
 
-(define (generator)
+(define (generator & optimizations)
   (define code [])
+
+  (if (not optimizations)
+      (set! optimizations 0))
 
   (define (make-fresh)
     (generator))
@@ -187,25 +190,27 @@
       (write-args (ast.node-data args) 0)
       (write "){" #t)
 
-      ;; check number of arguments
-      (write (str "if(arguments.length < " arg-min ") {") #t)
-      (write (str "throw Error(\""
-                  (or (ast.node-extra name) "lambda")
-                  ": not enough arguments\")")
-             #t)
-      (write "}" #t)
-
-      (if arg-max
+      (if (< optimizations 1)
           (begin
-            (write (str "else if(arguments.length > "
-                        arg-max
-                        ") {")
-                   #t)
+            ;; check number of arguments
+            (write (str "if(arguments.length < " arg-min ") {") #t)
             (write (str "throw Error(\""
                         (or (ast.node-extra name) "lambda")
-                        ": too many arguments\");")
+                        ": not enough arguments\")")
                    #t)
-            (write "}" #t)))
+            (write "}" #t)
+
+            (if arg-max
+                (begin
+                  (write (str "else if(arguments.length > "
+                              arg-max
+                              ") {")
+                         #t)
+                  (write (str "throw Error(\""
+                              (or (ast.node-extra name) "lambda")
+                              ": too many arguments\");")
+                         #t)
+                  (write "}" #t)))))
       
       (cond
        (capture-name

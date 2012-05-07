@@ -534,6 +534,8 @@
                                      expr?
                                      compile*))))))))
 
+(define %optimize-mode 0)
+
 (define (compile-program src generator)
   (if (not macro-generator)
       (set! macro-generator generator))
@@ -560,4 +562,7 @@
                       :set-macro-generator
                       (lambda (g)
                         (if (not macro-generator)
-                            (set! macro-generator g)))})
+                            (set! macro-generator g)))
+                      :set-optimizations
+                      (lambda (n)
+                        (set! %optimize-mode n))})
