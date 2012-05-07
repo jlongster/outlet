@@ -153,6 +153,19 @@
                     (begin ,@(cdr f))
                     (cond ,@(cdr forms)))))))))
 
+(install-macro
+ 'case
+ (lambda (form)
+   (let ((c (cadr form))
+         (variants (cddr form)))
+     `(cond
+       ,@(map (lambda (exp)
+                (if (== (car exp) 'else)
+                    exp
+                    `((list-find ',(car exp) ,c)
+                      ,@(cdr exp))))
+              variants)))))
+
 ;; TODO: clean this up, make it more efficient
 (install-macro
  'let

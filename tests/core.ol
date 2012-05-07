@@ -4,12 +4,12 @@
   `(let ((comp ,(if (null? args) '= (car args)))
          (res (,hook ,src)))
      (if (not (comp res ,val))
-         (throw (str "FAILURE with " (inspect ',hook) ": "
-                     (util.inspect ,src)
+         (throw (str "FAILURE with " (inspect ',hook) ":\n"
+                     ,src
                      " got "
-                     (util.inspect res)
+                     res
                      " but expected "
-                     (util.inspect ,val))))))
+                     ,val)))))
 
 (define-macro (test-read src val . args)
   `(%test read ,src ,val ,@args))
@@ -269,6 +269,13 @@
             ((eq? x 2) 'two)
             (else 'none))
            'none)
+
+;; case
+
+(test-eval (case 'foo
+             ((bar baz) 1)
+             ((biz foo) 2))
+           2)
 
 ;; misc
 

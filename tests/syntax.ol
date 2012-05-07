@@ -8,21 +8,21 @@
 (define (test-read src expected)
   (if (not (= (read src) expected))
       (throw (Error (str "FAILURE: got "
-                         (util.inspect (read src) #t 20)
+                         (read src)
                          " but expected "
-                         (util.inspect expected #t 20))))))
+                         expected)))))
 
 (define (test-eval val expected)
   (if (not (= val expected))
       (throw (Error (str "FAILURE: got "
-                         (util.inspect val #t 20)
+                         val
                          " but expected "
-                         (util.inspect expected #t 20))))))
+                         expected)))))
 
 (define (test-assert val)
   (if (not val)
       (throw (Error (str "FAILURE: "
-                         (inspect val)
+                         val
                          " is false")))))
 
 ;; integers
