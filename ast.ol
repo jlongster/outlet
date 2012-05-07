@@ -6,18 +6,23 @@
 (define unique-obj (list #f))
 
 (define (make-node type data lineno colno)
-  [unique-obj type data lineno colno])
+  [unique-obj type data #f lineno colno])
+
+(define (make-node-w/extra type data extra lineno colno)
+  [unique-obj type data extra lineno colno])
 
 (define (copy-node node data)
-  (make-node (node-type node)
-             data
-             (node-lineno node)
-             (node-colno node)))
+  (make-node-w/extra (node-type node)
+                     data
+                     (node-extra node)
+                     (node-lineno node)
+                     (node-colno node)))
 
 (define node-type (vec-getter 1))
 (define node-data (vec-getter 2))
-(define node-lineno (vec-getter 3))
-(define node-colno (vec-getter 4))
+(define node-extra (vec-getter 3))
+(define node-lineno (vec-getter 4))
+(define node-colno (vec-getter 5))
 
 (define (assert-node node)
   (if (not (and (vector? node)
@@ -85,9 +90,11 @@
   (node-data (car (node-data node))))
 
 (set! module.exports {:make-node make-node
+                      :make-node-w/extra make-node-w/extra
                       :copy-node copy-node
                       :node-type node-type
                       :node-data node-data
+                      :node-extra node-extra
                       :node-lineno node-lineno
                       :node-colno node-colno
                       :type? is-type?

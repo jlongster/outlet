@@ -277,6 +277,13 @@
   two)
 (test-eval (fizzle 1 2 3 4) '(2 3 4))
 
+;; optional parameters
+(define (bizzle x & y z)
+  (list x y z))
+(test-eval (bizzle 1) (list 1 #f #f))
+(test-eval (bizzle 1 2) (list 1 2 #f))
+(test-eval (bizzle 1 2 3) (list 1 2 3))
+
 ;; test code following an `if`
 (define (func)
   (if #t "yes" "no")

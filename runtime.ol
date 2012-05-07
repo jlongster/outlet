@@ -199,14 +199,16 @@
 
 ;; vectors
 
-(define (make-vector count val)
+(define (make-vector count & val)
   (let ((v (%raw "new Array(count)")))
-    (let loop ((i 0))
-      (if (< i count)
-          (begin
-            (vector-put! v i val)
-            (loop (+ i 1)))
-          v))))
+    (if val
+        (let loop ((i 0))
+          (if (< i count)
+              (begin
+                (vector-put! v i val)
+                (loop (+ i 1)))
+              v))
+        v)))
 
 (define (vector)
   (%raw "Array.prototype.slice.call(arguments)"))
@@ -225,8 +227,8 @@
         (loop (cdr lst)
               (res.concat (car lst))))))
 
-(define (vector-slice vec start end)
-  (%raw "vec.slice(start, end)"))
+(define (vector-slice vec start & end)
+  (%raw "vec.slice(start, end || undefined)"))
 
 (define (vector-push! vec obj)
   (%raw "vec.push(obj)"))

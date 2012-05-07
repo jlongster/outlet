@@ -108,7 +108,7 @@
         (set! name (name.replace (RegExp "\\*" "g") "_star_"))
         (set! name (name.replace (RegExp "\\+" "g") "_plus_"))
         (write name))
-      
+
       ;; Convert dots to brackets:
       ;; foo.bar -> foo["bar"]
       ;; foo.bar.baz -> foo["bar"]["baz"]
@@ -116,7 +116,7 @@
        (lambda (part)
          (write (str "[\"" part "\"]")))
        (vector-slice parts 1))
-      
+
       (terminate-expr expr?)))
 
   (define (write-define lval rval compile)
@@ -153,23 +153,31 @@
     (write "})()" #t)
     (terminate-expr expr?))
 
-  (define (write-lambda args body expr? compile)
+  (define (write-lambda node expr? compile)
+    (define name (car (ast.node-data node)))
+    (define args (cadr (ast.node-data node)))
+    (define body (cddr (ast.node-data node)))
+
     (cond
      ((ast.list? args)
       (define comma (inline-writer ","))
       (define capture-name #f)
       (define opt-args #f)
-      (define opt-args-idx #f)      
+      (define arg-min (length (ast.node-data args)))
+      (define arg-max arg-min)
 
       (define (write-args args i)
         (if (not (null? args))
             (let ((arg (ast.node-data (car args))))
               (cond
                ((== arg '.)
-                (set! capture-name (cadr args)))
+                (set! capture-name (cadr args))
+                (set! arg-min i)
+                (set! arg-max #f))
                ((== arg '&)
                 (set! opt-args (cdr args))
-                (set! opt-args-idx i))
+                (set! arg-min i)
+                (set! arg-max (- arg-max 1)))
                (else
                  (comma)
                  (write-term (car args) #t)
@@ -179,26 +187,43 @@
       (write-args (ast.node-data args) 0)
       (write "){" #t)
 
+      ;; check number of arguments
+      (write (str "if(arguments.length < " arg-min ") {") #t)
+      (write (str "throw Error(\""
+                  (or (ast.node-extra name) "lambda")
+                  ": not enough arguments\")")
+             #t)
+      (write "}" #t)
+
+      (if arg-max
+          (begin
+            (write (str "else if(arguments.length > "
+                        arg-max
+                        ") {")
+                   #t)
+            (write (str "throw Error(\""
+                        (or (ast.node-extra name) "lambda")
+                        ": too many arguments\");")
+                   #t)
+            (write "}" #t)))
+      
       (cond
        (capture-name
         (write "var ")
         (write-term capture-name #t)
         (write " = ")
         (write-term (ast.make-atom 'vector->list capture-name) #t)
-        (write "(Array.prototype.slice.call(arguments, ")
-        ;; only slice args from where the dot started
-        
-        (write (- (length (ast.node-data args)) 2))
-        (write "));" #t))
+        (write (str "(Array.prototype.slice.call(arguments, " arg-min "));")
+               #t))
        (opt-args
         (fold (lambda (arg i)
                 (write "var ")
                 (write-term arg #t)
                 (write (str " = arguments[" i "] || false;") #t)
                 (+ i 1))
-              opt-args-idx
+              arg-min
               opt-args))))
-     
+      
      ((symbol? (ast.node-data args))
       (write "(function() {" #t)
       (write "var ")

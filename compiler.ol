@@ -320,8 +320,8 @@
 
 (define (native? name)
   (and (symbol? name)
-       (not (eq? (dict-ref _natives_ (symbol->key name)))
-            undefined)))
+       (not (== (dict-ref _natives_ (symbol->key name))
+                undefined))))
 
 (define (verify-not-single node)
   (assert (> (length (ast.node-data node)) 1)
@@ -467,10 +467,7 @@
     (generator.write-if cnd tru alt expr? compile*)))
 
 (define (compile-lambda node generator expr? compile*)
-  (let ((nodes (ast.node-data node))
-        (args (cadr nodes))
-        (body (cddr nodes)))
-    (generator.write-lambda args body expr? compile*)))
+  (generator.write-lambda node expr? compile*))
 
 (define (compile-set! node generator compile*)
   (generator.write-set! (cadr (ast.node-data node))
@@ -486,7 +483,10 @@
           (generator.write-define name
                                   ;; convert the function into a lambda
                                   (ast.make-list*
-                                   (cons (ast.make-atom 'lambda name)
+                                   (cons (ast.make-node-w/extra 'ATOM 'lambda
+                                                                (ast.node-data name)
+                                                                (ast.node-lineno name)
+                                                                (ast.node-colno name))
                                          (cons (if (null? args)
                                                    (ast.make-empty-list name)
                                                    (ast.make-list* args))

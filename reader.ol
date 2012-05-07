@@ -171,7 +171,7 @@
     (let ((token (get-token)))
       (cond
        ((not token)
-        (make-token 'END #f))
+        (make-token 'END #f #f #f))
 
        ((compound-end? token)
         ;; we simply return the token so the list/vector/dict loop
