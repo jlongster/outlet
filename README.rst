@@ -1,4 +1,4 @@
-Outlet is a programming language. It is Lisp-like in nature and compiles to both javascript and lua.
+Outlet is a programming language. It is Lisp-like in nature and compiles to javascript (lua support is in the works).
 
 See http://jlongster.com/2012/01/04/outlet-my-lisp-to-javascript-experiment.html.
 
