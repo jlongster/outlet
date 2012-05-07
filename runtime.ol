@@ -552,6 +552,13 @@
   (%raw "while(trampoline_dash_result_p_(value)) { value = value[1](); }")
   value)
 
-;; TODO: this needs better randomization
+;; gensym
+
+(define %gensym-base 0)
+
+(define (gensym-fresh)
+  (set! %gensym-base 10000))
+
 (define (gensym)
-  (string->symbol (+ "o" (Math.floor (* (Math.random) 10000000)))))
+  (set! %gensym-base (+ %gensym-base 1))
+  (string->symbol (+ "o" %gensym-base)))
