@@ -51,8 +51,10 @@
       (if (not expr?)
           (begin
             (write (str "; "
-                        "// Line " (ast.node-lineno node)
-                        " Column " (ast.node-colno node))
+                        ;; Turn this off while playing with CPS
+                        ;; "// Line " (ast.node-lineno node)
+                        ;; " Column " (ast.node-colno node)
+                        )
                    #t)))))
 
   (define (write-number obj expr?)

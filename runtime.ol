@@ -562,3 +562,18 @@
 (define (gensym)
   (set! %gensym-base (+ %gensym-base 1))
   (string->symbol (+ "o" %gensym-base)))
+
+;; cps
+
+(define (cps-trampoline func)
+  (define v (func))
+  (%raw "while(v) { v = v(); }")
+  v)
+
+(define (cps-jump to)
+  to)
+
+(define (cps-halt v)
+  `((lambda ()
+      (pp (str "halted with result: " ,v))
+      #f)))

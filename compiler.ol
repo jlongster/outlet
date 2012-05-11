@@ -2,9 +2,7 @@
 (require (reader "./reader")
          (ast "./ast")
          (js "./backends/js")
-
-         ;; remove this
-         (fs "fs"))
+         (cps "./cps"))
 
 (define (self-evaluating? exp)
   (or (number? exp)
@@ -247,7 +245,7 @@
             (cons (tco bottom exit)
                   (cdr rexprs))))
           (else
-           (if (tco? bottom)
+           (if (and (tco? bottom) #f)
                (reverse
                 (cons `(vector "__tco_call" (lambda () ,bottom))
                       (cdr rexprs)))
@@ -296,7 +294,7 @@
              ;; ,@vars) after it didn't work
              ,@(list-append
                 (generate-defs syms forms)
-                (if (tco-call? name tco-ed)
+                (if (and (tco-call? name tco-ed) #f)
                     `((trampoline (,name ,@syms)))
                     `((,name ,@syms)))))))))))
 
@@ -556,13 +554,14 @@
   (let ((exp (if (string? src)
                  (reader.read src)
                  (sourcify src 0 0))))
-    (if (and (ast.type? exp 'LIST)
-             (== (ast.first* exp) 'begin))
-         ;; parse top-level forms individually
-        (for-each (lambda (e)
-                    (compile (expand e) generator))
-                  (cdr (ast.node-data exp)))
-        (compile (expand exp) generator))
+    (let ((src (desourcify (expand exp))))
+      ;; We need to expand again after CPS because it generates a few
+      ;; begin's
+      (let ((src (expand (sourcify
+                          (list 'cps-trampoline
+                                ((cps.cps src) cps-halt))))))
+        ;;(pp (desourcify src))
+        (compile src generator)))
     (generator.get-code)))
 
 (set! module.exports {:read (lambda (e) (desourcify (reader.read e)))
