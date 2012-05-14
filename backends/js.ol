@@ -6,7 +6,8 @@
   (not (and (ast.list? form)
             (or (== (ast.first* form) 'throw)
                 (== (ast.first* form) 'set!)
-                (== (ast.first* form) 'define)))))
+                (== (ast.first* form) 'define)
+                (== (ast.first* form) 'begin)))))
 
 (define (generator & optimizations)
   (define code [])
@@ -241,8 +242,13 @@
      ((null? (ast.node-data args))
       (write "(function() {")))
 
+    (write-statements body compile)
+    (write "})")
+    (terminate-expr expr?))
+
+  (define (write-statements expr* compile)
     (let ((i 0)
-          (len (length body)))
+          (len (length expr*)))
       (for-each (lambda (form)
                   ;; return the last form (if it's not a throw or a set)
                   (if (and (== i (- len 1))
@@ -251,9 +257,7 @@
 
                   (compile form)
                   (set! i (+ i 1)))
-                body))
-    (write "})")
-    (terminate-expr expr?))
+                expr*)))
 
   (define (write-func-call func args expr? compile)
     ;; write the calling function, which can be a symbol, a lambda, or a
@@ -319,6 +323,7 @@
    :write-set! write-set!
    :write-if write-if
    :write-lambda write-lambda
+   :write-statements write-statements
    :write-func-call write-func-call
    :write-raw-code write-raw-code
 

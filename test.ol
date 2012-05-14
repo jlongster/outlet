@@ -31,4 +31,5 @@
     (let ((s (reader.read src))
           (f (comp.expand s)))
       (comp.compile f gen)
+      ;;(println (gen.get-code))
       ((%raw "eval") (gen.get-code)))))

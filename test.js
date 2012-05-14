@@ -746,6 +746,16 @@ var gensym_dash_fresh = (function() {_per_gensym_dash_base = 10000;
 var gensym = (function() {_per_gensym_dash_base = (_per_gensym_dash_base + 1);
 return string_dash__gt_symbol(("o" + _per_gensym_dash_base)); // Line 563 Column 3
 });
+var cps_dash_trampoline = (function(func){
+var v = func();
+while(v) { v = v(); }return v; // Line <unknown undefined> Column <unknown undefined>
+});
+var cps_dash_jump = (function(to){
+return to; // Line <unknown undefined> Column <unknown undefined>
+});
+var cps_dash_halt = (function(v){
+return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 576 Column 4
+});
 
 
 var __compiler = require('/Users/james/projects/outlet/compiler');

@@ -1,0 +1,17 @@
+
+I am currently working on optimizing the CPS transformation of Outlet
+(for debugging). I wrote a post about this and received good feedback.
+Here are things I need to think about or study:
+
+* "A First-Order One-Pass CPS algorithm" - Danvy, 2001 (clojure-tco)
+** http://www.brics.dk/RS/01/49/BRICS-RS-01-49.pdf
+* "The Essence of Compiling with Continuations" - Amr Sabry
+* "Compiling with Continuations, Continued" - Andrew Kennedy
+* Minimal thunkification
+** http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.158.7919
+* Oliver Danvy
+** http://t.co/VXIq3msE
+* "first cut would be to reduce thunks: if your only loop construct is
+  application, only thunk app-inner-k"
+* "second, the more efficient transformations you mention in your post
+  specifically reduce allocation by creating fewer closures"

@@ -134,11 +134,6 @@
        #f))))
 
 (install-macro
- 'begin
- (lambda (form)
-   `((lambda () ,@(cdr form)))))
-
-(install-macro
  'cond
  (lambda (form)
    (if (null? (cdr form))
@@ -507,43 +502,62 @@
                                 (caddr (ast.node-data node))
                                 compile*))))
 
-(define (compile node generator . expr?)
-  (define (compile* node . expr?)
-    (compile node generator (opt expr? #f)))
-
-  (let ((expr? (opt expr? #f)))
+(define (compile-begin node generator compile* expr? top?)
+  (let ((e* (cdr (ast.node-data node))))
     (cond
-     ((self-evaluating? (ast.node-data node))
-      (compile-object node generator #f expr?))
-     ((symbol? (ast.node-data node))
-      (compile-reference node generator expr?))
-     ((ast.vector? node)
-      (compile-object node generator #f expr?))
-     ((ast.dict? node)
-      (compile-object node generator #f expr?))
-     ((ast.list? node)
-      (let ((sym (ast.first* node)))
-        (cond
-         ((== sym 'quote)
-          (compile-object (cadr (ast.node-data node)) generator #t expr?))
-         ((== sym 'quasiquote)
-          (compile-quasi (cadr (ast.node-data node)) generator expr?))
-         ((== sym 'if) (compile-if node generator expr? compile*))
-         ((== sym 'lambda) (compile-lambda node generator expr? compile*))
-         ((== sym 'set!) (compile-set! node generator compile*))
-         ((== sym 'define) (compile-define node generator compile*))
-         ((== sym '%raw)
-          (generator.write-raw-code (cadr (ast.node-data node))))
-         ((native? sym)
-          ((native-function sym) node generator expr? compile*))
-         (else
-          (if (not (or (symbol? (ast.first* node))
-                       (list? (ast.first* node))))
-              (throw (str "operator is not a procedure: " (ast.first* node))))
-          (generator.write-func-call (ast.first node)
-                                     (cdr (ast.node-data node))
-                                     expr?
-                                     compile*))))))))
+     (expr?
+      (compile*
+       (ast.make-list
+        (ast.make-list*
+         (cons
+          (ast.make-atom 'lambda node)
+          (cons
+           (ast.make-empty-list node)
+           e*))))
+       #t))
+     (top?
+      (for-each (lambda (e) (compile* e expr? top?))
+                e*))
+     (else
+      (generator.write-statements e* compile*)))))
+
+(define (compile node generator & expr? top?)
+  (define (compile* node & expr? top?)
+    (compile node generator expr? top?))
+
+  (cond
+   ((self-evaluating? (ast.node-data node))
+    (compile-object node generator #f expr?))
+   ((symbol? (ast.node-data node))
+    (compile-reference node generator expr?))
+   ((ast.vector? node)
+    (compile-object node generator #f expr?))
+   ((ast.dict? node)
+    (compile-object node generator #f expr?))
+   ((ast.list? node)
+    (let ((sym (ast.first* node)))
+      (cond
+       ((== sym 'quote)
+        (compile-object (cadr (ast.node-data node)) generator #t expr?))
+       ((== sym 'quasiquote)
+        (compile-quasi (cadr (ast.node-data node)) generator expr?))
+       ((== sym 'if) (compile-if node generator expr? compile*))
+       ((== sym 'lambda) (compile-lambda node generator expr? compile*))
+       ((== sym 'set!) (compile-set! node generator compile*))
+       ((== sym 'define) (compile-define node generator compile*))
+       ((== sym 'begin) (compile-begin node generator compile* expr? top?))
+       ((== sym '%raw)
+        (generator.write-raw-code (cadr (ast.node-data node))))
+       ((native? sym)
+        ((native-function sym) node generator expr? compile*))
+       (else
+        (if (not (or (symbol? (ast.first* node))
+                     (list? (ast.first* node))))
+            (throw (str "operator is not a procedure: " (ast.first* node))))
+        (generator.write-func-call (ast.first node)
+                                   (cdr (ast.node-data node))
+                                   expr?
+                                   compile*)))))))
 
 (define %optimize-mode 0)
 
@@ -554,19 +568,24 @@
   (let ((exp (if (string? src)
                  (reader.read src)
                  (sourcify src 0 0))))
-    (let ((src (desourcify (expand exp))))
-      ;; We need to expand again after CPS because it generates a few
-      ;; begin's
-      (let ((src (expand (sourcify
-                          (list 'cps-trampoline
-                                ((cps.cps src) cps-halt))))))
-        ;;(pp (desourcify src))
-        (compile src generator)))
+
+    (compile (expand exp) generator #f #t)
+
+    ;; CPS version:
+    ;; (let ((src (desourcify (expand exp))))
+    ;;   ;; We need to expand again after CPS because it generates a few
+    ;;   ;; begin's
+    ;;   (let ((src (expand (sourcify
+    ;;                       (list 'cps-trampoline
+    ;;                             ((cps.cps src) cps-halt))))))
+    ;;     (pp (desourcify src))
+    ;;     (compile src generator)))
+    
     (generator.get-code)))
 
 (set! module.exports {:read (lambda (e) (desourcify (reader.read e)))
                       :expand expand
-                      :compile compile
+                      :compile (lambda (e g) (compile e g #f #t))
                       :compile-program compile-program
                       :desourcify desourcify
                       :sourcify sourcify
