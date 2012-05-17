@@ -68,7 +68,9 @@
     (if (list-find primitives (car e))
         ((cps-terms (cdr e))
          (lambda (t)
-           `(cps-jump ,(inspect `(,(car e) ,@t)) (lambda () ,(k `(,(car e) ,@t))))))
+           `(cps-jump
+             ,(inspect `(,(car e) ,@t))
+             (lambda () ,(k `(,(car e) ,@t))))))
         ((cps-terms e)
          (lambda (t)
            (let ((d (gensym)))
@@ -202,19 +204,36 @@
     fs.readFileSync
     throw
     parseInt
-    parseFloat))
+    parseFloat
+    setTimeout
+    ctx.fillRect
+    document.addEventListener
+    document.getElementById
+    canvas.getContext
+    Math.rand))
 
 (define (cps e)
   (if (or (atom? e)
           (dict? e)
           (vector? e))
-      (lambda (k)
-        `(cps-jump
-          ,(inspect e)
-          (lambda () ,(k e))))
+      (lambda (k) (k e))
       (case (car e)
         ((require) (lambda (k) `(begin ,e ,(k ''void))))
         ((throw) (lambda (k) `(begin ,e ,(k ''void))))
+        ((debugger)
+         (lambda (k)
+           (let ((res (gensym)))
+             `(begin
+                (debugger-step!)
+                (cps-jump
+                 ,(inspect (cadr e))
+                 (lambda ()
+                   ,((cps (cadr e))
+                     (lambda (r)
+                       `((lambda (,res)
+                           (println (str "result: " ,res))
+                           ,(k res))
+                         ,r)))))))))
         ((quote) (cps-quote (cadr e)))
         ;;((call/cc (cps-call/cc (cadr e))))
         ((if) (cps-if (cadr e)

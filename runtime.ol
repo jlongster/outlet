@@ -567,14 +567,18 @@
 
 (define %next-thunk #f)
 
-(define (cps-trampoline thunk-msg)
+(define (breakpoint thunk-msg)
+  (set! %next-thunk thunk-msg)
   (println (vector-ref thunk-msg 0))
-  (let ((v ((vector-ref thunk-msg 1))))
-    (if v
-        (begin
-          (set! %next-thunk v)
-          (println "continue? ")
-          (process.stdin.resume)))))
+  (print "continue? ")
+  (process.stdin.resume))
+
+(define (cps-trampoline thunk_msg)
+  (%raw "thunk_msg = thunk_msg[1]();
+    while(thunk_msg) {
+      if(debugger_dash_step_p_) { breakpoint(thunk_msg); break; }
+    thunk_msg = thunk_msg[1](); }")
+  #f)
 
 (define (cps-continue)
   (cps-trampoline %next-thunk))
@@ -592,3 +596,8 @@
   `((lambda ()
       (pp (str "halted with result: " ,v))
       #f)))
+
+(define debugger-step? #f)
+(define (debugger-step!)
+  (set! debugger-step? #t))
+
