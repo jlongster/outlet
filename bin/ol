@@ -77,6 +77,8 @@ else {
         backend['write-runtime'](rt);
     }
 
+    backend['include-file']('runtime-js.js');
+
     var output = compiler["compile-program"](src, backend);
 
     if(compile) {

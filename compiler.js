@@ -750,11 +750,14 @@ var cps_dash_trampoline = (function(func){
 var v = func();
 while(v) { v = v(); }return v; // Line <unknown undefined> Column <unknown undefined>
 });
-var cps_dash_jump = (function(to){
+var cps_dash_jump = (function(to,args){
 return to; // Line <unknown undefined> Column <unknown undefined>
 });
 var cps_dash_halt = (function(v){
 return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 576 Column 4
+});
+var make_dash_continuation = (function(k){
+return k; // Line <unknown undefined> Column <unknown undefined>
 });
 
 
@@ -1435,7 +1438,18 @@ var compile_dash_program = (function(src,generator){
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 return ((function() {var o75 = (function(exp){
-compile(expand(exp),generator,false,true); // Line 567 Column 2
+((function() {var o77 = (function(src){
+return ((function() {var o79 = (function(src){
+pp(desourcify(src)); // Line 567 Column 2
+return compile(src,generator,false,true); // Line 567 Column 2
+});
+var o80 = sourcify(cps["cps"](src));
+return o79(o80); // Line 567 Column 2
+}))(); // Line 567 Column 2
+});
+var o78 = desourcify(expand(exp));
+return o77(o78); // Line 567 Column 2
+}))(); // Line 567 Column 2
 return generator["get-code"](); // Line 567 Column 2
 });
 var o76 = (function() {if(string_p_(src)) {return reader["read"](src); // Line 567 Column 2
@@ -1446,9 +1460,9 @@ return o75(o76); // Line 567 Column 2
 }))(); // Line 567 Column 2
 });
 module["exports"] = dict("\uFDD0read",(function(e){
-return desourcify(reader["read"](e)); // Line 585 Column 41
+return desourcify(reader["read"](e)); // Line 581 Column 41
 }),"\uFDD0expand",expand,"\uFDD0compile",(function(e,g){
-return compile(e,g,false,true); // Line 587 Column 46
+return compile(e,g,false,true); // Line 583 Column 46
 }),"\uFDD0compile-program",compile_dash_program,"\uFDD0desourcify",desourcify,"\uFDD0sourcify",sourcify,"\uFDD0pp",pp,"\uFDD0set-macro-generator",(function(g){
 return (function() {if(not(macro_dash_generator)) {macro_dash_generator = g;
 }})()

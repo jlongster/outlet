@@ -570,10 +570,46 @@
   (%raw "while(v) { v = v(); }")
   v)
 
-(define (cps-jump to)
+(define (cps-jump to args)
   to)
 
 (define (cps-halt v)
   `((lambda ()
       (pp (str "halted with result: " ,v))
       #f)))
+
+(define (make-continuation k)
+  k)
+
+;; environments
+
+;; (define %envs {:initial '({})})
+
+;; (define (lookup-variable env var)
+;;   (let loop ((env (dict-ref %envs env)))
+;;     (if (null? env)
+;;         (throw (Error (str "undefined variable: " var)))
+;;         (begin
+;;           (let ((frame (car env)))
+;;             (if (not (== (dict-ref frame var) undefined))
+;;                 (dict-ref frame var)
+;;                 (loop (cdr env))))))))
+
+;; (define (define-variable! env var val)
+;;   (dict-put! (car (dict-ref %envs env)) var val)
+;;   env)
+
+;; (define (set-variable! env var val)
+;;   (let loop ((env (dict-ref %envs env)))
+;;     (if (null? env)
+;;         (throw (Error (str "undefined variable: " var)))
+;;         (let ((frame (car env)))
+;;           (if (not (== (dict-ref frame var) undefined))
+;;               (dict-put! frame var val)
+;;               (loop (cdr env))))))
+;;   env)
+
+;; (define (extend-environment name env vars vals)
+;;   (dict-put! %envs name (cons (zip vars vals)
+;;                               (dict-ref %envs env)))
+;;   name)

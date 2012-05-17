@@ -37,6 +37,12 @@
                               root "/backends/js');") #t)
                   (write "var read = __compiler.read;" #t)))))))
 
+  (define (include-file file . root)
+    (let ((root (if (null? root)
+                    (str __dirname "/..")
+                    (car root))))
+      (write (fs.readFileSync (str root "/" file) "utf-8") #t)))
+  
   (define (inline-writer str)
     (let ((first #t))
       (lambda ()
@@ -311,7 +317,8 @@
                 (write ");"))
               args))
 
-  {:write-runtime write-runtime
+  {:include-file include-file
+   :write-runtime write-runtime
    :write-number write-number
    :write-string write-string
    :write-boolean write-boolean
