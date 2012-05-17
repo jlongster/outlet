@@ -72,9 +72,9 @@
         ((cps-terms e)
          (lambda (t env)
            (let ((d (gensym)))
-             `(,(car t)
-               (make-continuation (lambda (,d) ,(k d env)))
-               ,@(cdr t))))
+             `(begin
+                (push_continuation (make-continuation (lambda (,d) ,(k d env))))
+                (,(car t) ,@(cdr t)))))
          env))))
 
 (define (cps-terms e)
@@ -96,10 +96,10 @@
              (args (gensym)))
          `(make-continuation
            ;; optimization: just capture args in arguments?
-           (lambda (,c ,@vars)
+           (lambda (,@vars)
              (extend_environment ,env2 ,env ',(list->vector vars) arguments)
              ,((cps (cons 'begin body))
-               (lambda (a) `(,c ,a))
+               (lambda (a) `((pop_continuation) ,a))
                env2))))
        env)))
 

@@ -1440,7 +1440,6 @@ var compile_dash_program = (function(src,generator){
 return ((function() {var o75 = (function(exp){
 ((function() {var o77 = (function(src){
 return ((function() {var o79 = (function(src){
-pp(desourcify(src)); // Line 567 Column 2
 return compile(src,generator,false,true); // Line 567 Column 2
 });
 var o80 = sourcify(cps["cps"](src));

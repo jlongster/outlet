@@ -574,7 +574,7 @@
     ;; CPS version:
     (let ((src (desourcify (expand exp))))
       (let ((src (sourcify (cps.cps src))))
-        (pp (desourcify src))
+        ;;(pp (desourcify src))
         (compile src generator #f #t)))
     
     (generator.get-code)))

@@ -8,7 +8,7 @@ for(var i=0; i<slots.length; i++) {
 var initial_env = slots[slot_ptr++];
 initial_env[0] = false;
 initial_env[1] = [];
-initial_env[2] = [null];
+initial_env[2] = [];
 
 var _envs = {};
 _envs[string_dash__gt_symbol('initial')] = initial_env;
@@ -21,9 +21,7 @@ function lookup_variable(env, var_) {
         vars = slot[1];
         for(var i=0, len=vars.length; i<len; i++) {
             if(vars[i] == var_) {
-                // Add one because args is an actual arguments object, and
-                // the first argument is the continuation
-                return slot[2][i+1];
+                return slot[2][i];
             }
         }
         env = slot[0];
@@ -40,9 +38,7 @@ function set_variable(env, var_, val) {
         vars = slot[1];
         for(var i=0, len=vars.length; i<len; i++) {
             if(vars[i] == var_) {
-                // Add one because args is an actual arguments object, and
-                // the first argument is the continuation
-                slot[2][i+1] = val;
+                slot[2][i] = val;
             }
         }
         env = slot[0];
@@ -65,4 +61,17 @@ function extend_environment(name, env, vars, args) {
     slot[1] = vars;
     slot[2] = args;
     return name;
+}
+
+// stack
+
+var stack = new Array(50000);
+var stack_ptr = -1;
+
+function push_continuation(k) {
+    stack[stack_ptr++] = k;
+}
+
+function pop_continuation() {
+    return stack[--stack_ptr];
 }

@@ -830,7 +830,7 @@ return k(list_dash_append(list(car(e)),t),env); // Line 69 Column 12
 }),env); // Line 67 Column 9
 } else {return cps_dash_terms(e)((function(t,env){
 return ((function() {var o3 = (function(d){
-return list_dash_append(list(car(t),list("\uFDD1make-continuation",list("\uFDD1lambda",list(d),k(d,env)))),cdr(t)); // Line 73 Column 11
+return list("\uFDD1begin",list("\uFDD1push_continuation",list("\uFDD1make-continuation",list("\uFDD1lambda",list(d),k(d,env)))),list_dash_append(list(car(t)),cdr(t))); // Line 73 Column 11
 });
 var o4 = gensym();
 return o3(o4); // Line 73 Column 11
@@ -857,8 +857,8 @@ return k(_emptylst,env); // Line 89 Column 23
 var cps_dash_abstraction = (function(vars,body){
 return (function(k,env){
 return k(((function() {var o5 = (function(c,env2,args){
-return list("\uFDD1make-continuation",list("\uFDD1lambda",list_dash_append(list(c),vars),list("\uFDD1extend_environment",env2,env,list("\uFDD1quote",list_dash__gt_vector(vars)),"\uFDD1arguments"),cps(cons("\uFDD1begin",body))((function(a){
-return list(c,a); // Line 93 Column 7
+return list("\uFDD1make-continuation",list("\uFDD1lambda",vars,list("\uFDD1extend_environment",env2,env,list("\uFDD1quote",list_dash__gt_vector(vars)),"\uFDD1arguments"),cps(cons("\uFDD1begin",body))((function(a){
+return list(list("\uFDD1pop_continuation"),a); // Line 93 Column 7
 }),env2))); // Line 93 Column 7
 });
 var o6 = gensym();
