@@ -565,13 +565,28 @@
 
 ;; cps
 
-(define (cps-trampoline func)
-  (define v (func))
-  (%raw "while(v) { v = v(); }")
-  v)
+(define %next-thunk #f)
 
-(define (cps-jump to)
-  to)
+(define (cps-trampoline thunk-msg)
+  (println (vector-ref thunk-msg 0))
+  (let ((v ((vector-ref thunk-msg 1))))
+    (if v
+        (begin
+          (set! %next-thunk v)
+          (println "continue? ")
+          (process.stdin.resume)))))
+
+(define (cps-continue)
+  (cps-trampoline %next-thunk))
+
+(process.stdin.on
+ "data"
+ (lambda (txt)
+   (process.stdin.pause)
+   (cps-continue)))
+
+(define (cps-jump msg to)
+  [msg to])
 
 (define (cps-halt v)
   `((lambda ()

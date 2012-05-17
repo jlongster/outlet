@@ -15,8 +15,11 @@
     ((cps form)
      (lambda (a)
        `(begin
-          (set! ,var ,a)
-          ,(k ''void))))))
+          (cps-jump
+           ,(inspect `(set! ,var ,a))
+           (lambda ()
+             (set! ,var ,a)
+             ,(k ''void))))))))
 
 (define (cps-define var/func body)
   (if (list? var/func)
@@ -65,11 +68,13 @@
     (if (list-find primitives (car e))
         ((cps-terms (cdr e))
          (lambda (t)
-           (k `(,(car e) ,@t))))
+           `(cps-jump ,(inspect `(,(car e) ,@t)) (lambda () ,(k `(,(car e) ,@t))))))
         ((cps-terms e)
          (lambda (t)
            (let ((d (gensym)))
-             `(cps-jump (lambda () (,(car t) (lambda (,d) ,(k d)) ,@(cdr t))))))))))
+             `(cps-jump
+               ,(inspect `(,(car t) ,@(cdr t)))
+               (lambda () (,(car t) (lambda (,d) ,(k d)) ,@(cdr t))))))))))
 
 (define (cps-terms e)
   (if (list? e)
@@ -86,7 +91,7 @@
     (k (let ((c (gensym)))
          `(lambda (,c ,@vars)
             ,((cps (cons 'begin body))
-              (lambda (a) `(cps-jump (lambda () (,c ,a))))))))))
+              (lambda (a) `(,c ,a))))))))
 
 ;; (define (cps-call/cc catcher)
 ;;   (lambda (k)
@@ -203,7 +208,10 @@
   (if (or (atom? e)
           (dict? e)
           (vector? e))
-      (lambda (k) (k e))
+      (lambda (k)
+        `(cps-jump
+          ,(inspect e)
+          (lambda () ,(k e))))
       (case (car e)
         ((require) (lambda (k) `(begin ,e ,(k ''void))))
         ((throw) (lambda (k) `(begin ,e ,(k ''void))))

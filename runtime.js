@@ -746,14 +746,31 @@ var gensym_dash_fresh = (function() {_per_gensym_dash_base = 10000;
 var gensym = (function() {_per_gensym_dash_base = (_per_gensym_dash_base + 1);
 return string_dash__gt_symbol(("o" + _per_gensym_dash_base)); // Line 563 Column 3
 });
-var cps_dash_trampoline = (function(func){
-var v = func();
-while(v) { v = v(); }return v; // Line <unknown undefined> Column <unknown undefined>
+var _per_next_dash_thunk = false;
+var cps_dash_trampoline = (function(thunk_dash_msg){
+println(vector_dash_ref(thunk_dash_msg,0)); // Line 570 Column 3
+return ((function() {var o55 = (function(v){
+return (function() {if(v) {return ((function() {_per_next_dash_thunk = v;
+println("continue? "); // Line 571 Column 2
+return process["stdin"]["resume"](); // Line 571 Column 2
+}))(); // Line 571 Column 2
+}})()
+; // Line <unknown undefined> Column <unknown undefined>
 });
-var cps_dash_jump = (function(to){
-return to; // Line <unknown undefined> Column <unknown undefined>
+var o56 = vector_dash_ref(thunk_dash_msg,1)();
+return o55(o56); // Line 571 Column 2
+}))(); // Line 571 Column 2
+});
+var cps_dash_continue = (function() {return cps_dash_trampoline(_per_next_dash_thunk); // Line 579 Column 3
+});
+process["stdin"]["on"]("data",(function(txt){
+process["stdin"]["pause"](); // Line 584 Column 4
+return cps_dash_continue(); // Line 585 Column 4
+})); // Line 581 Column 1
+var cps_dash_jump = (function(msg,to){
+return vector(msg,to); // Line 588 Column 2
 });
 var cps_dash_halt = (function(v){
-return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 576 Column 4
+return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 591 Column 4
 });
 

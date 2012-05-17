@@ -569,17 +569,20 @@
                  (reader.read src)
                  (sourcify src 0 0))))
 
-    (compile (expand exp) generator #f #t)
+    ;;(compile (expand exp) generator #f #t)
 
     ;; CPS version:
-    ;; (let ((src (desourcify (expand exp))))
-    ;;   ;; We need to expand again after CPS because it generates a few
-    ;;   ;; begin's
-    ;;   (let ((src (expand (sourcify
-    ;;                       (list 'cps-trampoline
-    ;;                             ((cps.cps src) cps-halt))))))
-    ;;     (pp (desourcify src))
-    ;;     (compile src generator)))
+    (let ((src (desourcify (expand exp))))
+      ;; We need to expand again after CPS because it generates a few
+      ;; begin's
+      (let ((src (expand (sourcify
+                          `(cps-trampoline
+                            (cps-jump
+                             ,(inspect src)
+                             (lambda ()
+                               ,((cps.cps src) cps-halt))))))))
+        ;;(pp (desourcify src))
+        (compile src generator)))
     
     (generator.get-code)))
 
