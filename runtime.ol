@@ -570,8 +570,15 @@
   (%raw "while(v) { v = v(); }")
   v)
 
-(define (cps-jump to args)
+(define (cps-jump to)
   to)
+
+(define (cps2-trampoline v)
+  (%raw "while(v) { v = v[0].apply(null, v[1]); }")
+  v)
+
+(define (cps2-jump to args)
+  [to args])
 
 (define (cps-halt v)
   `((lambda ()

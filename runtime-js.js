@@ -1,5 +1,5 @@
 
-var slots = new Array(10000);
+var slots = new Array(60000);
 var slot_ptr = 0;
 for(var i=0; i<slots.length; i++) {
     slots[i] = new Array(3);

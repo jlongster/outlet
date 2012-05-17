@@ -750,11 +750,17 @@ var cps_dash_trampoline = (function(func){
 var v = func();
 while(v) { v = v(); }return v; // Line <unknown undefined> Column <unknown undefined>
 });
-var cps_dash_jump = (function(to,args){
+var cps_dash_jump = (function(to){
 return to; // Line <unknown undefined> Column <unknown undefined>
 });
+var cps2_dash_trampoline = (function(v){
+while(v) { v = v[0].apply(null, v[1]); }return v; // Line <unknown undefined> Column <unknown undefined>
+});
+var cps2_dash_jump = (function(to,args){
+return vector(to,args); // Line 580 Column 2
+});
 var cps_dash_halt = (function(v){
-return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 576 Column 4
+return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 583 Column 4
 });
 var make_dash_continuation = (function(k){
 return k; // Line <unknown undefined> Column <unknown undefined>

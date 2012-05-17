@@ -573,7 +573,7 @@
 
     ;; CPS version:
     (let ((src (desourcify (expand exp))))
-      (let ((src (sourcify (cps.cps src))))
+      (let ((src (sourcify `(cps2-trampoline ,(cps.cps src)))))
         ;;(pp (desourcify src))
         (compile src generator #f #t)))
     

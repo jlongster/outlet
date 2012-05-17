@@ -750,11 +750,17 @@ var cps_dash_trampoline = (function(func){
 var v = func();
 while(v) { v = v(); }return v; // Line <unknown undefined> Column <unknown undefined>
 });
-var cps_dash_jump = (function(to,args){
+var cps_dash_jump = (function(to){
 return to; // Line <unknown undefined> Column <unknown undefined>
 });
+var cps2_dash_trampoline = (function(v){
+while(v) { v = v[0].apply(null, v[1]); }return v; // Line <unknown undefined> Column <unknown undefined>
+});
+var cps2_dash_jump = (function(to,args){
+return vector(to,args); // Line 580 Column 2
+});
 var cps_dash_halt = (function(v){
-return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 576 Column 4
+return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 583 Column 4
 });
 var make_dash_continuation = (function(k){
 return k; // Line <unknown undefined> Column <unknown undefined>
@@ -830,7 +836,7 @@ return k(list_dash_append(list(car(e)),t),env); // Line 69 Column 12
 }),env); // Line 67 Column 9
 } else {return cps_dash_terms(e)((function(t,env){
 return ((function() {var o3 = (function(d){
-return list("\uFDD1begin",list("\uFDD1push_continuation",list("\uFDD1make-continuation",list("\uFDD1lambda",list(d),k(d,env)))),list_dash_append(list(car(t)),cdr(t))); // Line 73 Column 11
+return list("\uFDD1begin",list("\uFDD1push_continuation",list("\uFDD1make-continuation",list("\uFDD1lambda",list(d),k(d,env)))),list("\uFDD1cps2-jump",car(t),list_dash__gt_vector(cdr(t)))); // Line 73 Column 11
 });
 var o4 = gensym();
 return o3(o4); // Line 73 Column 11

@@ -74,7 +74,7 @@
            (let ((d (gensym)))
              `(begin
                 (push_continuation (make-continuation (lambda (,d) ,(k d env))))
-                (,(car t) ,@(cdr t)))))
+                (cps2-jump ,(car t) ,(list->vector (cdr t))))))
          env))))
 
 (define (cps-terms e)
