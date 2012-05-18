@@ -578,7 +578,8 @@
       (let ((src (expand (sourcify
                           `(cps-trampoline
                             (cps-jump
-                             ,(inspect src)
+                             #f
+                             ,(vector-slice (inspect src) 0 100)
                              (lambda ()
                                ,((cps.cps src) cps-halt))))))))
         ;;(pp (desourcify src))

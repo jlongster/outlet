@@ -565,39 +565,55 @@
 
 ;; cps
 
-(define %next-thunk #f)
+(define %breakpoints-flag #t)
 
 (define (breakpoint thunk-msg)
   (set! %next-thunk thunk-msg)
-  (println (vector-ref thunk-msg 0))
-  (print "continue? ")
-  (process.stdin.resume))
+  (debugger-step (vector-ref thunk-msg 1)))
 
-(define (cps-trampoline thunk_msg)
-  (%raw "thunk_msg = thunk_msg[1]();
-    while(thunk_msg) {
-      if(debugger_dash_step_p_) { breakpoint(thunk_msg); break; }
-    thunk_msg = thunk_msg[1](); }")
-  #f)
+(define debugger-step? #f)
+(define (start-stepping)
+  (set! debugger-step? #t))
 
-(define (cps-continue)
+(define (stop-stepping)
+  (set! debugger-step? #f))
+
+(define (enable-breakpoints)
+  (set! %breakpoints-flag #t))
+
+(define (disable-breakpoints)
+  (set! %breakpoints-flag #f))
+
+(define (debugger-continue)
+  (set! %next-thunk ((vector-ref %next-thunk 2)))
   (cps-trampoline %next-thunk))
 
-(process.stdin.on
- "data"
- (lambda (txt)
-   (process.stdin.pause)
-   (cps-continue)))
+;; (define (debugger-step msg)
+;;   (println msg)
+;;   (print "continue? ")
+;;   (process.stdin.resume))
 
-(define (cps-jump msg to)
-  [msg to])
+;; (process.stdin.on
+;;  "data"
+;;  (lambda (txt)
+;;    (process.stdin.pause)
+;;    (debugger-continue)))
+
+(define %next-thunk #f)
+
+(define (cps-trampoline thunk_msg)
+  (%raw "while(thunk_msg) {
+     if(_per_breakpoints_dash_flag && (thunk_msg[0] || debugger_dash_step_p_)) {
+       breakpoint(thunk_msg);
+       break;
+     }
+     thunk_msg = thunk_msg[2](); }")
+  #f)
+
+(define (cps-jump breakpoint msg to)
+  [breakpoint msg to])
 
 (define (cps-halt v)
   `((lambda ()
       (pp (str "halted with result: " ,v))
       #f)))
-
-(define debugger-step? #f)
-(define (debugger-step!)
-  (set! debugger-step? #t))
-

@@ -6,6 +6,9 @@
       (null? exp)
       (symbol? exp)))
 
+(define (inspect-short exp)
+  (vector-slice (inspect exp) 0 100))
+
 (define (cps-quote data)
   (lambda (k)
     (k `(quote ,data))))
@@ -16,7 +19,8 @@
      (lambda (a)
        `(begin
           (cps-jump
-           ,(inspect `(set! ,var ,a))
+           #f
+           ,(inspect-short `(set! ,var ,a))
            (lambda ()
              (set! ,var ,a)
              ,(k ''void))))))))
@@ -69,13 +73,15 @@
         ((cps-terms (cdr e))
          (lambda (t)
            `(cps-jump
-             ,(inspect `(,(car e) ,@t))
+             #f
+             ,(inspect-short `(,(car e) ,@t))
              (lambda () ,(k `(,(car e) ,@t))))))
         ((cps-terms e)
          (lambda (t)
            (let ((d (gensym)))
              `(cps-jump
-               ,(inspect `(,(car t) ,@(cdr t)))
+               #f
+               ,(inspect-short `(,(car t) ,@(cdr t)))
                (lambda () (,(car t) (lambda (,d) ,(k d)) ,@(cdr t))))))))))
 
 (define (cps-terms e)
@@ -198,6 +204,8 @@
     cps-trampoline
     cps-jump
     cps-halt
+    disable-breakpoints
+    enable-breakpoints
 
     RegExp
     s.match
@@ -210,7 +218,10 @@
     document.addEventListener
     document.getElementById
     canvas.getContext
-    Math.rand))
+    Math.random
+    process.stdin.on
+    process.stdin.pause
+    process.stdin.resume))
 
 (define (cps e)
   (if (or (atom? e)
@@ -220,13 +231,13 @@
       (case (car e)
         ((require) (lambda (k) `(begin ,e ,(k ''void))))
         ((throw) (lambda (k) `(begin ,e ,(k ''void))))
-        ((debugger)
+        ((debug)
          (lambda (k)
            (let ((res (gensym)))
              `(begin
-                (debugger-step!)
                 (cps-jump
-                 ,(inspect (cadr e))
+                 #t
+                 ,(inspect-short (cadr e))
                  (lambda ()
                    ,((cps (cadr e))
                      (lambda (r)
@@ -234,6 +245,15 @@
                            (println (str "result: " ,res))
                            ,(k res))
                          ,r)))))))))
+        ((callback)
+         (lambda (k)
+           (k `(lambda ,(cadr e)
+                 (cps-trampoline
+                  (cps-jump
+                   #f
+                   ,(inspect-short `(lambda ,(cadr e) ,@(cddr e)))
+                   (lambda () ,((cps (cons 'begin (cddr e)))
+                           (lambda (r) #f)))))))))
         ((quote) (cps-quote (cadr e)))
         ;;((call/cc (cps-call/cc (cadr e))))
         ((if) (cps-if (cadr e)

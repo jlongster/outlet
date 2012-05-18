@@ -746,33 +746,37 @@ var gensym_dash_fresh = (function() {_per_gensym_dash_base = 10000;
 var gensym = (function() {_per_gensym_dash_base = (_per_gensym_dash_base + 1);
 return string_dash__gt_symbol(("o" + _per_gensym_dash_base)); // Line 563 Column 3
 });
-var _per_next_dash_thunk = false;
+var _per_breakpoints_dash_flag = true;
 var breakpoint = (function(thunk_dash_msg){
 _per_next_dash_thunk = thunk_dash_msg;
-println(vector_dash_ref(thunk_dash_msg,0)); // Line 571 Column 3
-print("continue? "); // Line 572 Column 3
-return process["stdin"]["resume"](); // Line 573 Column 3
-});
-var cps_dash_trampoline = (function(thunk_msg){
-thunk_msg = thunk_msg[1]();
-    while(thunk_msg) {
-      if(debugger_dash_step_p_) { breakpoint(thunk_msg); break; }
-    thunk_msg = thunk_msg[1](); }return false; // Line <unknown undefined> Column <unknown undefined>
-});
-var cps_dash_continue = (function() {return cps_dash_trampoline(_per_next_dash_thunk); // Line 583 Column 3
-});
-process["stdin"]["on"]("data",(function(txt){
-process["stdin"]["pause"](); // Line 588 Column 4
-return cps_dash_continue(); // Line 589 Column 4
-})); // Line 585 Column 1
-var cps_dash_jump = (function(msg,to){
-return vector(msg,to); // Line 592 Column 2
-});
-var cps_dash_halt = (function(v){
-return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 595 Column 4
+return debugger_dash_step(vector_dash_ref(thunk_dash_msg,1)); // Line 571 Column 3
 });
 var debugger_dash_step_p_ = false;
-var debugger_dash_step_excl_ = (function() {debugger_dash_step_p_ = true;
+var start_dash_stepping = (function() {debugger_dash_step_p_ = true;
+});
+var stop_dash_stepping = (function() {debugger_dash_step_p_ = false;
+});
+var enable_dash_breakpoints = (function() {_per_breakpoints_dash_flag = true;
+});
+var disable_dash_breakpoints = (function() {_per_breakpoints_dash_flag = false;
+});
+var debugger_dash_continue = (function() {_per_next_dash_thunk = vector_dash_ref(_per_next_dash_thunk,2)();
+return cps_dash_trampoline(_per_next_dash_thunk); // Line 588 Column 3
+});
+var _per_next_dash_thunk = false;
+var cps_dash_trampoline = (function(thunk_msg){
+while(thunk_msg) {
+     if(_per_breakpoints_dash_flag && (thunk_msg[0] || debugger_dash_step_p_)) {
+       breakpoint(thunk_msg);
+       break;
+     }
+     thunk_msg = thunk_msg[2](); }return false; // Line <unknown undefined> Column <unknown undefined>
+});
+var cps_dash_jump = (function(breakpoint,msg,to){
+return vector(breakpoint,msg,to); // Line 613 Column 2
+});
+var cps_dash_halt = (function(v){
+return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 616 Column 4
 });
 
 
@@ -1457,7 +1461,7 @@ return ((function() {var o75 = (function(exp){
 return ((function() {var o79 = (function(src){
 return compile(src,generator); // Line 567 Column 2
 });
-var o80 = expand(sourcify(list("\uFDD1cps-trampoline",list("\uFDD1cps-jump",inspect(src),list("\uFDD1lambda",_emptylst,cps["cps"](src)(cps_dash_halt))))));
+var o80 = expand(sourcify(list("\uFDD1cps-trampoline",list("\uFDD1cps-jump",false,vector_dash_slice(inspect(src),0,100),list("\uFDD1lambda",_emptylst,cps["cps"](src)(cps_dash_halt))))));
 return o79(o80); // Line 567 Column 2
 }))(); // Line 567 Column 2
 });
@@ -1474,9 +1478,9 @@ return o75(o76); // Line 567 Column 2
 }))(); // Line 567 Column 2
 });
 module["exports"] = dict("\uFDD0read",(function(e){
-return desourcify(reader["read"](e)); // Line 588 Column 41
+return desourcify(reader["read"](e)); // Line 589 Column 41
 }),"\uFDD0expand",expand,"\uFDD0compile",(function(e,g){
-return compile(e,g,false,true); // Line 590 Column 46
+return compile(e,g,false,true); // Line 591 Column 46
 }),"\uFDD0compile-program",compile_dash_program,"\uFDD0desourcify",desourcify,"\uFDD0sourcify",sourcify,"\uFDD0pp",pp,"\uFDD0set-macro-generator",(function(g){
 return (function() {if(not(macro_dash_generator)) {macro_dash_generator = g;
 }})()
