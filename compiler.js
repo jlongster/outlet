@@ -1466,7 +1466,6 @@ var compile_dash_program = (function(src,generator){
 return ((function() {var o75 = (function(exp){
 ((function() {var o77 = (function(src){
 return ((function() {var o79 = (function(src){
-pp(desourcify(src)); // Line 567 Column 2
 return compile(src,generator); // Line 567 Column 2
 });
 var o80 = expand(sourcify(list("\uFDD1cps-trampoline",list("\uFDD1cps-jump",false,vector_dash_slice(inspect(src),0,100),list("\uFDD1lambda",_emptylst,cps["cps"](src)(cps_dash_halt))))));
