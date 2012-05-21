@@ -101,6 +101,20 @@
             ,((cps (cons 'begin body))
               (lambda (a) `(,c ,a))))))))
 
+(define (cps-tilde func args)
+  (lambda (k)
+    ((cps-terms args)
+     (lambda (t)
+       `(,func ,@t
+               (lambda (err msg)
+                 (cps-trampoline
+                  (cps-jump
+                   #f
+                   "<callback>"
+                   (lambda ()
+                     ,(k 'msg)
+                     #f)))))))))
+
 ;; (define (cps-call/cc catcher)
 ;;   (lambda (k)
 ;;     (let ((c (k )))
@@ -207,6 +221,7 @@
     disable-breakpoints
     enable-breakpoints
 
+    alert
     RegExp
     s.match
     fs.readFileSync
@@ -219,9 +234,15 @@
     document.getElementById
     canvas.getContext
     Math.random
+    Math.floor
     process.stdin.on
     process.stdin.pause
-    process.stdin.resume))
+    process.stdin.resume
+    client.set
+    client.get
+    client.end
+    console.log
+    redis.createClient))
 
 (define (cps e)
   (if (or (atom? e)
@@ -254,6 +275,7 @@
                    ,(inspect-short `(lambda ,(cadr e) ,@(cddr e)))
                    (lambda () ,((cps (cons 'begin (cddr e)))
                            (lambda (r) #f)))))))))
+        ((~) (cps-tilde (cadr e) (cddr e)))
         ((quote) (cps-quote (cadr e)))
         ;;((call/cc (cps-call/cc (cadr e))))
         ((if) (cps-if (cadr e)

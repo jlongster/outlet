@@ -756,12 +756,19 @@ var start_dash_stepping = (function() {debugger_dash_step_p_ = true;
 });
 var stop_dash_stepping = (function() {debugger_dash_step_p_ = false;
 });
+var debugger_dash_stepping_p_ = (function() {return not(_eq__eq_(_per_next_dash_thunk,false)); // Line 581 Column 3
+});
 var enable_dash_breakpoints = (function() {_per_breakpoints_dash_flag = true;
 });
 var disable_dash_breakpoints = (function() {_per_breakpoints_dash_flag = false;
 });
-var debugger_dash_continue = (function() {_per_next_dash_thunk = vector_dash_ref(_per_next_dash_thunk,2)();
-return cps_dash_trampoline(_per_next_dash_thunk); // Line 588 Column 3
+var debugger_dash_continue = (function() {return ((function() {var o55 = (function(thunk){
+_per_next_dash_thunk = false;
+return cps_dash_trampoline(thunk); // Line 590 Column 2
+});
+var o56 = vector_dash_ref(_per_next_dash_thunk,2)();
+return o55(o56); // Line 590 Column 2
+}))(); // Line 590 Column 2
 });
 var _per_next_dash_thunk = false;
 var cps_dash_trampoline = (function(thunk_msg){
@@ -773,9 +780,9 @@ while(thunk_msg) {
      thunk_msg = thunk_msg[2](); }return false; // Line <unknown undefined> Column <unknown undefined>
 });
 var cps_dash_jump = (function(breakpoint,msg,to){
-return vector(breakpoint,msg,to); // Line 613 Column 2
+return vector(breakpoint,msg,to); // Line 617 Column 2
 });
 var cps_dash_halt = (function(v){
-return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 616 Column 4
+return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 620 Column 4
 });
 

@@ -578,6 +578,9 @@
 (define (stop-stepping)
   (set! debugger-step? #f))
 
+(define (debugger-stepping?)
+  (not (== %next-thunk #f)))
+
 (define (enable-breakpoints)
   (set! %breakpoints-flag #t))
 
@@ -585,8 +588,9 @@
   (set! %breakpoints-flag #f))
 
 (define (debugger-continue)
-  (set! %next-thunk ((vector-ref %next-thunk 2)))
-  (cps-trampoline %next-thunk))
+  (let ((thunk ((vector-ref %next-thunk 2))))
+    (set! %next-thunk #f)
+    (cps-trampoline thunk)))
 
 ;; (define (debugger-step msg)
 ;;   (println msg)
