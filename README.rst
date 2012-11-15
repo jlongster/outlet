@@ -24,6 +24,8 @@ Current Status
 
 Outlet is no longer being actively hacked on. It is used to test out new ideas here and there, but it is not actively maintained.
 
+I plan on writing a "post-mortem" of my experience, though this isn't necessarily dead, just frozen. I'll most likely come back and hack on cool ideas. It's just not something you should use, unless you want to play with compilers.
+
 Example
 -------
 
@@ -82,16 +84,29 @@ To get started:
 
 ::
 
+    # Download Outlet and add the `bin` directory to the path
+    git clone git@github.com:jlongster/outlet.git
+    export PATH="`pwd`/bin:$PATH"
+
+    ol file.ol # Compile a file (saves it to file.js, the original filename with a js ext)
+    ol -c file.ol # Compile a file and print to stdout
+    ol -e '(define a 4)' # Evalute an expression
+    ol -c -e '(define a 4)' # Compile an expression and print to stdout
+
+To use the javascript API:
+
+::
+
     var compiler = require('./compiler');
     var js = require('./backends/js');
     compiler.compile('(define foo 5)', js()); // returns javascript source
 
-This is a rough interface, and will improve when build tools are worked on.
-
 See the tests in `tests` for examples.
 
-More sophisticated build tools will come soon. If you want to work on the compiler, Outlet comes with a Makefile. To compile your changes and run all tests:
+If you want to work on the compiler, Outlet comes with a Makefile. To compile your changes and run all tests:
 
 ::
 
+    make # Compile the compiler with itself
+    make BOOT=1 # Compile the compiler with the last known working version
     make test
