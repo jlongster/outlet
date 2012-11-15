@@ -19,12 +19,10 @@ Features
 * Javascript code generator
 * Several other things, it's hackable!
 
-Current Status: Refactoring
+Current Status:
 ---------------------------
 
-The current implementation is essentially a prototype. Although it provides a minimally feature-complete language, it has several flaws and hacks. Now that I've let this project simmer a little bit, it's time to refactor it into a more robust implementation. The result will be faster, better tooling, and more thought-out.
-
-The refactoring is happening on the `refactor branch <https://github.com/jlongster/outlet/tree/refactor>`_.
+Outlet is not longer being actively hacked on. It is used to test out new ideas here and there, but it is not actively maintained.
 
 Example
 -------
