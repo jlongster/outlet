@@ -22,7 +22,7 @@ Features
 Current Status
 --------------
 
-Outlet is not longer being actively hacked on. It is used to test out new ideas here and there, but it is not actively maintained.
+Outlet is no longer being actively hacked on. It is used to test out new ideas here and there, but it is not actively maintained.
 
 Example
 -------
