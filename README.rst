@@ -88,10 +88,17 @@ To get started:
     git clone git@github.com:jlongster/outlet.git
     export PATH="`pwd`/bin:$PATH"
 
-    ol file.ol # Compile a file (saves it to file.js, the original filename with a js ext)
-    ol -c file.ol # Compile a file and print to stdout
-    ol -e '(define a 4)' # Evalute an expression
-    ol -c -e '(define a 4)' # Compile an expression and print to stdout
+    # Compile a file (saves it to file.js, the original filename with a js ext)
+    ol file.ol
+
+    # Compile a file and print to stdout
+    ol -c file.ol
+
+    # Evalute an expression
+    ol -e '(define a 4)'
+
+   # Compile an expression and print to stdout
+    ol -c -e '(define a 4)'
 
 To use the javascript API:
 
@@ -107,6 +114,6 @@ If you want to work on the compiler, Outlet comes with a Makefile. To compile yo
 
 ::
 
-    make # Compile the compiler with itself
-    make BOOT=1 # Compile the compiler with the last known working version
-    make test
+    make         # Compile the compiler with itself
+    make BOOT=1  # Compile the compiler with the last known working version
+    make test    # Run tests
