@@ -1,18 +1,11 @@
 var util = require("util");var type = (function(obj){
-return (function() {if(number_p_(obj)) {return ((function() {return "\uFDD1number"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 6 Column 2
-} else {return (function() {if(boolean_p_(obj)) {return ((function() {return "\uFDD1boolean"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 6 Column 2
-} else {return (function() {if(string_p_(obj)) {return ((function() {return "\uFDD1string"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 6 Column 2
-} else {return (function() {if(null_p_(obj)) {return ((function() {return "\uFDD1null"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 6 Column 2
-} else {return (function() {if(list_p_(obj)) {return ((function() {return "\uFDD1list"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 6 Column 2
-} else {return (function() {if(vector_p_(obj)) {return ((function() {return "\uFDD1vector"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 6 Column 2
-} else {return (function() {if(dict_p_(obj)) {return ((function() {return "\uFDD1dict"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 6 Column 2
+return (function() {if(number_p_(obj)) {return "\uFDD1number"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(boolean_p_(obj)) {return "\uFDD1boolean"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(string_p_(obj)) {return "\uFDD1string"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(null_p_(obj)) {return "\uFDD1null"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(list_p_(obj)) {return "\uFDD1list"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(vector_p_(obj)) {return "\uFDD1vector"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(dict_p_(obj)) {return "\uFDD1dict"; // Line <unknown undefined> Column <unknown undefined>
 } else {return false; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -135,12 +128,9 @@ return cdr(car(cdr(lst))); // Line 124 Column 21
 });
 var list_dash_ref = (function(lst,i){
 return ((function() {var loop = (function(lst,i){
-return (function() {if(null_p_(lst)) {return ((function() {return false; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 127 Column 2
-} else {return (function() {if(eq_p_(i,0)) {return ((function() {return car(lst); // Line 127 Column 2
-}))(); // Line 127 Column 2
-} else {return ((function() {return loop(cdr(lst),(i - 1)); // Line 127 Column 2
-}))(); // Line 127 Column 2
+return (function() {if(null_p_(lst)) {return false; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(eq_p_(i,0)) {return car(lst); // Line 127 Column 2
+} else {return loop(cdr(lst),(i - 1)); // Line 127 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -187,15 +177,14 @@ return ((function() {var o6 = (function(access){
 return ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return false; // Line <unknown undefined> Column <unknown undefined>
 } else {return (function() {if(_eq__eq_(access(car(lst)),val)) {return lst; // Line <unknown undefined> Column <unknown undefined>
-} else {return vector("__tco_call",(function() {return loop(cdr(lst)); // Line 156 Column 2
-})); // Line 156 Column 2
+} else {return loop(cdr(lst)); // Line 156 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o8 = lst;
-return trampoline(loop(o8)); // Line 156 Column 2
+return loop(o8); // Line 156 Column 2
 }))(); // Line 156 Column 2
 });
 var o7 = (function() {if(null_p_(rst)) {return (function(x){
@@ -215,15 +204,13 @@ return (function() {if(null_p_(lst)) {return _emptylst; // Line <unknown undefin
 });
 var for_dash_each = (function(func,lst){
 return ((function() {var loop = (function(lst){
-return (function() {if(not(null_p_(lst))) {return ((function() {func(car(lst)); // Line 171 Column 2
-return vector("__tco_call",(function() {return loop(cdr(lst)); // Line 171 Column 2
-})); // Line 171 Column 2
-}))(); // Line 171 Column 2
+return (function() {if(not(null_p_(lst))) {func(car(lst)); // Line 171 Column 2
+return loop(cdr(lst)); // Line 171 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o9 = lst;
-return trampoline(loop(o9)); // Line 171 Column 2
+return loop(o9); // Line 171 Column 2
 }))(); // Line 171 Column 2
 });
 var fold = (function(func,acc,lst){
@@ -252,16 +239,14 @@ var make_dash_vector = (function(count){
 var val = arguments[1] || false;
 return ((function() {var o11 = (function(v){
 return (function() {if(val) {return ((function() {var loop = (function(i){
-return (function() {if((i < count)) {return ((function() {vector_dash_put_excl_(v,i,val); // Line 202 Column 2
-return vector("__tco_call",(function() {return loop((i + 1)); // Line 202 Column 2
-})); // Line 202 Column 2
-}))(); // Line 202 Column 2
+return (function() {if((i < count)) {vector_dash_put_excl_(v,i,val); // Line 202 Column 2
+return loop((i + 1)); // Line 202 Column 2
 } else {return v; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o13 = 0;
-return trampoline(loop(o13)); // Line 202 Column 2
+return loop(o13); // Line 202 Column 2
 }))(); // Line 202 Column 2
 } else {return v; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -280,14 +265,13 @@ var vector_dash_concat = (function(){
 var vecs = vector_dash__gt_list(Array.prototype.slice.call(arguments, 0));
 return ((function() {var loop = (function(lst,res){
 return (function() {if(null_p_(lst)) {return res; // Line <unknown undefined> Column <unknown undefined>
-} else {return vector("__tco_call",(function() {return loop(cdr(lst),res["concat"](car(lst))); // Line 222 Column 2
-})); // Line 222 Column 2
+} else {return loop(cdr(lst),res["concat"](car(lst))); // Line 222 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o14 = cdr(vecs);
 var o15 = car(vecs);
-return trampoline(loop(o14,o15)); // Line 222 Column 2
+return loop(o14,o15); // Line 222 Column 2
 }))(); // Line 222 Column 2
 });
 var vector_dash_slice = (function(vec,start){
@@ -298,8 +282,7 @@ return vec.push(obj)});
 var vector_dash_find = (function(vec,val){
 return ((function() {var loop = (function(i){
 return (function() {if((i < vec.length)) {return (function() {if(eq_p_(vector_dash_ref(vec,i),val)) {return i; // Line <unknown undefined> Column <unknown undefined>
-} else {return vector("__tco_call",(function() {return loop((i + 1)); // Line 236 Column 2
-})); // Line 236 Column 2
+} else {return loop((i + 1)); // Line 236 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 } else {return false; // Line <unknown undefined> Column <unknown undefined>
@@ -307,7 +290,7 @@ return (function() {if((i < vec.length)) {return (function() {if(eq_p_(vector_da
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o16 = 0;
-return trampoline(loop(o16)); // Line 236 Column 2
+return loop(o16); // Line 236 Column 2
 }))(); // Line 236 Column 2
 });
 var vector_dash_length = (function(vec){
@@ -323,42 +306,37 @@ return res; // Line <unknown undefined> Column <unknown undefined>
 var vector_dash_map = (function(func,vec){
 var res = [];
 ((function() {var loop = (function(i){
-return (function() {if((i < vec["length"])) {return ((function() {res["push"](func(vector_dash_ref(vec,i))); // Line 254 Column 2
-return vector("__tco_call",(function() {return loop((i + 1)); // Line 254 Column 2
-})); // Line 254 Column 2
-}))(); // Line 254 Column 2
+return (function() {if((i < vec["length"])) {res["push"](func(vector_dash_ref(vec,i))); // Line 254 Column 2
+return loop((i + 1)); // Line 254 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o17 = 0;
-return trampoline(loop(o17)); // Line 254 Column 2
+return loop(o17); // Line 254 Column 2
 }))(); // Line 254 Column 2
 return res; // Line <unknown undefined> Column <unknown undefined>
 });
 var vector_dash_for_dash_each = (function(func,vec){
 return ((function() {var loop = (function(i){
-return (function() {if((i < vec["length"])) {return ((function() {func(vector_dash_ref(vec,i)); // Line 262 Column 2
-return vector("__tco_call",(function() {return loop((i + 1)); // Line 262 Column 2
-})); // Line 262 Column 2
-}))(); // Line 262 Column 2
+return (function() {if((i < vec["length"])) {func(vector_dash_ref(vec,i)); // Line 262 Column 2
+return loop((i + 1)); // Line 262 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o18 = 0;
-return trampoline(loop(o18)); // Line 262 Column 2
+return loop(o18); // Line 262 Column 2
 }))(); // Line 262 Column 2
 });
 var vector_dash_fold = (function(func,acc,vec){
 return ((function() {var loop = (function(i,acc){
-return (function() {if((i < vector_dash_length(vec))) {return vector("__tco_call",(function() {return loop((i + 1),func(vector_dash_ref(vec,i),acc)); // Line 269 Column 2
-})); // Line 269 Column 2
+return (function() {if((i < vector_dash_length(vec))) {return loop((i + 1),func(vector_dash_ref(vec,i),acc)); // Line 269 Column 2
 } else {return acc; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o19 = 0;
 var o20 = acc;
-return trampoline(loop(o19,o20)); // Line 269 Column 2
+return loop(o19,o20); // Line 269 Column 2
 }))(); // Line 269 Column 2
 });
 var dict = (function() {
@@ -367,8 +345,7 @@ var res = {};
 ((function() {var loop = (function(lst){
 return (function() {if(not(null_p_(lst))) {return ((function() {var o22 = (function(key,val){
 dict_dash_put_excl_(res,key,val); // Line 281 Column 4
-return vector("__tco_call",(function() {return loop(cddr(lst)); // Line 281 Column 4
-})); // Line 281 Column 4
+return loop(cddr(lst)); // Line 281 Column 4
 });
 var o23 = car(lst);
 var o24 = cadr(lst);
@@ -378,7 +355,7 @@ return o22(o23,o24); // Line 281 Column 4
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o21 = args;
-return trampoline(loop(o21)); // Line 281 Column 4
+return loop(o21); // Line 281 Column 4
 }))(); // Line 281 Column 4
 return res; // Line <unknown undefined> Column <unknown undefined>
 });
@@ -391,8 +368,7 @@ var res = dict();
 ((function() {var loop = (function(lst){
 return (function() {if(not(null_p_(lst))) {return ((function() {var o26 = (function(k){
 dict_dash_put_excl_(res,k,func(dict_dash_ref(dct,k))); // Line 297 Column 2
-return vector("__tco_call",(function() {return loop(cdr(lst)); // Line 297 Column 2
-})); // Line 297 Column 2
+return loop(cdr(lst)); // Line 297 Column 2
 });
 var o27 = car(lst);
 return o26(o27); // Line 297 Column 2
@@ -401,7 +377,7 @@ return o26(o27); // Line 297 Column 2
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o25 = keys(dct);
-return trampoline(loop(o25)); // Line 297 Column 2
+return loop(o25); // Line 297 Column 2
 }))(); // Line 297 Column 2
 return res; // Line <unknown undefined> Column <unknown undefined>
 });
@@ -422,16 +398,14 @@ return o28(o29); // Line 306 Column 2
 var dict_dash__gt_vector = (function(dct){
 var res = vector();
 ((function() {var loop = (function(lst){
-return (function() {if(not(null_p_(lst))) {return ((function() {vector_dash_push_excl_(res,car(lst)); // Line 316 Column 2
+return (function() {if(not(null_p_(lst))) {vector_dash_push_excl_(res,car(lst)); // Line 316 Column 2
 vector_dash_push_excl_(res,dict_dash_ref(dct,car(lst))); // Line 316 Column 2
-return vector("__tco_call",(function() {return loop(cdr(lst)); // Line 316 Column 2
-})); // Line 316 Column 2
-}))(); // Line 316 Column 2
+return loop(cdr(lst)); // Line 316 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o30 = keys(dct);
-return trampoline(loop(o30)); // Line 316 Column 2
+return loop(o30); // Line 316 Column 2
 }))(); // Line 316 Column 2
 return res; // Line <unknown undefined> Column <unknown undefined>
 });
@@ -456,16 +430,14 @@ return dict_dash_ref(dct,k); // Line 335 Column 20
 var zip = (function(keys,vals){
 var res = dict();
 ((function() {var loop = (function(ks,vs){
-return (function() {if(not(null_p_(ks))) {return ((function() {dict_dash_put_excl_(res,car(ks),car(vs)); // Line 340 Column 2
-return vector("__tco_call",(function() {return loop(cdr(ks),cdr(vs)); // Line 340 Column 2
-})); // Line 340 Column 2
-}))(); // Line 340 Column 2
+return (function() {if(not(null_p_(ks))) {dict_dash_put_excl_(res,car(ks),car(vs)); // Line 340 Column 2
+return loop(cdr(ks),cdr(vs)); // Line 340 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o33 = keys;
 var o34 = vals;
-return trampoline(loop(o33,o34)); // Line 340 Column 2
+return loop(o33,o34); // Line 340 Column 2
 }))(); // Line 340 Column 2
 return res; // Line <unknown undefined> Column <unknown undefined>
 });
@@ -475,18 +447,15 @@ return (typeof obj !== 'number' && !obj); // Line <unknown undefined> Column <un
 var _eq__eq_ = (function(obj1,obj2){
 return obj1 === obj2});
 var _eq_ = (function(obj1,obj2){
-return (function() {if((list_p_(obj1) && list_p_(obj2))) {return ((function() {return ((function() {var loop = (function(lst1,lst2){
+return (function() {if((list_p_(obj1) && list_p_(obj2))) {return ((function() {var loop = (function(lst1,lst2){
 var n1 = null_p_(lst1);
 var n2 = null_p_(lst2);
-return (function() {if((n1 && n2)) {return ((function() {return true; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 360 Column 2
-} else {return (function() {if((n1 || n2)) {return ((function() {return false; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 360 Column 2
-} else {return ((function() {return (function() {if(equal_p_(car(lst1),car(lst2))) {return loop(cdr(lst1),cdr(lst2)); // Line 360 Column 2
+return (function() {if((n1 && n2)) {return true; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if((n1 || n2)) {return false; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(equal_p_(car(lst1),car(lst2))) {return loop(cdr(lst1),cdr(lst2)); // Line 360 Column 2
 } else {return false; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 360 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -496,11 +465,9 @@ var o35 = obj1;
 var o36 = obj2;
 return loop(o35,o36); // Line 360 Column 2
 }))(); // Line 360 Column 2
-}))(); // Line 360 Column 2
-} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return ((function() {return (function() {if(not(_eq_(obj1["length"],obj2["length"]))) {return false; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if((vector_p_(obj1) && vector_p_(obj2))) {return (function() {if(not(_eq_(obj1["length"],obj2["length"]))) {return false; // Line <unknown undefined> Column <unknown undefined>
 } else {return ((function() {var loop = (function(i){
-return (function() {if((i < obj1["length"])) {return (function() {if(_eq_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return vector("__tco_call",(function() {return loop((i + 1)); // Line 360 Column 2
-})); // Line 360 Column 2
+return (function() {if((i < obj1["length"])) {return (function() {if(_eq_(vector_dash_ref(obj1,i),vector_dash_ref(obj2,i))) {return loop((i + 1)); // Line 360 Column 2
 } else {return false; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -509,16 +476,14 @@ return (function() {if((i < obj1["length"])) {return (function() {if(_eq_(vector
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o37 = 0;
-return trampoline(loop(o37)); // Line 360 Column 2
+return loop(o37); // Line 360 Column 2
 }))(); // Line 360 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 360 Column 2
-} else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {return ((function() {var o38 = (function(keys1,keys2){
+} else {return (function() {if((dict_p_(obj1) && dict_p_(obj2))) {return ((function() {var o38 = (function(keys1,keys2){
 return (eq_p_(length(keys1),length(keys2)) && ((function() {var loop = (function(lst){
 return (function() {if(null_p_(lst)) {return true; // Line <unknown undefined> Column <unknown undefined>
-} else {return (function() {if(equal_p_(dict_dash_ref(obj1,car(lst)),dict_dash_ref(obj2,car(lst)))) {return vector("__tco_call",(function() {return loop(cdr(lst)); // Line 360 Column 2
-})); // Line 360 Column 2
+} else {return (function() {if(equal_p_(dict_dash_ref(obj1,car(lst)),dict_dash_ref(obj2,car(lst)))) {return loop(cdr(lst)); // Line 360 Column 2
 } else {return false; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -526,16 +491,14 @@ return (function() {if(null_p_(lst)) {return true; // Line <unknown undefined> C
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o41 = keys1;
-return trampoline(loop(o41)); // Line 360 Column 2
+return loop(o41); // Line 360 Column 2
 }))()); // Line <unknown undefined> Column <unknown undefined>
 });
 var o39 = keys(obj1);
 var o40 = keys(obj2);
 return o38(o39,o40); // Line 360 Column 2
 }))(); // Line 360 Column 2
-}))(); // Line 360 Column 2
-} else {return ((function() {return eq_p_(obj1,obj2); // Line 360 Column 2
-}))(); // Line 360 Column 2
+} else {return eq_p_(obj1,obj2); // Line 360 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -555,30 +518,22 @@ var pp = (function(obj){
 return println(inspect(obj)); // Line 414 Column 3
 });
 var _per_inspect_dash_non_dash_sequence = (function(obj){
-return (function() {if(number_p_(obj)) {return ((function() {return ("" + obj); // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 418 Column 2
-} else {return (function() {if(string_p_(obj)) {return ((function() {obj = obj["replace"](RegExp("\\\\","g"),"\\\\");
+return (function() {if(number_p_(obj)) {return ("" + obj); // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(string_p_(obj)) {obj = obj["replace"](RegExp("\\\\","g"),"\\\\");
 obj = obj["replace"](RegExp("\n","g"),"\\n");
 obj = obj["replace"](RegExp("\r","g"),"\\r");
 obj = obj["replace"](RegExp("\t","g"),"\\t");
 obj = obj["replace"](RegExp("\"","g"),"\\\"");
 return ("\"" + obj + "\""); // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 418 Column 2
-} else {return (function() {if(key_p_(obj)) {return ((function() {return (":" + symbol_dash__gt_string(obj)); // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 418 Column 2
-} else {return (function() {if(symbol_p_(obj)) {return ((function() {return symbol_dash__gt_string(obj); // Line 418 Column 2
-}))(); // Line 418 Column 2
-} else {return (function() {if(boolean_p_(obj)) {return ((function() {return (function() {if(obj) {return "#t"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(key_p_(obj)) {return (":" + symbol_dash__gt_string(obj)); // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(symbol_p_(obj)) {return symbol_dash__gt_string(obj); // Line 418 Column 2
+} else {return (function() {if(boolean_p_(obj)) {return (function() {if(obj) {return "#t"; // Line <unknown undefined> Column <unknown undefined>
 } else {return "#f"; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 418 Column 2
-} else {return (function() {if(null_p_(obj)) {return ((function() {return "()"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 418 Column 2
-} else {return (function() {if(function_p_(obj)) {return ((function() {return "<function>"; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 418 Column 2
-} else {return ((function() {return ("<unknown " + obj + ">"); // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 418 Column 2
+} else {return (function() {if(null_p_(obj)) {return "()"; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(function_p_(obj)) {return "<function>"; // Line <unknown undefined> Column <unknown undefined>
+} else {return ("<unknown " + obj + ">"); // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -613,16 +568,12 @@ return o42(o43); // Line 435 Column 2
 });
 var _per_space = (function(obj){
 return _per_recur_dash_protect(obj,false,(function(obj,arg,recur){
-return (function() {if(list_p_(obj)) {return ((function() {return (length(obj) + 1 + fold((function(el,acc){
+return (function() {if(list_p_(obj)) {return (length(obj) + 1 + fold((function(el,acc){
 return (acc + recur(el,false)); // Line <unknown undefined> Column <unknown undefined>
 }),0,obj)); // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 448 Column 5
-} else {return (function() {if(dict_p_(obj)) {return ((function() {return recur(dict_dash__gt_list(obj),false); // Line 448 Column 5
-}))(); // Line 448 Column 5
-} else {return (function() {if(vector_p_(obj)) {return ((function() {return recur(vector_dash__gt_list(obj),false); // Line 448 Column 5
-}))(); // Line 448 Column 5
-} else {return ((function() {return vector_dash_length(_per_inspect_dash_non_dash_sequence(obj)); // Line 448 Column 5
-}))(); // Line 448 Column 5
+} else {return (function() {if(dict_p_(obj)) {return recur(dict_dash__gt_list(obj),false); // Line 448 Column 5
+} else {return (function() {if(vector_p_(obj)) {return recur(vector_dash__gt_list(obj),false); // Line 448 Column 5
+} else {return vector_dash_length(_per_inspect_dash_non_dash_sequence(obj)); // Line 448 Column 5
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -646,12 +597,11 @@ return vector_dash_for_dash_each((function(_){
 return disp(" "); // Line 468 Column 2
 }),make_dash_vector(n)); // Line 468 Column 2
 });
-return (function() {if(list_p_(obj)) {return ((function() {return ((function() {var o46 = (function(sp,first){
+return (function() {if(list_p_(obj)) {return ((function() {var o46 = (function(sp,first){
 disp("("); // Line 468 Column 2
 for_dash_each((function(el){
-(function() {if(not(first)) {return (function() {if((sp && not(no_dash_newlines))) {return ((function() {disp("\n"); // Line 468 Column 2
+(function() {if(not(first)) {return (function() {if((sp && not(no_dash_newlines))) {disp("\n"); // Line 468 Column 2
 return pad(i); // Line 468 Column 2
-}))(); // Line 468 Column 2
 } else {return disp(" "); // Line 468 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -667,13 +617,11 @@ var o47 = (_per_space(obj) > 30);
 var o48 = true;
 return o46(o47,o48); // Line 468 Column 2
 }))(); // Line 468 Column 2
-}))(); // Line 468 Column 2
-} else {return (function() {if(vector_p_(obj)) {return ((function() {return ((function() {var o49 = (function(sp,first){
+} else {return (function() {if(vector_p_(obj)) {return ((function() {var o49 = (function(sp,first){
 disp("["); // Line 468 Column 2
 vector_dash_for_dash_each((function(el){
-(function() {if(not(first)) {return (function() {if((sp && not(no_dash_newlines))) {return ((function() {disp("\n"); // Line 468 Column 2
+(function() {if(not(first)) {return (function() {if((sp && not(no_dash_newlines))) {disp("\n"); // Line 468 Column 2
 return pad(i); // Line 468 Column 2
-}))(); // Line 468 Column 2
 } else {return disp(" "); // Line 468 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -689,13 +637,11 @@ var o50 = (_per_space(obj) > 30);
 var o51 = true;
 return o49(o50,o51); // Line 468 Column 2
 }))(); // Line 468 Column 2
-}))(); // Line 468 Column 2
-} else {return (function() {if(dict_p_(obj)) {return ((function() {return ((function() {var o52 = (function(sp,first){
+} else {return (function() {if(dict_p_(obj)) {return ((function() {var o52 = (function(sp,first){
 disp("{"); // Line 468 Column 2
 for_dash_each((function(k){
-(function() {if(not(first)) {return (function() {if((sp && not(no_dash_newlines))) {return ((function() {disp("\n"); // Line 468 Column 2
+(function() {if(not(first)) {return (function() {if((sp && not(no_dash_newlines))) {disp("\n"); // Line 468 Column 2
 return pad(i); // Line 468 Column 2
-}))(); // Line 468 Column 2
 } else {return disp(" "); // Line 468 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -713,9 +659,7 @@ var o53 = (_per_space(obj) > 30);
 var o54 = true;
 return o52(o53,o54); // Line 468 Column 2
 }))(); // Line 468 Column 2
-}))(); // Line 468 Column 2
-} else {return ((function() {return _per_inspect_dash_non_dash_sequence(obj); // Line 468 Column 2
-}))(); // Line 468 Column 2
+} else {return _per_inspect_dash_non_dash_sequence(obj); // Line 468 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -783,7 +727,7 @@ var cps_dash_jump = (function(breakpoint,msg,to){
 return vector(breakpoint,msg,to); // Line 617 Column 2
 });
 var cps_dash_halt = (function(v){
-return list(list("\uFDD1lambda",_emptylst,list("\uFDD1pp",list("\uFDD1str","halted with result: ",v)),false)); // Line 620 Column 4
+return list(list("\uFDD1lambda",_emptylst,v,false)); // Line 620 Column 4
 });
 
 
@@ -794,20 +738,19 @@ var alternating_dash_map = (function(func,lst){
 var former_p_ = vector_dash__gt_list(Array.prototype.slice.call(arguments, 2));
 return ((function() {var loop = (function(lst,acc){
 return (function() {if((null_p_(lst) || null_p_(cdr(lst)))) {return acc; // Line <unknown undefined> Column <unknown undefined>
-} else {return vector("__tco_call",(function() {return loop(cddr(lst),cons((function() {if(not(null_p_(former_p_))) {return func(car(lst)); // Line 14 Column 2
+} else {return loop(cddr(lst),cons((function() {if(not(null_p_(former_p_))) {return func(car(lst)); // Line 14 Column 2
 } else {return car(lst); // Line 14 Column 2
 }})()
 ,cons((function() {if(null_p_(former_p_)) {return func(cadr(lst)); // Line 14 Column 2
 } else {return cadr(lst); // Line 14 Column 2
 }})()
 ,acc))); // Line 14 Column 2
-})); // Line 14 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var o1 = lst;
 var o2 = _emptylst;
-return trampoline(loop(o1,o2)); // Line 14 Column 2
+return loop(o1,o2); // Line 14 Column 2
 }))(); // Line 14 Column 2
 });
 var opt = (function(arg,def){
@@ -822,31 +765,24 @@ return (function() {if(not(cnd)) {throw(msg); // Line 33 Column 7
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var expand = (function(node){
-return (function() {if(ast["atom?"](node)) {return ((function() {return node; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 38 Column 2
-} else {return (function() {if(ast["vector?"](node)) {return ((function() {return ast["copy-node"](node,map((function(e){
+return (function() {if(ast["atom?"](node)) {return node; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(ast["vector?"](node)) {return ast["copy-node"](node,map((function(e){
 return expand(e); // Line 38 Column 2
 }),ast["node-data"](node))); // Line 38 Column 2
-}))(); // Line 38 Column 2
-} else {return (function() {if(ast["dict?"](node)) {return ((function() {return ast["copy-node"](node,map((function(e){
+} else {return (function() {if(ast["dict?"](node)) {return ast["copy-node"](node,map((function(e){
 return expand(e); // Line 38 Column 2
 }),ast["node-data"](node))); // Line 38 Column 2
-}))(); // Line 38 Column 2
-} else {return (function() {if((_eq__eq_(ast["first*"](node),"\uFDD1quote") || _eq__eq_(ast["first*"](node),"\uFDD1quasiquote"))) {return ((function() {return node; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 38 Column 2
-} else {return (function() {if(_eq__eq_(ast["first*"](node),"\uFDD1lambda")) {return ((function() {return ast["copy-node"](node,cons(ast["first"](node),cons(cadr(ast["node-data"](node)),map((function(e){
+} else {return (function() {if((_eq__eq_(ast["first*"](node),"\uFDD1quote") || _eq__eq_(ast["first*"](node),"\uFDD1quasiquote"))) {return node; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(_eq__eq_(ast["first*"](node),"\uFDD1lambda")) {return ast["copy-node"](node,cons(ast["first"](node),cons(cadr(ast["node-data"](node)),map((function(e){
 return expand(e); // Line 38 Column 2
 }),cddr(ast["node-data"](node)))))); // Line 38 Column 2
-}))(); // Line 38 Column 2
-} else {return (function() {if(macro_p_(ast["first*"](node))) {return ((function() {return ((function() {var o3 = (function(res){
+} else {return (function() {if(macro_p_(ast["first*"](node))) {return ((function() {var o3 = (function(res){
 return expand(sourcify(res,ast["node-lineno"](node),ast["node-colno"](node))); // Line 38 Column 2
 });
 var o4 = macro_dash_function(ast["first*"](node))(desourcify(node));
 return o3(o4); // Line 38 Column 2
 }))(); // Line 38 Column 2
-}))(); // Line 38 Column 2
-} else {return ((function() {return ast["copy-node"](node,map(expand,ast["node-data"](node))); // Line 38 Column 2
-}))(); // Line 38 Column 2
+} else {return ast["copy-node"](node,map(expand,ast["node-data"](node))); // Line 38 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -886,20 +822,16 @@ return o5(o6); // Line 83 Column 2
 }))(); // Line 83 Column 2
 });
 var sourcify = (function(exp,lineno,colno){
-return (function() {if((self_dash_evaluating_p_(exp) || symbol_p_(exp))) {return ((function() {return ast["make-node"]("\uFDD1ATOM",exp,lineno,colno); // Line 94 Column 2
-}))(); // Line 94 Column 2
-} else {return (function() {if(vector_p_(exp)) {return ((function() {return ast["make-node"]("\uFDD1VECTOR",map((function(e){
+return (function() {if((self_dash_evaluating_p_(exp) || symbol_p_(exp))) {return ast["make-node"]("\uFDD1ATOM",exp,lineno,colno); // Line 94 Column 2
+} else {return (function() {if(vector_p_(exp)) {return ast["make-node"]("\uFDD1VECTOR",map((function(e){
 return sourcify(e,lineno,colno); // Line 94 Column 2
 }),vector_dash__gt_list(exp)),lineno,colno); // Line 94 Column 2
-}))(); // Line 94 Column 2
-} else {return (function() {if(dict_p_(exp)) {return ((function() {return ast["make-node"]("\uFDD1DICT",map((function(e){
+} else {return (function() {if(dict_p_(exp)) {return ast["make-node"]("\uFDD1DICT",map((function(e){
 return sourcify(e,lineno,colno); // Line 94 Column 2
 }),dict_dash__gt_list(exp)),lineno,colno); // Line 94 Column 2
-}))(); // Line 94 Column 2
-} else {return ((function() {return ast["make-node"]("\uFDD1LIST",map((function(e){
+} else {return ast["make-node"]("\uFDD1LIST",map((function(e){
 return sourcify(e,lineno,colno); // Line 94 Column 2
 }),exp),lineno,colno); // Line 94 Column 2
-}))(); // Line 94 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -908,16 +840,11 @@ return sourcify(e,lineno,colno); // Line 94 Column 2
 ; // Line <unknown undefined> Column <unknown undefined>
 });
 var desourcify = (function(node){
-return (function() {if(ast["atom?"](node)) {return ((function() {return ast["node-data"](node); // Line 114 Column 2
-}))(); // Line 114 Column 2
-} else {return (function() {if(ast["vector?"](node)) {return ((function() {return list_dash__gt_vector(map(desourcify,ast["node-data"](node))); // Line 114 Column 2
-}))(); // Line 114 Column 2
-} else {return (function() {if(ast["dict?"](node)) {return ((function() {return apply(dict,map(desourcify,ast["node-data"](node))); // Line 114 Column 2
-}))(); // Line 114 Column 2
-} else {return (function() {if(ast["list?"](node)) {return ((function() {return map(desourcify,ast["node-data"](node)); // Line 114 Column 2
-}))(); // Line 114 Column 2
-} else {return ((function() {throw(str("unknown node type: ",node)); // Line 114 Column 2
-}))(); // Line 114 Column 2
+return (function() {if(ast["atom?"](node)) {return ast["node-data"](node); // Line 114 Column 2
+} else {return (function() {if(ast["vector?"](node)) {return list_dash__gt_vector(map(desourcify,ast["node-data"](node))); // Line 114 Column 2
+} else {return (function() {if(ast["dict?"](node)) {return apply(dict,map(desourcify,ast["node-data"](node))); // Line 114 Column 2
+} else {return (function() {if(ast["list?"](node)) {return map(desourcify,ast["node-data"](node)); // Line 114 Column 2
+} else {throw(str("unknown node type: ",node)); // Line 114 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -978,25 +905,20 @@ return o20(o21,o22); // Line 151 Column 3
 })); // Line 148 Column 1
 install_dash_macro("\uFDD1let",(function(form){
 var replace = (function(expr,old,sym){
-return (function() {if(symbol_p_(expr)) {return ((function() {return (function() {if(_eq__eq_(expr,old)) {return sym; // Line <unknown undefined> Column <unknown undefined>
+return (function() {if(symbol_p_(expr)) {return (function() {if(_eq__eq_(expr,old)) {return sym; // Line <unknown undefined> Column <unknown undefined>
 } else {return expr; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 166 Column 5
-} else {return (function() {if(literal_p_(expr)) {return ((function() {return expr; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 166 Column 5
-} else {return (function() {if(dict_p_(expr)) {return ((function() {return dict_dash_map((function(e){
+} else {return (function() {if(literal_p_(expr)) {return expr; // Line <unknown undefined> Column <unknown undefined>
+} else {return (function() {if(dict_p_(expr)) {return dict_dash_map((function(e){
 return replace(e,old,sym); // Line 166 Column 5
 }),expr); // Line 166 Column 5
-}))(); // Line 166 Column 5
-} else {return (function() {if(vector_p_(expr)) {return ((function() {return vector_dash_map((function(e){
+} else {return (function() {if(vector_p_(expr)) {return vector_dash_map((function(e){
 return replace(e,old,sym); // Line 166 Column 5
 }),expr); // Line 166 Column 5
-}))(); // Line 166 Column 5
-} else {return (function() {if(list_p_(expr)) {return ((function() {return map((function(e){
+} else {return (function() {if(list_p_(expr)) {return map((function(e){
 return replace(e,old,sym); // Line 166 Column 5
 }),expr); // Line 166 Column 5
-}))(); // Line 166 Column 5
 } else {return false; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -1013,10 +935,9 @@ var generate_dash_defs = (function(syms,exprs){
 return reverse(((function() {var loop = (function(lst,forms,vars,acc){
 return (function() {if(null_p_(lst)) {return acc; // Line <unknown undefined> Column <unknown undefined>
 } else {return ((function() {var o27 = (function(sym,name,code){
-return vector("__tco_call",(function() {return loop(cdr(lst),cdr(forms),dict_dash_merge(vars,dict(name,sym)),cons(list("\uFDD1define",car(lst),fold((function(el,acc){
+return loop(cdr(lst),cdr(forms),dict_dash_merge(vars,dict(name,sym)),cons(list("\uFDD1define",car(lst),fold((function(el,acc){
 return replace(acc,key_dash__gt_symbol(el),dict_dash_ref(vars,el)); // Line 180 Column 6
 }),code,keys(vars))),acc)); // Line 180 Column 6
-})); // Line 180 Column 6
 });
 var o28 = car(lst);
 var o29 = car(car(forms));
@@ -1030,7 +951,7 @@ var o23 = syms;
 var o24 = exprs;
 var o25 = dict();
 var o26 = _emptylst;
-return trampoline(loop(o23,o24,o25,o26)); // Line 180 Column 6
+return loop(o23,o24,o25,o26); // Line 180 Column 6
 }))()); // Line 179 Column 6
 });
 var tco = (function(exprs,exit){
@@ -1054,26 +975,20 @@ return (function() {if(null_p_(cdddr(expr))) {return list("\uFDD1if",cadr(expr),
 });
 return ((function() {var o31 = (function(rexprs){
 return ((function() {var o33 = (function(bottom){
-return (function() {if(if_p_(bottom)) {return ((function() {return reverse(cons(process_dash_if(bottom,(function(expr){
-return (function() {if(begin_p_(expr)) {return ((function() {return tco(expr,exit); // Line 224 Column 5
-}))(); // Line 224 Column 5
-} else {return (function() {if(let_p_(expr)) {return ((function() {return tco(expr,exit); // Line 224 Column 5
-}))(); // Line 224 Column 5
-} else {return ((function() {return car(tco(list(expr),exit)); // Line 224 Column 5
-}))(); // Line 224 Column 5
+return (function() {if(if_p_(bottom)) {return reverse(cons(process_dash_if(bottom,(function(expr){
+return (function() {if(begin_p_(expr)) {return tco(expr,exit); // Line 224 Column 5
+} else {return (function() {if(let_p_(expr)) {return tco(expr,exit); // Line 224 Column 5
+} else {return car(tco(list(expr),exit)); // Line 224 Column 5
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 })),cdr(rexprs))); // Line 224 Column 5
-}))(); // Line 224 Column 5
-} else {return (function() {if(let_p_(bottom)) {return ((function() {return reverse(cons(tco(bottom,exit),cdr(rexprs))); // Line 224 Column 5
-}))(); // Line 224 Column 5
-} else {return ((function() {return (function() {if((tco_p_(bottom) && false)) {return reverse(cons(list("\uFDD1vector","__tco_call",list("\uFDD1lambda",_emptylst,bottom)),cdr(rexprs))); // Line 224 Column 5
+} else {return (function() {if(let_p_(bottom)) {return reverse(cons(tco(bottom,exit),cdr(rexprs))); // Line 224 Column 5
+} else {return (function() {if((tco_p_(bottom) && false)) {return reverse(cons(list("\uFDD1vector","__tco_call",list("\uFDD1lambda",_emptylst,bottom)),cdr(rexprs))); // Line 224 Column 5
 } else {return exprs; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
-}))(); // Line 224 Column 5
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -1221,17 +1136,15 @@ return (function() {if(null_p_(nodes)) {return reverse((function() {if(null_p_(a
 ); // Line 402 Column 2
 } else {return ((function() {var o52 = (function(node){
 return (function() {if((ast["list?"](node) && _eq__eq_(ast["first*"](node),"\uFDD1unquote-splicing"))) {return ((function() {var o54 = (function(el){
-return vector("__tco_call",(function() {return loop(cdr(nodes),cons(el,(function() {if(null_p_(acc)) {return slices; // Line <unknown undefined> Column <unknown undefined>
+return loop(cdr(nodes),cons(el,(function() {if(null_p_(acc)) {return slices; // Line <unknown undefined> Column <unknown undefined>
 } else {return cons(make_dash_splice(reverse(acc)),slices); // Line 402 Column 2
 }})()
 ),_emptylst); // Line 402 Column 2
-})); // Line 402 Column 2
 });
 var o55 = cadr(ast["node-data"](node));
 return o54(o55); // Line 402 Column 2
 }))(); // Line 402 Column 2
-} else {return vector("__tco_call",(function() {return loop(cdr(nodes),slices,cons(node,acc)); // Line 402 Column 2
-})); // Line 402 Column 2
+} else {return loop(cdr(nodes),slices,cons(node,acc)); // Line 402 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 });
@@ -1244,7 +1157,7 @@ return o52(o53); // Line 402 Column 2
 var o49 = lst;
 var o50 = _emptylst;
 var o51 = _emptylst;
-return trampoline(loop(o49,o50,o51)); // Line 402 Column 2
+return loop(o49,o50,o51); // Line 402 Column 2
 }))(); // Line 402 Column 2
 });
 var quasiquote_dash_split = (function(append_dash_name,func_dash_name,node){
@@ -1260,26 +1173,16 @@ return o56(o57); // Line 427 Column 2
 });
 var compile_dash_object = (function(node,generator,quoted_p_,expr_p_){
 return ((function() {var o58 = (function(exp){
-return (function() {if(key_p_(exp)) {return ((function() {return generator["write-key"](exp,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(symbol_p_(exp)) {return ((function() {return generator["write-symbol"](exp,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(number_p_(exp)) {return ((function() {return generator["write-number"](exp,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(boolean_p_(exp)) {return ((function() {return generator["write-boolean"](exp,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(string_p_(exp)) {return ((function() {return generator["write-string"](exp,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(ast["dict?"](node)) {return ((function() {return compile(apply_dash_node("\uFDD1dict",node,quoted_p_),generator,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(ast["vector?"](node)) {return ((function() {return compile(apply_dash_node("\uFDD1vector",node,quoted_p_),generator,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(null_p_(exp)) {return ((function() {return generator["write-empty-list"](exp,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return (function() {if(ast["list?"](node)) {return ((function() {return compile(apply_dash_node("\uFDD1list",node,quoted_p_),generator,expr_p_); // Line 433 Column 2
-}))(); // Line 433 Column 2
-} else {return ((function() {throw(str("compile-object: unknown type: ",exp)); // Line 433 Column 2
-}))(); // Line 433 Column 2
+return (function() {if(key_p_(exp)) {return generator["write-key"](exp,expr_p_); // Line 433 Column 2
+} else {return (function() {if(symbol_p_(exp)) {return generator["write-symbol"](exp,expr_p_); // Line 433 Column 2
+} else {return (function() {if(number_p_(exp)) {return generator["write-number"](exp,expr_p_); // Line 433 Column 2
+} else {return (function() {if(boolean_p_(exp)) {return generator["write-boolean"](exp,expr_p_); // Line 433 Column 2
+} else {return (function() {if(string_p_(exp)) {return generator["write-string"](exp,expr_p_); // Line 433 Column 2
+} else {return (function() {if(ast["dict?"](node)) {return compile(apply_dash_node("\uFDD1dict",node,quoted_p_),generator,expr_p_); // Line 433 Column 2
+} else {return (function() {if(ast["vector?"](node)) {return compile(apply_dash_node("\uFDD1vector",node,quoted_p_),generator,expr_p_); // Line 433 Column 2
+} else {return (function() {if(null_p_(exp)) {return generator["write-empty-list"](exp,expr_p_); // Line 433 Column 2
+} else {return (function() {if(ast["list?"](node)) {return compile(apply_dash_node("\uFDD1list",node,quoted_p_),generator,expr_p_); // Line 433 Column 2
+} else {throw(str("compile-object: unknown type: ",exp)); // Line 433 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -1304,14 +1207,10 @@ return o58(o59); // Line 433 Column 2
 }))(); // Line 433 Column 2
 });
 var compile_dash_quasi = (function(node,generator,expr_p_){
-return (function() {if(ast["list?"](node)) {return ((function() {return compile(quasiquote_dash_split("\uFDD1list-append","\uFDD1list",node),generator,expr_p_); // Line 452 Column 2
-}))(); // Line 452 Column 2
-} else {return (function() {if(ast["vector?"](node)) {return ((function() {return compile(quasiquote_dash_split("\uFDD1vector-concat","\uFDD1vector",node),generator,expr_p_); // Line 452 Column 2
-}))(); // Line 452 Column 2
-} else {return (function() {if(ast["dict?"](node)) {return ((function() {return compile(quasiquote_dash_split("\uFDD1dict-merge","\uFDD1dict",node),generator,expr_p_); // Line 452 Column 2
-}))(); // Line 452 Column 2
-} else {return ((function() {return compile_dash_object(node,generator,true,expr_p_); // Line 452 Column 2
-}))(); // Line 452 Column 2
+return (function() {if(ast["list?"](node)) {return compile(quasiquote_dash_split("\uFDD1list-append","\uFDD1list",node),generator,expr_p_); // Line 452 Column 2
+} else {return (function() {if(ast["vector?"](node)) {return compile(quasiquote_dash_split("\uFDD1vector-concat","\uFDD1vector",node),generator,expr_p_); // Line 452 Column 2
+} else {return (function() {if(ast["dict?"](node)) {return compile(quasiquote_dash_split("\uFDD1dict-merge","\uFDD1dict",node),generator,expr_p_); // Line 452 Column 2
+} else {return compile_dash_object(node,generator,true,expr_p_); // Line 452 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -1366,14 +1265,11 @@ return o65(o66); // Line 483 Column 2
 });
 var compile_dash_begin = (function(node,generator,compile_star_,expr_p_,top_p_){
 return ((function() {var o71 = (function(e_star_){
-return (function() {if(expr_p_) {return ((function() {return compile_star_(ast["make-list"](ast["make-list*"](cons(ast["make-atom"]("\uFDD1lambda",node),cons(ast["make-empty-list"](node),e_star_)))),true); // Line 505 Column 2
-}))(); // Line 505 Column 2
-} else {return (function() {if(top_p_) {return ((function() {return for_dash_each((function(e){
+return (function() {if(expr_p_) {return compile_star_(ast["make-list"](ast["make-list*"](cons(ast["make-atom"]("\uFDD1lambda",node),cons(ast["make-empty-list"](node),e_star_)))),true); // Line 505 Column 2
+} else {return (function() {if(top_p_) {return for_dash_each((function(e){
 return compile_star_(e,expr_p_,top_p_); // Line 505 Column 2
 }),e_star_); // Line 505 Column 2
-}))(); // Line 505 Column 2
-} else {return ((function() {return generator["write-statements"](e_star_,compile_star_); // Line 505 Column 2
-}))(); // Line 505 Column 2
+} else {return generator["write-statements"](e_star_,compile_star_); // Line 505 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -1391,38 +1287,24 @@ var expr_p_ = arguments[1] || false;
 var top_p_ = arguments[2] || false;
 return compile(node,generator,expr_p_,top_p_); // Line 525 Column 5
 });
-return (function() {if(self_dash_evaluating_p_(ast["node-data"](node))) {return ((function() {return compile_dash_object(node,generator,false,expr_p_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(symbol_p_(ast["node-data"](node))) {return ((function() {return compile_dash_reference(node,generator,expr_p_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(ast["vector?"](node)) {return ((function() {return compile_dash_object(node,generator,false,expr_p_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(ast["dict?"](node)) {return ((function() {return compile_dash_object(node,generator,false,expr_p_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(ast["list?"](node)) {return ((function() {return ((function() {var o73 = (function(sym){
-return (function() {if(_eq__eq_(sym,"\uFDD1quote")) {return ((function() {return compile_dash_object(cadr(ast["node-data"](node)),generator,true,expr_p_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(_eq__eq_(sym,"\uFDD1quasiquote")) {return ((function() {return compile_dash_quasi(cadr(ast["node-data"](node)),generator,expr_p_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(_eq__eq_(sym,"\uFDD1if")) {return ((function() {return compile_dash_if(node,generator,expr_p_,compile_star_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(_eq__eq_(sym,"\uFDD1lambda")) {return ((function() {return compile_dash_lambda(node,generator,expr_p_,compile_star_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(_eq__eq_(sym,"\uFDD1set!")) {return ((function() {return compile_dash_set_excl_(node,generator,compile_star_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(_eq__eq_(sym,"\uFDD1define")) {return ((function() {return compile_dash_define(node,generator,compile_star_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(_eq__eq_(sym,"\uFDD1begin")) {return ((function() {return compile_dash_begin(node,generator,compile_star_,expr_p_,top_p_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(_eq__eq_(sym,"\uFDD1%raw")) {return ((function() {return generator["write-raw-code"](cadr(ast["node-data"](node))); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return (function() {if(native_p_(sym)) {return ((function() {return native_dash_function(sym)(node,generator,expr_p_,compile_star_); // Line 527 Column 2
-}))(); // Line 527 Column 2
-} else {return ((function() {(function() {if(not((symbol_p_(ast["first*"](node)) || list_p_(ast["first*"](node))))) {throw(str("operator is not a procedure: ",ast["first*"](node))); // Line 527 Column 2
+return (function() {if(self_dash_evaluating_p_(ast["node-data"](node))) {return compile_dash_object(node,generator,false,expr_p_); // Line 527 Column 2
+} else {return (function() {if(symbol_p_(ast["node-data"](node))) {return compile_dash_reference(node,generator,expr_p_); // Line 527 Column 2
+} else {return (function() {if(ast["vector?"](node)) {return compile_dash_object(node,generator,false,expr_p_); // Line 527 Column 2
+} else {return (function() {if(ast["dict?"](node)) {return compile_dash_object(node,generator,false,expr_p_); // Line 527 Column 2
+} else {return (function() {if(ast["list?"](node)) {return ((function() {var o73 = (function(sym){
+return (function() {if(_eq__eq_(sym,"\uFDD1quote")) {return compile_dash_object(cadr(ast["node-data"](node)),generator,true,expr_p_); // Line 527 Column 2
+} else {return (function() {if(_eq__eq_(sym,"\uFDD1quasiquote")) {return compile_dash_quasi(cadr(ast["node-data"](node)),generator,expr_p_); // Line 527 Column 2
+} else {return (function() {if(_eq__eq_(sym,"\uFDD1if")) {return compile_dash_if(node,generator,expr_p_,compile_star_); // Line 527 Column 2
+} else {return (function() {if(_eq__eq_(sym,"\uFDD1lambda")) {return compile_dash_lambda(node,generator,expr_p_,compile_star_); // Line 527 Column 2
+} else {return (function() {if(_eq__eq_(sym,"\uFDD1set!")) {return compile_dash_set_excl_(node,generator,compile_star_); // Line 527 Column 2
+} else {return (function() {if(_eq__eq_(sym,"\uFDD1define")) {return compile_dash_define(node,generator,compile_star_); // Line 527 Column 2
+} else {return (function() {if(_eq__eq_(sym,"\uFDD1begin")) {return compile_dash_begin(node,generator,compile_star_,expr_p_,top_p_); // Line 527 Column 2
+} else {return (function() {if(_eq__eq_(sym,"\uFDD1%raw")) {return generator["write-raw-code"](cadr(ast["node-data"](node))); // Line 527 Column 2
+} else {return (function() {if(native_p_(sym)) {return native_dash_function(sym)(node,generator,expr_p_,compile_star_); // Line 527 Column 2
+} else {(function() {if(not((symbol_p_(ast["first*"](node)) || list_p_(ast["first*"](node))))) {throw(str("operator is not a procedure: ",ast["first*"](node))); // Line 527 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 return generator["write-func-call"](ast["first"](node),cdr(ast["node-data"](node)),expr_p_,compile_star_); // Line 527 Column 2
-}))(); // Line 527 Column 2
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 }})()
@@ -1445,7 +1327,6 @@ return generator["write-func-call"](ast["first"](node),cdr(ast["node-data"](node
 var o74 = ast["first*"](node);
 return o73(o74); // Line 527 Column 2
 }))(); // Line 527 Column 2
-}))(); // Line 527 Column 2
 } else {return false; // Line <unknown undefined> Column <unknown undefined>
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
@@ -1464,17 +1345,7 @@ var compile_dash_program = (function(src,generator){
 }})()
 ; // Line <unknown undefined> Column <unknown undefined>
 return ((function() {var o75 = (function(exp){
-((function() {var o77 = (function(src){
-return ((function() {var o79 = (function(src){
-return compile(src,generator); // Line 567 Column 2
-});
-var o80 = expand(sourcify(list("\uFDD1cps-trampoline",list("\uFDD1cps-jump",false,vector_dash_slice(inspect(src),0,100),list("\uFDD1lambda",_emptylst,cps["cps"](src)(cps_dash_halt))))));
-return o79(o80); // Line 567 Column 2
-}))(); // Line 567 Column 2
-});
-var o78 = desourcify(expand(exp));
-return o77(o78); // Line 567 Column 2
-}))(); // Line 567 Column 2
+compile(expand(exp),generator,false,true); // Line 567 Column 2
 return generator["get-code"](); // Line 567 Column 2
 });
 var o76 = (function() {if(string_p_(src)) {return reader["read"](src); // Line 567 Column 2

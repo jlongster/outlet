@@ -1,7 +1,41 @@
 
-I am currently working on optimizing the CPS transformation of Outlet
-(for debugging). I wrote a post about this and received good feedback.
-Here are things I need to think about or study:
+It's time to solidify the semantics of Outlet (name to be changed). We
+now know the requirements, so we should be able to make informed decisions.
+
+The most important thing will be how modules are implemented. Modules
+and interfaces are important for compilation strategies: compiling
+separately, calling conventions, etc. Modules should have enough
+information for the compiler, but not force the dev to be too verbose.
+
+We need to make sure REPL-style development is still possible with
+modules. Being able to be "inside" of a module is extremely useful.
+
+There will be two different calling conventions in Outlet:
+
+* Normal (javascript)
+* CPS
+
+It's impossible for one to work with the other. You can make it work,
+but it's pointless because you lose the full ability to pause the
+program or do anything with the continuations.
+
+Maybe modules aren't the answer to compiling units separately and
+mixing calling convention. It looks like we'll need to compile
+everything either with CPS or not.
+
+So let's play around with CPS, compiling everything with it by default
+and adding an optimization argument to compile without it. We'll see
+if it's fast enough to continue with this.
+
+NOTE: After some research, the CPS form of javascript isn't too bad
+performance-wise, but it's still worrisome. It's an interesting
+technique, but the performance hit combined with the complexity of
+calling conventions makes this a difficult solution for stepping
+debugging.
+
+**
+
+CPS Research:
 
 * "A First-Order One-Pass CPS algorithm" - Danvy, 2001 (clojure-tco)
 ** http://www.brics.dk/RS/01/49/BRICS-RS-01-49.pdf

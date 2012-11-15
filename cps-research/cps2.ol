@@ -1,0 +1,75 @@
+
+(define (value? exp)
+  (or (number? exp)
+      (string? exp)
+      (boolean? exp)
+      (null? exp)
+      (symbol? exp)
+      (dict? exp)
+      (vector? exp)
+      (and (list? exp)
+           (== (car exp) 'lambda))))
+
+(define (e exp)
+  (cond
+   ((value? exp)
+    (lambda (k)
+      `(,k ,(t exp))))
+   ((list? exp)
+    (lambda (k)
+      ((s exp) k)))))
+
+(define (s comp)
+  (let ((func (car comp))
+        (arg (cadr comp)))
+    (lambda (k)
+      ((e* func)
+       (lambda (x0)
+         ((e* arg)
+          (lambda (x1)
+            `((,x0 ,x1) ,k))))))))
+
+(define (t val)
+  (cond
+   ((and (list? val)
+         (== (car val) 'lambda))
+    (let ((k (gensym)))
+      `(lambda ,(cadr val)
+         (lambda (,k)
+           ,((e (car (cddr val)))
+             k)))))
+   ((value? val) val)
+   (else (throw (str "t: invalid expression: " val)))))
+
+(define (e* exp)
+  (cond
+   ((value? exp)
+    (lambda (k)
+      (k (t exp))))
+   ((list? exp)
+    (lambda (k)
+      ((s* exp) k)))
+   (else
+    (throw (str "e*: invalid expression: " exp)))))
+
+(define (s* comp)
+  (let ((func (car comp))
+        (arg (cadr comp)))
+    (lambda (k)
+      ((e* func)
+       (lambda (x0)
+         ((e* arg)
+          (lambda (x1)
+             `((,x0 ,x1) (lambda (x2) ,(k 'x2))))))))))
+
+(pp ((e '(foo bar))
+     '(lambda (r)
+        (pp r))))
+
+;; output:
+
+;; (((lambda (x)
+;;     (lambda (o1) ((x 3) o1)))
+;;   (lambda (y)
+;;     (lambda (o2) (o2 y))))
+;;  (lambda (r) (pp r)))

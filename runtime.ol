@@ -618,6 +618,4 @@
   [breakpoint msg to])
 
 (define (cps-halt v)
-  `((lambda ()
-      (pp (str "halted with result: " ,v))
-      #f)))
+  `((lambda () ,v #f)))
